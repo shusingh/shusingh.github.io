@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>PyTorch on Shubham</title>
+    <link>https://shusingh.github.io/tags/pytorch/</link>
+    <description>Recent content in PyTorch on Shubham</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 11 Feb 2018 12:41:05 -0500</lastBuildDate><atom:link href="https://shusingh.github.io/tags/pytorch/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Generating realistic Human Faces using GANs</title>
+      <link>https://shusingh.github.io/projects/creations/gans/</link>
+      <pubDate>Sun, 11 Feb 2018 12:41:05 -0500</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/gans/</guid>
+      <description>In this project, we implemented generative adversarial network to generate realistic looking human faces. A GAN is simply described as a game between two neural networks to beat each other.
+Dataset Used:
+ Flickr-Faces-HQ Dataset (FFHQ) dataset  This dataset contains 52k high-quality PNG images relating to human faces at 512x512 resolution.
+   We implemented Discriminator with a four-layerd architecture strided with batch normalisation(except input layer) and LeakyRelu activations with sigmoid on the final layer.</description>
+    </item>
+    
+  </channel>
+</rss>

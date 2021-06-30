@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Home on Shubham</title>
+    <link>https://shusingh.github.io/</link>
+    <description>Recent content in Home on Shubham</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 10 Feb 2018 18:56:13 -0500</lastBuildDate><atom:link href="https://shusingh.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Atlassian Deployment Triggers</title>
+      <link>https://shusingh.github.io/projects/contributions/deploy-triggers/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/contributions/deploy-triggers/</guid>
+      <description>Addressed pretty significant page load performance issue founde in larger deployments. Eliminates uses of intensive backend query, replacing it with an asynchronous API call against a lucene index. This change reduces page load from from 2+ minutes to nearly instant, with an incredibly responsive UI.</description>
+    </item>
+    
+    <item>
+      <title>An approach to forecast impact of Covid-19 using supervised machine learning model</title>
+      <link>https://shusingh.github.io/publications/covid-research/</link>
+      <pubDate>Thu, 01 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/publications/covid-research/</guid>
+      <description>The current focus on the analysis of environmental data for the prediction of future trends has made it a prime area of research worldwide. Based on the kind of data prediction and analytical techniques employed, the present as well as the future state of the data can be forecasted or predicted. The novelty of the work proposed and outlined in this article is that it considers an approach that combines nonlinear transmission and social-spatial and temporal transmission along with the monthwise prediction of future data.</description>
+    </item>
+    
+    <item>
+      <title>Added Docker Build Status Badge to shields.io</title>
+      <link>https://shusingh.github.io/projects/contributions/shields-docker/</link>
+      <pubDate>Tue, 07 Jan 2020 17:09:26 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/contributions/shields-docker/</guid>
+      <description>Shields.io is a massive library of badges that can be inserted into project README&amp;rsquo;s or websites displaying various statuses (code coverage, health, version, etc). Support for docker was missing the current build health, and was a pretty trivial addition.</description>
+    </item>
+    
+    <item>
+      <title>Schema.org Structured Data documentation fixes</title>
+      <link>https://shusingh.github.io/projects/contributions/schema-org/</link>
+      <pubDate>Tue, 07 Jan 2020 17:08:21 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/contributions/schema-org/</guid>
+      <description>While adding Structured Data to a client&amp;rsquo;s website I found some example JSON that was invalid. Simple contribution to cleanup the user documentation providing syntactically valid JSON documents.</description>
+    </item>
+    
+    <item>
+      <title>Generating realistic Human Faces using GANs</title>
+      <link>https://shusingh.github.io/projects/creations/gans/</link>
+      <pubDate>Sun, 11 Feb 2018 12:41:05 -0500</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/gans/</guid>
+      <description>In this project, we implemented generative adversarial network to generate realistic looking human faces. A GAN is simply described as a game between two neural networks to beat each other.
+Dataset Used:
+ Flickr-Faces-HQ Dataset (FFHQ) dataset  This dataset contains 52k high-quality PNG images relating to human faces at 512x512 resolution.
+   We implemented Discriminator with a four-layerd architecture strided with batch normalisation(except input layer) and LeakyRelu activations with sigmoid on the final layer.</description>
+    </item>
+    
+    <item>
+      <title>Forcing Visits to use SSL</title>
+      <link>https://shusingh.github.io/blog/force-ssl/</link>
+      <pubDate>Thu, 01 Jan 2009 14:09:10 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/blog/force-ssl/</guid>
+      <description>Intro Doesn&amp;rsquo;t matter whether it&amp;rsquo;s a CakePHP app for a client, your own personal CMS, or any other web based application. If your passing around passwords or other sensitive info you should really implement SSL. SSL provides 2 main perks to your visitors.
+ First it encrypts all communication that flies across the web. This prevents curious or devious billies from getting your secrets. Secondly it ensures to the user that your server is in fact who it claims, and not a nasty &amp;lsquo;man in the middle&amp;quot; attack.</description>
+    </item>
+    
+    <item>
+      <title>911 Calls Analysis</title>
+      <link>https://shusingh.github.io/projects/creations/911/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/911/</guid>
+      <description>In this project, I analyzed and visualized 911 calls data from Montgomery County, Pennsylvania.
+Dataset Used:
+ Kaggel 911 Calls Dataset (https://www.kaggle.com/mchirico/montcoalert)  I visualized and analyzed this data using different well-known libraries in python, such as pandas, numpy, seaborn, plotly, matplotlib. I used folium for visualizsing the coordinates latitude and longitude on a map. I tried to look into various factors and reasons for all the 911 calls and tried to find correlations between different factors.</description>
+    </item>
+    
+    <item>
+      <title>Covid-19 Future Forecasting</title>
+      <link>https://shusingh.github.io/projects/creations/covid19/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/covid19/</guid>
+      <description>In this project, which was later adapted as part of a research paper, I followed these steps:
+  Data Collection and Preprocessing: I collected data from the following sources:
+ &amp;ldquo;Ministry of Health and Family Welfare India&amp;rdquo; website (https://www.mohfw.gov.in/) &amp;ldquo;World Health Organization (WHO) website (https://covid19.who.int/table) &amp;ldquo;Our World In Data&amp;rdquo; website (https://ourworldindata.org/coronavirus) &amp;ldquo;Kaggle&amp;rdquo; website (https://www.kaggle.com/)   I performed data cleaning and preprocessing as a lot of data was missing in all the datasets.</description>
+    </item>
+    
+    <item>
+      <title>Java For Everyone</title>
+      <link>https://shusingh.github.io/projects/creations/java-app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/java-app/</guid>
+      <description>I worked on this project during my undergraduate education. It was a fun project that I started on my own when I was learning Java programming language. The goal with this project was to provide everyone who wants to learn about Java Programming language, with all the necessary resources just a single click away.
+This app was divided into sub-sections which were as follows:
+ Tutorial Section Practice Question Section Sample Codes Section Motivation Section  The tutorial section of this android application contains basic java tutorials for beginners.</description>
+    </item>
+    
+    <item>
+      <title>React Mini Apps</title>
+      <link>https://shusingh.github.io/projects/creations/react-mini/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/react-mini/</guid>
+      <description>In this project I worked on several mini react.js projects on my learning journey of react.js. These applications are smaller components which can be used in large-scale websites. These applications include:
+ Birthday reminder app Controlled forms Github users app  Learning react.js has been very interesting and fun. Currently I am learning about react.js and the MERN stack for Full Stack Web Development.</description>
+    </item>
+    
+    <item>
+      <title>Search Results</title>
+      <link>https://shusingh.github.io/search/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/search/</guid>
+      <description>This file exists solely to respond to /search URL with the related search layout template.
+No content shown here is rendered, all content is based in the template layouts/page/search.html
+Setting a very low sitemap priority will tell search engines this is not important content.
+This implementation uses Fusejs, jquery and mark.js
+Initial setup Search depends on additional output content type of JSON in config.toml
+[outputs] home = [&amp;#34;HTML&amp;#34;, &amp;#34;JSON&amp;#34;] Searching additional fileds To search additional fields defined in front matter, you must add it in 2 places.</description>
+    </item>
+    
+  </channel>
+</rss>

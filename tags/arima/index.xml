@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>arima on Shubham</title>
+    <link>https://shusingh.github.io/tags/arima/</link>
+    <description>Recent content in arima on Shubham</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 01 Apr 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://shusingh.github.io/tags/arima/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>An approach to forecast impact of Covid-19 using supervised machine learning model</title>
+      <link>https://shusingh.github.io/publications/covid-research/</link>
+      <pubDate>Thu, 01 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/publications/covid-research/</guid>
+      <description>The current focus on the analysis of environmental data for the prediction of future trends has made it a prime area of research worldwide. Based on the kind of data prediction and analytical techniques employed, the present as well as the future state of the data can be forecasted or predicted. The novelty of the work proposed and outlined in this article is that it considers an approach that combines nonlinear transmission and social-spatial and temporal transmission along with the monthwise prediction of future data.</description>
+    </item>
+    
+    <item>
+      <title>Covid-19 Future Forecasting</title>
+      <link>https://shusingh.github.io/projects/creations/covid19/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/covid19/</guid>
+      <description>In this project, which was later adapted as part of a research paper, I followed these steps:
+  Data Collection and Preprocessing: I collected data from the following sources:
+ &amp;ldquo;Ministry of Health and Family Welfare India&amp;rdquo; website (https://www.mohfw.gov.in/) &amp;ldquo;World Health Organization (WHO) website (https://covid19.who.int/table) &amp;ldquo;Our World In Data&amp;rdquo; website (https://ourworldindata.org/coronavirus) &amp;ldquo;Kaggle&amp;rdquo; website (https://www.kaggle.com/)   I performed data cleaning and preprocessing as a lot of data was missing in all the datasets.</description>
+    </item>
+    
+  </channel>
+</rss>

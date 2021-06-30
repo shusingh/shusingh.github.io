@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Research Experience on Shubham</title>
+    <link>https://shusingh.github.io/publications/</link>
+    <description>Recent content in Research Experience on Shubham</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 30 Jun 2021 16:47:30 +0000</lastBuildDate><atom:link href="https://shusingh.github.io/publications/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>An approach to forecast impact of Covid-19 using supervised machine learning model</title>
+      <link>https://shusingh.github.io/publications/covid-research/</link>
+      <pubDate>Thu, 01 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/publications/covid-research/</guid>
+      <description>The current focus on the analysis of environmental data for the prediction of future trends has made it a prime area of research worldwide. Based on the kind of data prediction and analytical techniques employed, the present as well as the future state of the data can be forecasted or predicted. The novelty of the work proposed and outlined in this article is that it considers an approach that combines nonlinear transmission and social-spatial and temporal transmission along with the monthwise prediction of future data.</description>
+    </item>
+    
+  </channel>
+</rss>

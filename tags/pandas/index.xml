@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>pandas on Shubham</title>
+    <link>https://shusingh.github.io/tags/pandas/</link>
+    <description>Recent content in pandas on Shubham</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://shusingh.github.io/tags/pandas/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>911 Calls Analysis</title>
+      <link>https://shusingh.github.io/projects/creations/911/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/911/</guid>
+      <description>In this project, I analyzed and visualized 911 calls data from Montgomery County, Pennsylvania.
+Dataset Used:
+ Kaggel 911 Calls Dataset (https://www.kaggle.com/mchirico/montcoalert)  I visualized and analyzed this data using different well-known libraries in python, such as pandas, numpy, seaborn, plotly, matplotlib. I used folium for visualizsing the coordinates latitude and longitude on a map. I tried to look into various factors and reasons for all the 911 calls and tried to find correlations between different factors.</description>
+    </item>
+    
+  </channel>
+</rss>

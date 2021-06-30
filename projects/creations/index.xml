@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on Shubham</title>
+    <link>https://shusingh.github.io/projects/creations/</link>
+    <description>Recent content in Projects on Shubham</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 28 Jun 2021 15:00:28 +0000</lastBuildDate><atom:link href="https://shusingh.github.io/projects/creations/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Generating realistic Human Faces using GANs</title>
+      <link>https://shusingh.github.io/projects/creations/gans/</link>
+      <pubDate>Sun, 11 Feb 2018 12:41:05 -0500</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/gans/</guid>
+      <description>In this project, we implemented generative adversarial network to generate realistic looking human faces. A GAN is simply described as a game between two neural networks to beat each other.
+Dataset Used:
+ Flickr-Faces-HQ Dataset (FFHQ) dataset  This dataset contains 52k high-quality PNG images relating to human faces at 512x512 resolution.
+   We implemented Discriminator with a four-layerd architecture strided with batch normalisation(except input layer) and LeakyRelu activations with sigmoid on the final layer.</description>
+    </item>
+    
+    <item>
+      <title>911 Calls Analysis</title>
+      <link>https://shusingh.github.io/projects/creations/911/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/911/</guid>
+      <description>In this project, I analyzed and visualized 911 calls data from Montgomery County, Pennsylvania.
+Dataset Used:
+ Kaggel 911 Calls Dataset (https://www.kaggle.com/mchirico/montcoalert)  I visualized and analyzed this data using different well-known libraries in python, such as pandas, numpy, seaborn, plotly, matplotlib. I used folium for visualizsing the coordinates latitude and longitude on a map. I tried to look into various factors and reasons for all the 911 calls and tried to find correlations between different factors.</description>
+    </item>
+    
+    <item>
+      <title>Covid-19 Future Forecasting</title>
+      <link>https://shusingh.github.io/projects/creations/covid19/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/covid19/</guid>
+      <description>In this project, which was later adapted as part of a research paper, I followed these steps:
+  Data Collection and Preprocessing: I collected data from the following sources:
+ &amp;ldquo;Ministry of Health and Family Welfare India&amp;rdquo; website (https://www.mohfw.gov.in/) &amp;ldquo;World Health Organization (WHO) website (https://covid19.who.int/table) &amp;ldquo;Our World In Data&amp;rdquo; website (https://ourworldindata.org/coronavirus) &amp;ldquo;Kaggle&amp;rdquo; website (https://www.kaggle.com/)   I performed data cleaning and preprocessing as a lot of data was missing in all the datasets.</description>
+    </item>
+    
+    <item>
+      <title>Java For Everyone</title>
+      <link>https://shusingh.github.io/projects/creations/java-app/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/java-app/</guid>
+      <description>I worked on this project during my undergraduate education. It was a fun project that I started on my own when I was learning Java programming language. The goal with this project was to provide everyone who wants to learn about Java Programming language, with all the necessary resources just a single click away.
+This app was divided into sub-sections which were as follows:
+ Tutorial Section Practice Question Section Sample Codes Section Motivation Section  The tutorial section of this android application contains basic java tutorials for beginners.</description>
+    </item>
+    
+    <item>
+      <title>React Mini Apps</title>
+      <link>https://shusingh.github.io/projects/creations/react-mini/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/react-mini/</guid>
+      <description>In this project I worked on several mini react.js projects on my learning journey of react.js. These applications are smaller components which can be used in large-scale websites. These applications include:
+ Birthday reminder app Controlled forms Github users app  Learning react.js has been very interesting and fun. Currently I am learning about react.js and the MERN stack for Full Stack Web Development.</description>
+    </item>
+    
+  </channel>
+</rss>

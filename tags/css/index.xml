@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>css on Shubham</title>
+    <link>https://shusingh.github.io/tags/css/</link>
+    <description>Recent content in css on Shubham</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language><atom:link href="https://shusingh.github.io/tags/css/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>React Mini Apps</title>
+      <link>https://shusingh.github.io/projects/creations/react-mini/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://shusingh.github.io/projects/creations/react-mini/</guid>
+      <description>In this project I worked on several mini react.js projects on my learning journey of react.js. These applications are smaller components which can be used in large-scale websites. These applications include:
+ Birthday reminder app Controlled forms Github users app  Learning react.js has been very interesting and fun. Currently I am learning about react.js and the MERN stack for Full Stack Web Development.</description>
+    </item>
+    
+  </channel>
+</rss>
