@@ -1,0 +1,132 @@
+# Site
+repository: shusingh/portfolio-website
+favicon: images/favicon.ico
+
+# Content configuration version
+version: 2
+
+# Personal info
+name: Shubham Singh
+title: Software Development Engineer
+email: kshubhsingh@gmail.com
+website: www.github.com/shusingh/portfolio-website
+
+# Dark Mode (true/false/never)
+darkmode: false
+
+# Social links
+github_username:  shusingh
+# stackoverflow_username: "00000001"
+# dribbble_username: jekyll
+# facebook_username: jekyll
+# flickr_username: jekyll
+instagram_username: shubham_is_lucky
+linkedin_username: shusingh
+# xing_username: jekyll
+# pinterest_username: jekyll
+# youtube_username: globalmtb
+# googleplus_username: +jekyll
+# orcid_username: 0000-0000-0000-0000
+
+# Additional icon links
+# additional_links:
+# - title: itsgoingto.be
+#   icon: fas fa-globe
+#   url: https://www.itsgoingto.be
+# - title: another link
+#   icon: font awesome brand icon name (eg. fab fa-twitter) (https://fontawesome.com/icons?d=gallery&m=free)
+#   url: Link url (eg. https://google.com)
+
+# Google Analytics and Tag Manager
+# Using more than one of these may cause issues with reporting
+# gtm: "GTM-0000000"
+# gtag: "UA-00000000-0"
+# google_analytics: "UA-00000000-0"
+
+# About Section
+# about_title: About Me
+about_profile_image: images/pp.png
+about_content: | # this will include new lines to allow paragraphs
+  Hello, I'm Shubham Kumar Singh, a Software Development Engineer at Amazon. With several years of experience in software development, I am passionate about creating innovative solutions that help meet customer needs. I enjoy working in fast-paced environments and collaborating with teams to tackle complex problems.
+
+  I am most skilled in: <mark>Cloud Computing Platforms</mark>, <mark>Java</mark>, and <mark>Python</mark>. Outside of work, I enjoy <mark>traveling</mark> and trying new cuisines.
+
+content:
+
+  - title: Experience # Title for the section
+    layout: list # Type of content section (list/text)
+    content:
+      - layout: left
+        title: Amazon
+        # link: amazon.com
+        # link_text: boringcompany.com
+        sub_title: Software Development Engineer
+        caption: August 2022 - Present
+        quote: >
+          Every day at Amazon is a new opportunity to learn, grow, and innovate in the world of software development.
+        description: | # this will include new lines to allow paragraphs
+            I work as a software development engineer at Amazon, focusing on the backend systems that power websites handling Amazon's cross-border shipment. My work primarily involves leveraging AWS technologies to ensure that these systems are reliable, scalable, and efficient, enabling smooth and efficient cross-border shipping for our customers.
+      - layout: left
+        title: Indiana University Bloomington
+        # link: amazon.com
+        # link_text: boringcompany.com
+        sub_title: Research Assistant
+        caption: May 2021 - August 2021
+        quote: >
+          Exploring geospatial data to uncover insights and mitigate risks in Biosphere Reserves was both challenging and rewarding as a Research Assistant.
+        description: | # this will include new lines to allow paragraphs
+            As a Research Assistant, I utilized ArcGIS and QGIS to analyze and visualize geospatial data related to Biosphere Reserves. By assessing multiple risk factors, I was able to uncover insights and help mitigate potential risks to these important ecosystems. The experience was challenging and rewarding, and helped me develop valuable skills in geospatial analysis and data visualization.
+
+  - title: Education # Title for the section
+    layout: list # Type of content section (list/text)
+    content:
+      - layout: left
+        title: Indiana University Bloomington
+        caption: 2021 - 2022
+        sub_title: Masters in Data Science
+        quote: >
+          Indiana University Bloomington's Data Science program equipped me with the skills and knowledge to thrive in the data-driven world.
+        description: | # this will include new lines to allow paragraphs
+          My Masters in Data Science from Indiana University Bloomington gave me a strong foundation in data analysis, machine learning, AWS, Google Cloud Platform, and programming languages. The program's emphasis on collaboration and teamwork helped me build valuable professional connections.
+
+  # - title: Projects # Title for the section
+  #   layout: list # Type of content section (list/text)
+  #   content:
+  #     - layout: top-middle
+  #       title: Super awesome project
+  #       link: github.com/shusingh
+  #       # link_text: Project Website
+  #       additional_links:
+  #         - title:  sproogen/modern-resume-theme
+  #           icon: fab fa-github
+  #           url: github.com/sproogen/modern-resume-theme
+  #         # - title:  Github page for project (eg. sproogen/modern-resume-theme)
+  #         #   icon: fab fa-github
+  #         #   url: Link to project (eg. sproogen.github.io/modern-resume-theme)
+  #       quote: >
+  #         This is probably one of the greatest apps ever created, if you don't agree you're probably wrong.
+  #       description: | # this will include new lines to allow paragraphs
+  #         I started this project as a way if learning <mark>React</mark> and it has since grown into a fully fledged app. I have learned many skills through this and been I'm very proud of having this in my portfolio. If you don't have a project as awesome as this I would advise you make one.
+
+  - title: A Little More About Me
+    layout: text
+    content: | # this will include new lines to allow paragraphs
+      Alongside my interests in software engineering and data science some of my other interests and hobbies are:
+      - Trekking
+      - Gaming
+      - Cooking
+      - [Becoming a ninja](https://www.youtube.com/watch?v=vtg4o__aRMg)
+
+# Footer
+footer_show_references: true
+# references_title: References on request (Override references text)
+
+# Build settings
+remote_theme: sproogen/resume-theme
+
+sass:
+  sass_dir: _sass
+  style: compressed
+
+plugins:
+ - jekyll-seo-tag
