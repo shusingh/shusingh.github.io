@@ -81,7 +81,7 @@ content:
     content:
       - layout: left
         title: Cost-Optimization Analyzer
-        technologies: AWS Cost Explorer API, Lambda, DynamoDB, QuickSight
+        sub-title: <mark>AWS Cost Explorer API</mark>, <mark>Lambda</mark>, <mark>DynamoDB</mark>, <mark>QuickSight</mark>
         description: >
           Developed an application to analyze AWS spending and offer cost-saving recommendations through pattern identification and resource optimization.
 
