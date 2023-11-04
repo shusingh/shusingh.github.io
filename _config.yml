@@ -81,25 +81,25 @@ content:
     content:
       - layout: left
         title: Cost-Optimization Analyzer
-        sub-title: <mark>AWS Cost Explorer API</mark>, <mark>Lambda</mark>, <mark>DynamoDB</mark>, <mark>QuickSight</mark>
+        caption: AWS Cost Explorer API, Lambda, DynamoDB, QuickSight
         description: >
           Developed an application to analyze AWS spending and offer cost-saving recommendations through pattern identification and resource optimization.
 
       - layout: left
         title: Dynamic Content Delivery Network (CDN)
-        technologies: AWS CloudFront, Lambda@Edge, S3, Route 53
+        caption: AWS CloudFront, Lambda@Edge, S3, Route 53
         description: >
           Designed a CDN that adaptively serves content based on user's location and preferences, significantly optimizing user experience.
 
       - layout: left
         title: Serverless Data Processing Pipeline
-        technologies: AWS Lambda, S3, DynamoDB, API Gateway, Kinesis
+        caption: AWS Lambda, S3, DynamoDB, API Gateway, Kinesis
         description: >
           Engineered a serverless pipeline for real-time data processing, utilizing Lambda for efficient data transformations and streamlined storage.
 
       - layout: left
         title: Real-Time Analytics Dashboard
-        technologies: AWS Kinesis, Lambda, QuickSight, DynamoDB
+        caption: AWS Kinesis, Lambda, QuickSight, DynamoDB
         description: >
           Implemented a real-time analytics dashboard to visualize data streams, enhancing decision-making with up-to-the-minute insights.
 
