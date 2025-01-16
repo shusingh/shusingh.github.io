@@ -49,7 +49,7 @@ export const About: React.FC = () => {
     <AboutSectionContainer id="about">
       <HeroSectionContainer>
         <AvatarContainer>
-          <Image src="src/assets/avatar.gif" boxSize="90px" borderRadius="full" fit="cover" alt="Adventurer" />
+          <Image src="/avatar.gif" boxSize="90px" borderRadius="full" fit="cover" alt="Adventurer" />
         </AvatarContainer>
         <HeroTextContainer>
           <h1>{ABOUT_SECTION_TEXT.TITLE}</h1>
