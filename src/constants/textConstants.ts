@@ -24,9 +24,10 @@ export const ABOUT_SECTION_TEXT = {
   TITLE: 'Shubham Singh',
   SUB_TITLE: 'Product-focused Developer',
   DESCRIPTION: `
-  Hi, I'm Shubham. I have a passion for building scalable and efficient solutions. 
-  Fueled by curiosity and a passion for elegant design, 
-  I blend cutting-edge tech with user-centric thinking to build experiences people love.
+  Hi, I'm Shubham — a software engineer passionate about building scalable, 
+  elegant, and high-impact systems. I thrive at the intersection of performance, 
+  design, and usability, blending cutting-edge technology with user-centric 
+  thinking to craft solutions people love.
   <br />Always shipping, always learning, always ready for the next challenge.
   `,
 };
@@ -38,19 +39,12 @@ export const EXPERIENCE_SECTION_TEXT: ExperienceSectionText = {
     JOB_TITLE: 'Software Development Engineer',
     JOB_DURATION: '2022 - Present',
     JOB_DESCRIPTION: `
-      Led the development of scalable software solutions, 
-      including designing and deploying an artifact search and upload platform 
-      using AWS and microservices architecture to enhance retrieval efficiency 
-      and improve user experience.
-      <br /><br />
-      Built and maintained PySpark ETL pipelines to automate compliance checks 
-      under the EU Digital Services Act, ensuring accurate reporting 
-      and reducing manual intervention.
-      <br /><br />
-      Focused on performance optimization, dynamic feature integration, 
-      and fostering best practices through code reviews and mentorship, 
-      consistently delivering high-quality, production-ready solutions.
-`,
+      Designed and built scalable backend services and internal platforms to improve developer productivity and operational visibility.<br /><br />
+      Architected an artifact management system used by 25K+ daily users; integrated CI/CD workflows to streamline search, upload, and release pipelines.<br /><br />
+      Developed high-throughput ETL pipelines in PySpark to automate compliance reporting under the EU Digital Services Act, reducing manual overhead by 80%.<br /><br />
+      Led development of a real-time observability dashboard backed by Andes; adopted by 6+ internal teams to monitor system health and track SLAs.<br /><br />
+      Promoted engineering best practices through design reviews, mentorship, and collaborative development across Java, Python, Go, and TypeScript microservices.
+    `,
   },
   ELI_LILLY: {
     COMPANY_NAME: 'Eli Lilly & Co.',
@@ -58,8 +52,8 @@ export const EXPERIENCE_SECTION_TEXT: ExperienceSectionText = {
     JOB_TITLE: 'Data Analyst Intern (Co-op)',
     JOB_DURATION: 'Jan 2021 - March 2021',
     JOB_DESCRIPTION: `
-    Led the development of a machine learning pipeline to analyze 
-    cancer-related gene lines, optimizing data preprocessing and model accuracy.
+      Built Python pipelines to automate the analysis of 10K+ cancer-related gene samples, enhancing the accuracy and reproducibility of bioinformatics research.<br /><br />
+      Delivered key visual insights for research teams using Matplotlib and Seaborn, supporting experimental decisions across multiple trials.
     `,
   },
   INDIANA_UNIVERSITY: {
@@ -68,13 +62,8 @@ export const EXPERIENCE_SECTION_TEXT: ExperienceSectionText = {
     JOB_TITLE: 'Research & Teaching Assistant',
     JOB_DURATION: 'May 2021 - Aug 2021',
     JOB_DESCRIPTION: `
-    Conducted geospatial analysis using QGIS, 
-    identifying environmental risk factors for Biosphere Reserves 
-    and proposing mitigation strategies.
-    <br /><br />
-    Assisted students in advanced data visualization techniques 
-    during I422 Data Visualization lab sessions, 
-    providing practical guidance on analysis tools.
+      Conducted geospatial analysis using QGIS to identify environmental risk factors for Biosphere Reserves and suggest mitigation strategies.<br /><br />
+      Mentored students in I422 Data Visualization labs, guiding hands-on analysis with tools like Tableau and D3.js to support project-based learning.
     `,
   },
 };
@@ -91,50 +80,51 @@ export interface ProjectSectionText {
 }
 
 export const PROJECT_SECTION_TEXT: ProjectSectionText = {
+  PLATFORM_OBSERVABILITY_DASHBOARD: {
+    PROJECT_TITLE: 'Platform Observability Dashboard',
+    PROJECT_DESCRIPTION: `
+      Designed and built a Grafana-like dashboard to visualize platform metrics, logs, and SLAs across services using data aggregated in Andes.<br /><br />
+      Empowered internal teams with real-time insights into system health, reducing incident triage time and improving visibility across distributed microservices.
+    `,
+    TECH_STACK: ['React.js', 'TypeScript', 'Andes', 'Go', 'AWS'],
+  },
   DATA_COLLECTION_SERVICE: {
     PROJECT_TITLE: 'Data Collection & Transformation Service',
     PROJECT_DESCRIPTION: `
-      Built a data collection and transformation service using Java and Python, implementing the ACBDA pattern and Dagger for dependency injection.<br /><br />
-      Designed scalable workflows for processing API-based datasets with PySpark, achieving 90%+ unit test coverage. Leveraged AWS Glue and S3 for secure data storage and retrieval, integrating deployment pipelines with AWS Lambda, CloudFormation, and CDK to ensure scalability and maintainability.
+      Engineered a scalable data processing service for ingesting and transforming large API-driven datasets using PySpark and Java.<br /><br />
+      Leveraged AWS Glue, S3, and Lambda for secure processing workflows; integrated CI/CD pipelines for automated deployment and testing.
     `,
     TECH_STACK: ['Java', 'Python', 'PySpark', 'AWS Glue', 'S3', 'Lambda', 'CDK'],
   },
   COST_OPTIMIZATION_ANALYZER: {
-    PROJECT_TITLE: 'Cost-Optimization Analyzer',
+    PROJECT_TITLE: 'Cloud Cost Optimization Analyzer',
     PROJECT_DESCRIPTION: `
-      Built a cost-optimization tool to analyze and reduce cloud spending patterns using AWS Cost Explorer API and QuickSight.<br /><br />
-      Visualized resource consumption trends, providing actionable insights to optimize cloud resource allocation and reduce potential costs.
+      Built a serverless tool to analyze cloud usage and provide actionable insights using AWS Cost Explorer and QuickSight.<br /><br />
+      Automated daily cost reports and alerts, helping teams reduce spend through smarter resource allocation and usage monitoring.
     `,
-    TECH_STACK: ['AWS Cost Explorer API', 'QuickSight', 'Python'],
+    TECH_STACK: ['AWS Cost Explorer API', 'QuickSight', 'Python', 'Lambda'],
   },
-  MICROSERVICES_ECOMMERCE: {
-    PROJECT_TITLE: 'Microservices E-Commerce Playground',
+  DISTRIBUTED_KEY_VALUE_STORE: {
+    PROJECT_TITLE: 'Distributed Key-Value Store',
     PROJECT_DESCRIPTION: `
-      Developed a microservices-based e-commerce system for personal learning, splitting core functionalities (products, orders, payments) into independent services.<br /><br />
-      Containerized each service with Docker and deployed them on AWS ECS to experiment with horizontal scaling and service discovery.
+      Created a Raft-based key-value store to simulate a fault-tolerant, distributed database system with leader election and consistent hashing.<br /><br />
+      Focused on performance under network partitions and containerized deployment using Helm and Kubernetes.
     `,
-    TECH_STACK: ['Java', 'Spring Boot', 'Docker', 'AWS ECS'],
-  },
-  REAL_TIME_CHAT_APP: {
-    PROJECT_TITLE: 'Real-Time Chat Application',
-    PROJECT_DESCRIPTION: `
-      Built a real-time chat application using Socket.IO and Express to gain hands-on experience with low-latency, event-driven communication.<br /><br />
-      Deployed the application on AWS EC2 with an Nginx reverse proxy for load balancing, learning best practices for basic DevOps and server configuration.
-    `,
-    TECH_STACK: ['Node.js', 'Express', 'Socket.IO', 'AWS EC2', 'Nginx'],
+    TECH_STACK: ['Go', 'Raft', 'gRPC', 'Kubernetes', 'Helm'],
   },
 };
 
-import {
-  FaJava,
-  FaPython,
-  FaJs,
-  FaAws,
-  FaDocker,
-  FaReact,
-  FaJenkins,
-  FaGitAlt,
-} from 'react-icons/fa';
+import { 
+  FaJava, 
+  FaPython, 
+  FaJs, 
+  FaAws, 
+  FaDocker, 
+  FaReact, 
+  FaJenkins, 
+  FaGitAlt, 
+  FaCss3,
+  FaHtml5 } from 'react-icons/fa';
 import {
   SiTypescript,
   SiCplusplus,
@@ -146,10 +136,10 @@ import {
   SiExpress,
 } from 'react-icons/si';
 import { MdDesignServices, MdCached } from 'react-icons/md';
-import { VscTypeHierarchy } from "react-icons/vsc";
-import { TbArrowsJoin } from "react-icons/tb";
-import { FaCode } from "react-icons/fa6";
-import { AiTwotoneApi } from "react-icons/ai";
+import { VscTypeHierarchy } from 'react-icons/vsc';
+import { TbArrowsJoin } from 'react-icons/tb';
+import { FaCode, FaGolang } from 'react-icons/fa6';
+import { AiTwotoneApi } from 'react-icons/ai';
 
 interface Skill {
   name: string;
@@ -171,6 +161,7 @@ export const SKILLS_SECTION_TEXT: SkillsSectionText = {
     SKILLS: [
       { name: 'Java', icon: FaJava },
       { name: 'Python', icon: FaPython },
+      { name: 'Go', icon: FaGolang },
       { name: 'JavaScript', icon: FaJs },
       { name: 'TypeScript', icon: SiTypescript },
       { name: 'C/C++', icon: SiCplusplus },
@@ -180,8 +171,8 @@ export const SKILLS_SECTION_TEXT: SkillsSectionText = {
     TITLE: 'Distributed Systems & System Design',
     SKILLS: [
       { name: 'Distributed Systems', icon: VscTypeHierarchy },
-      { name: 'Load Balancing', icon: FaAws },
-      { name: 'Fault Tolerance', icon: FaAws },
+      { name: 'Event-Driven Architecture', icon: TbArrowsJoin },
+      { name: 'Fault Tolerance', icon: MdDesignServices },
       { name: 'Design Patterns', icon: MdDesignServices },
       { name: 'Microservices Architecture', icon: FaReact },
     ],
@@ -203,6 +194,7 @@ export const SKILLS_SECTION_TEXT: SkillsSectionText = {
       { name: 'Jenkins', icon: FaJenkins },
       { name: 'GitHub Actions', icon: FaGitAlt },
       { name: 'Infrastructure as Code (IaC)', icon: FaCode },
+      { name: 'Monitoring & Alerting (CloudWatch, DataDog)', icon: FaCode },
     ],
   },
   DATABASE_MANAGEMENT: {
@@ -220,6 +212,7 @@ export const SKILLS_SECTION_TEXT: SkillsSectionText = {
       { name: 'Express.js', icon: SiExpress },
       { name: 'GraphQL', icon: SiGraphql },
       { name: 'RESTful APIs', icon: AiTwotoneApi },
+      { name: 'gRPC', icon: FaCode },
     ],
   },
   SOFTWARE_ENGINEERING: {
@@ -228,8 +221,19 @@ export const SKILLS_SECTION_TEXT: SkillsSectionText = {
       { name: 'Algorithms', icon: MdDesignServices },
       { name: 'Data Structures', icon: MdDesignServices },
       { name: 'Design Patterns', icon: MdDesignServices },
+      { name: 'Test Automation (JUnit, PyTest)', icon: FaCode },
+      { name: 'Code Reviews & Mentorship', icon: FaCode },
       { name: 'Agile', icon: MdDesignServices },
       { name: 'SCRUM', icon: MdDesignServices },
+    ],
+  },
+  WEB_TECHNOLOGIES: {
+    TITLE: 'Web Technologies',
+    SKILLS: [
+      { name: 'HTML5', icon: FaHtml5 },
+      { name: 'CSS3', icon: FaCss3 },
+      { name: 'Responsive Design', icon: FaCode },
+      { name: 'Accessibility (a11y)', icon: FaCode },
     ],
   },
 };
@@ -237,6 +241,5 @@ export const SKILLS_SECTION_TEXT: SkillsSectionText = {
 export const SOCIAL_LINKS = {
   Github: 'https://github.com/shusingh',
   LinkedIn: 'https://www.linkedin.com/in/shusingh/',
-  Gmail: 'mailto:ksingh.shubh@gmail.com'
-}
-
+  Gmail: 'mailto:ksingh.shubh@gmail.com',
+};

@@ -15,7 +15,7 @@ website: www.github.com/shusingh/portfolio-website
 darkmode: false
 
 # Social links
-github_username:  shusingh
+github_username: shusingh
 # stackoverflow_username: "00000001"
 # dribbble_username: jekyll
 # facebook_username: jekyll
@@ -54,7 +54,6 @@ about_content: |
   When not engaged with code, I'm a fervent traveler and food enthusiast, always on the lookout for the next adventure or culinary discovery. Hiking, reading, gaming, and experimenting with new recipes offer me a world of experiences.
 
 content:
-
   - title: Experience
     layout: list
     content:
@@ -132,4 +131,4 @@ sass:
   style: compressed
 
 plugins:
- - jekyll-seo-tag
+  - jekyll-seo-tag
