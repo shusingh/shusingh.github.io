@@ -35,10 +35,12 @@ export const Projects: React.FC = () => {
             <TimelineCard
               key={index}
               timelineTitle={project.PROJECT_TITLE}
+              timelineTitleLink={project.PROJECT_LINK}
               timelineContentTitle={PERSONAL_PROJECT}
               timelineContentSubTitle={project.TECH_STACK.join(' • ')}
               timelineContentDescription={project.PROJECT_DESCRIPTION}
               timelineLogo={<FaProjectDiagram />}
+              githubLink={project.GITHUB_LINK}
             />
           ))}
         </StyledTimelineRoot>
