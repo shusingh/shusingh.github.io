@@ -8,7 +8,7 @@ import { Skills } from './sections/Skills/Skills';
 import { Footer } from './components/Footer/Footer';
 
 const AppContainer = styled.div`
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
 `;

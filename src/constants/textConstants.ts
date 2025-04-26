@@ -39,11 +39,11 @@ export const EXPERIENCE_SECTION_TEXT: ExperienceSectionText = {
     JOB_TITLE: 'Software Development Engineer',
     JOB_DURATION: '2022 - Present',
     JOB_DESCRIPTION: `
-      Designed and built scalable backend services and internal platforms to improve developer productivity and operational visibility.<br /><br />
-      Architected an artifact management system used by 25K+ daily users; integrated CI/CD workflows to streamline search, upload, and release pipelines.<br /><br />
-      Developed high-throughput ETL pipelines in PySpark to automate compliance reporting under the EU Digital Services Act, reducing manual overhead by 80%.<br /><br />
-      Led development of a real-time observability dashboard backed by Andes; adopted by 6+ internal teams to monitor system health and track SLAs.<br /><br />
-      Promoted engineering best practices through design reviews, mentorship, and collaborative development across Java, Python, Go, and TypeScript microservices.
+      Architected and delivered a File Ingestor Self-Service platform (UI + backend) that streamlined critical data ingestion from third-party sellers, enabling data-driven decision making and reducing manual coordination by 90%.<br /><br />
+      Designed and implemented an automated artifact-management platform with CI/CD pipelines and fine-grained RBAC, transforming manual document reviews into streamlined workflows that cut review turnaround by 60% and case closure time by 40%.<br /><br />
+      Engineered high-performance PySpark ETL pipelines processing 30M+ monthly records for EU regulatory compliance, implementing row-level validation with S3 quarantine and automated alerts that reduced incident resolution time by 70%.<br /><br />
+      Built a plug-and-play User Management Service with resource-level RBAC that consolidated authentication across 10+ microservices, eliminating critical security gaps and reducing security incidents by 60%.<br /><br />
+      Led technical design reviews and cross-functional collaborations across distributed microservices in Java, Python, Go and TypeScript, establishing engineering best practices and ensuring maintainable, high-quality code through rigorous peer reviews.
     `,
   },
   ELI_LILLY: {
@@ -73,6 +73,7 @@ export interface Project {
   PROJECT_DESCRIPTION: string;
   TECH_STACK: string[];
   PROJECT_LINK?: string;
+  GITHUB_LINK?: string;
 }
 
 export interface ProjectSectionText {
@@ -80,29 +81,33 @@ export interface ProjectSectionText {
 }
 
 export const PROJECT_SECTION_TEXT: ProjectSectionText = {
-  PLATFORM_OBSERVABILITY_DASHBOARD: {
-    PROJECT_TITLE: 'Platform Observability Dashboard',
+  AI_TRIP_PLANNER: {
+    PROJECT_TITLE: 'AI Trip Planner',
     PROJECT_DESCRIPTION: `
-      Designed and built a Grafana-like dashboard to visualize platform metrics, logs, and SLAs across services using data aggregated in Andes.<br /><br />
-      Empowered internal teams with real-time insights into system health, reducing incident triage time and improving visibility across distributed microservices.
+      Designed and implemented a multi-step trip planning SPA using Vite, React + TypeScript, and Hero UI with a dynamic form flow capturing destinations, dates, and traveler interests through an intuitive UI with real-time progress tracking.<br /><br />
+      Built a scalable Go REST API backend that integrates with Hugging Face Inference API (Flan-T5-Base) to generate personalized travel recommendations based on user preferences.
     `,
-    TECH_STACK: ['React.js', 'TypeScript', 'Andes', 'Go', 'AWS'],
+    TECH_STACK: ['React', 'TypeScript', 'Go', 'Hugging Face API', 'Vite', 'Hero UI'],
+    PROJECT_LINK: 'https://tripplannerwebsite.onrender.com/',
+    GITHUB_LINK: 'https://github.com/shusingh/TripPlanner',
   },
-  DATA_COLLECTION_SERVICE: {
-    PROJECT_TITLE: 'Data Collection & Transformation Service',
+  KANBAN_BOARD: {
+    PROJECT_TITLE: 'Drag & Drop Kanban Board',
     PROJECT_DESCRIPTION: `
-      Engineered a scalable data processing service for ingesting and transforming large API-driven datasets using PySpark and Java.<br /><br />
-      Leveraged AWS Glue, S3, and Lambda for secure processing workflows; integrated CI/CD pipelines for automated deployment and testing.
+      Developed a localStorage-backed, offline-first Kanban board SPA using Vite, React + TypeScript, and Hero UI that enables intuitive task management with drag-and-drop functionality powered by @hello-pangea/dnd.<br /><br />
+      Implemented advanced UI features including per-column color theming, dark/light mode support, deletion confirmation modals, and persistent state management for seamless user experience.
     `,
-    TECH_STACK: ['Java', 'Python', 'PySpark', 'AWS Glue', 'S3', 'Lambda', 'CDK'],
+    TECH_STACK: ['React', 'TypeScript', 'Hero UI', '@hello-pangea/dnd', 'Vite', 'localStorage'],
+    PROJECT_LINK: 'https://kanban-board-6ty7.onrender.com/',
+    GITHUB_LINK: 'https://github.com/shusingh/kanban-board',
   },
   COST_OPTIMIZATION_ANALYZER: {
     PROJECT_TITLE: 'Cloud Cost Optimization Analyzer',
     PROJECT_DESCRIPTION: `
-      Built a serverless tool to analyze cloud usage and provide actionable insights using AWS Cost Explorer and QuickSight.<br /><br />
-      Automated daily cost reports and alerts, helping teams reduce spend through smarter resource allocation and usage monitoring.
+      Built a serverless tool to automate EC2/RDS cost analysis using AWS SDK with scheduled daily reports delivered via Lambda and CloudWatch Events.<br /><br />
+      Integrated AWS Budgets API to trigger real-time SNS alerts and created interactive QuickSight dashboards to visualize cost trends, helping teams reduce spend through smarter resource allocation.
     `,
-    TECH_STACK: ['AWS Cost Explorer API', 'QuickSight', 'Python', 'Lambda'],
+    TECH_STACK: ['AWS Cost Explorer API', 'QuickSight', 'Python', 'Lambda', 'CloudWatch', 'SNS'],
   },
   DISTRIBUTED_KEY_VALUE_STORE: {
     PROJECT_TITLE: 'Distributed Key-Value Store',
@@ -114,17 +119,7 @@ export const PROJECT_SECTION_TEXT: ProjectSectionText = {
   },
 };
 
-import { 
-  FaJava, 
-  FaPython, 
-  FaJs, 
-  FaAws, 
-  FaDocker, 
-  FaReact, 
-  FaJenkins, 
-  FaGitAlt, 
-  FaCss3,
-  FaHtml5 } from 'react-icons/fa';
+import { FaJava, FaPython, FaJs, FaAws, FaDocker, FaReact, FaJenkins, FaGitAlt, FaCss3, FaHtml5 } from 'react-icons/fa';
 import {
   SiTypescript,
   SiCplusplus,

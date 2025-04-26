@@ -5,10 +5,11 @@ import {
   TimelineItem,
   TimelineTitle,
 } from '@/components/ui/timeline';
-import { Link, Text } from '@chakra-ui/react';
+import { Link, Text, Flex } from '@chakra-ui/react';
 import styled from 'styled-components';
 import React from 'react';
 import { LuExternalLink } from 'react-icons/lu';
+import { FaGithub } from 'react-icons/fa';
 
 interface ExperienceCardProps {
   timelineTitle: string;
@@ -17,10 +18,16 @@ interface ExperienceCardProps {
   timelineContentSubTitle: string;
   timelineContentDescription: string;
   timelineLogo: React.ReactNode;
+  githubLink?: string;
 }
 
 const StyledText = styled(Text)`
   color: var(--color-whiteAlpha-700);
+`;
+
+const LinkContainer = styled(Flex)`
+  align-items: center;
+  gap: 8px;
 `;
 
 export const TimelineCard: React.FC<ExperienceCardProps> = ({
@@ -30,23 +37,31 @@ export const TimelineCard: React.FC<ExperienceCardProps> = ({
   timelineContentSubTitle,
   timelineContentDescription,
   timelineLogo,
+  githubLink,
 }) => {
   return (
     <TimelineItem>
-      <TimelineContent width="auto" minW="200px">
+      <TimelineContent alignItems='end' width="auto" minW="25rem">
         <TimelineTitle>
-          {timelineTitleLink ? (
-            <Link href={timelineTitleLink} variant="plain" target="__blank">
-              {timelineTitle}
-              <LuExternalLink />
-            </Link>
-          ) : (
-            timelineTitle
-          )}
+          <LinkContainer>
+            {timelineTitleLink ? (
+              <Link href={timelineTitleLink} variant="plain" target="_blank">
+                {timelineTitle}
+                <LuExternalLink />
+              </Link>
+            ) : (
+              timelineTitle
+            )}
+            {githubLink && (
+              <Link href={githubLink} variant="plain" target="_blank" ml={2}>
+                <FaGithub />
+              </Link>
+            )}
+          </LinkContainer>
         </TimelineTitle>
       </TimelineContent>
       <TimelineConnector>{timelineLogo}</TimelineConnector>
-      <TimelineContent>
+      <TimelineContent width="auto" minW="25rem">
         <TimelineTitle>{timelineContentTitle}</TimelineTitle>
         <TimelineDescription>{timelineContentSubTitle}</TimelineDescription>
         <StyledText textStyle="sm" dangerouslySetInnerHTML={{ __html: timelineContentDescription }} />
