@@ -101,6 +101,16 @@ export const PROJECT_SECTION_TEXT: ProjectSectionText = {
     PROJECT_LINK: 'https://kanban-board-6ty7.onrender.com/',
     GITHUB_LINK: 'https://github.com/shusingh/kanban-board',
   },
+  CHILL_PIXEL: {
+    PROJECT_TITLE: 'Chill Pixel',
+    PROJECT_DESCRIPTION: `
+      Created a beautiful lofi music player with a pixel art theme, offering a nostalgic aesthetic while streaming relaxing beats.<br /><br />
+      Implemented features like retro-style controls, playlist management, and real-time track information using React, TypeScript, and the Jamendo API.
+    `,
+    TECH_STACK: ['React', 'TypeScript', 'Vite', 'Tailwind CSS', 'Jamendo API', 'Render.com'],
+    PROJECT_LINK: 'https://chill-pixel.onrender.com/',
+    GITHUB_LINK: 'https://github.com/shusingh/chill-pixel',
+  },
   COST_OPTIMIZATION_ANALYZER: {
     PROJECT_TITLE: 'Cloud Cost Optimization Analyzer',
     PROJECT_DESCRIPTION: `
