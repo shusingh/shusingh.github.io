@@ -42,7 +42,6 @@ export const EXPERIENCE_SECTION_TEXT: ExperienceSectionText = {
       Architected and delivered a File Ingestor Self-Service platform (UI + backend) that streamlined critical data ingestion from third-party sellers, enabling data-driven decision making and reducing manual coordination by 90%.<br /><br />
       Designed and implemented an automated artifact-management platform with CI/CD pipelines and fine-grained RBAC, transforming manual document reviews into streamlined workflows that cut review turnaround by 60% and case closure time by 40%.<br /><br />
       Engineered high-performance PySpark ETL pipelines processing 30M+ monthly records for EU regulatory compliance, implementing row-level validation with S3 quarantine and automated alerts that reduced incident resolution time by 70%.<br /><br />
-      Built a plug-and-play User Management Service with resource-level RBAC that consolidated authentication across 10+ microservices, eliminating critical security gaps and reducing security incidents by 60%.<br /><br />
       Led technical design reviews and cross-functional collaborations across distributed microservices in Java, Python, Go and TypeScript, establishing engineering best practices and ensuring maintainable, high-quality code through rigorous peer reviews.
     `,
   },
@@ -118,14 +117,6 @@ export const PROJECT_SECTION_TEXT: ProjectSectionText = {
       Integrated AWS Budgets API to trigger real-time SNS alerts and created interactive QuickSight dashboards to visualize cost trends, helping teams reduce spend through smarter resource allocation.
     `,
     TECH_STACK: ['AWS Cost Explorer API', 'QuickSight', 'Python', 'Lambda', 'CloudWatch', 'SNS'],
-  },
-  DISTRIBUTED_KEY_VALUE_STORE: {
-    PROJECT_TITLE: 'Distributed Key-Value Store',
-    PROJECT_DESCRIPTION: `
-      Created a Raft-based key-value store to simulate a fault-tolerant, distributed database system with leader election and consistent hashing.<br /><br />
-      Focused on performance under network partitions and containerized deployment using Helm and Kubernetes.
-    `,
-    TECH_STACK: ['Go', 'Raft', 'gRPC', 'Kubernetes', 'Helm'],
   },
 };
 

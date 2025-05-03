@@ -1,4 +1,4 @@
-import { TimelineCard } from '../../components/Timeline/TimelineCard';
+import { TimelineCard } from '@/components/Timeline/TimelineCard';
 import { TimelineRoot } from '@chakra-ui/react';
 import styled from 'styled-components';
 import React from 'react';
