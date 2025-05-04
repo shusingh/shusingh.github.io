@@ -11,6 +11,11 @@ const system = createSystem(defaultConfig, {
         heading: { value: 'Source Code Pro Variable' },
         body: { value: 'Source Code Pro Variable' },
       },
+      colors: {
+        gray: {
+          900: { value: '#1f2328' },
+        },
+      },
     },
   },
 });

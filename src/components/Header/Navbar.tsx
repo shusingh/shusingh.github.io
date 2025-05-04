@@ -12,7 +12,7 @@ const NavbarContainer = styled.nav`
   justify-content: space-between;
   padding: 1rem;
   z-index: 1000;
-  background: rgba(17, 17, 17, 0.95);
+  background: rgba(31, 35, 40, 0.95);
   backdrop-filter: blur(6px);
   border-bottom: 1px dotted rgba(255, 255, 255, 0.1);
 `;
