@@ -39,6 +39,20 @@ const SkillsBox = styled.div`
   gap: 10px;
 `;
 
+const StyledTag = styled(Tag)`
+  background-color: rgba(42, 47, 54, 0.8);
+  color: white;
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: rgba(58, 63, 70, 0.8);
+  }
+`;
+
 export const Skills: React.FC = () => {
   return (
     <SkillsSectionContainer id="skills">
@@ -50,9 +64,9 @@ export const Skills: React.FC = () => {
           </TitleBox>
           <SkillsBox>
             {value.SKILLS.map((skill) => (
-              <Tag size="sm" key={skill.name} startElement={<skill.icon />}>
+              <StyledTag size="sm" key={skill.name} startElement={<skill.icon />}>
                 {skill.name}
-              </Tag>
+              </StyledTag>
             ))}
           </SkillsBox>
         </SkillsRow>
