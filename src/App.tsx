@@ -2,8 +2,14 @@ import { ChakraProvider, createSystem, defaultConfig, defineConfig } from '@chak
 import { LandingPage } from './pages/LandingPage/LandingPage';
 import styled from 'styled-components';
 import { useMouseGradient } from './hooks/useMouseGradient';
+import { useCallback } from 'react';
 
-const AppWrapper = styled.div<{ gradientPosition: { x: number; y: number } }>`
+interface GradientPosition {
+  x: number;
+  y: number;
+}
+
+const AppWrapper = styled.div<{ gradientPosition: GradientPosition }>`
   position: fixed;
   top: 0;
   left: 0;
@@ -16,6 +22,7 @@ const AppWrapper = styled.div<{ gradientPosition: { x: number; y: number } }>`
   );
   pointer-events: none;
   z-index: 0;
+  will-change: background;
 `;
 
 const ContentWrapper = styled.div`
@@ -26,15 +33,19 @@ const ContentWrapper = styled.div`
 function App() {
   const mousePosition = useMouseGradient();
 
-  const config = defineConfig({
-    ...defaultConfig,
-    cssVarsPrefix: 'chakra',
-  });
+  const config = useCallback(
+    () =>
+      defineConfig({
+        ...defaultConfig,
+        cssVarsPrefix: 'chakra',
+      }),
+    []
+  );
 
-  const system = createSystem(config);
+  const system = useCallback(() => createSystem(config()), [config]);
 
   return (
-    <ChakraProvider value={system}>
+    <ChakraProvider value={system()}>
       <AppWrapper gradientPosition={mousePosition} />
       <ContentWrapper>
         <LandingPage />
