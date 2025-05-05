@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 import { EXPERIENCE_SECTION_TEXT } from '@/constants/textConstants';
 import { Card } from '@/components/Card/Card';
