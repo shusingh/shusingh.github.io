@@ -57,11 +57,11 @@ const SectionWrapper = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  display: none;
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
   color: var(--text-primary);
+  display: none;
 
   @media (max-width: 1024px) {
     display: block;
@@ -76,16 +76,16 @@ export const LandingPage = () => {
           <HeroSection />
         </LeftSectionContainer>
         <RightSectionContainer>
-          <SectionWrapper id="about">
-            <SectionTitle>About</SectionTitle>
+          <SectionWrapper id="about" aria-labelledby="about-title">
+            <SectionTitle id="about-title">About</SectionTitle>
             <About />
           </SectionWrapper>
-          <SectionWrapper id="experience">
-            <SectionTitle>Experience</SectionTitle>
+          <SectionWrapper id="experience" aria-labelledby="experience-title">
+            <SectionTitle id="experience-title">Experience</SectionTitle>
             <Experience />
           </SectionWrapper>
-          <SectionWrapper id="projects">
-            <SectionTitle>Projects</SectionTitle>
+          <SectionWrapper id="projects" aria-labelledby="projects-title">
+            <SectionTitle id="projects-title">Projects</SectionTitle>
             <Projects />
           </SectionWrapper>
         </RightSectionContainer>

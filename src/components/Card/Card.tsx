@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Box, Text, Flex, Link, Badge } from '@chakra-ui/react';
 import { FiExternalLink } from 'react-icons/fi';
 import styled from 'styled-components';
@@ -7,7 +7,7 @@ interface CardProps {
   timeline: string;
   title: string;
   description: string;
-  skills: string[];
+  skills: readonly string[];
   link: string;
   imageSrc?: string;
 }
@@ -38,10 +38,10 @@ const CardContainer = styled(Link)`
     outline: none;
   }
 
-  &:focus:not(:focus-visible) {
-    background-color: transparent;
-    box-shadow: none;
-    border-color: transparent;
+  &:focus-visible {
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   @media (max-width: 768px) {
@@ -115,24 +115,28 @@ const ExternalLinkIcon = styled(FiExternalLink)`
   }
 `;
 
-export const Card: React.FC<CardProps> = ({ timeline, title, description, skills, link, imageSrc }) => {
+export const Card: React.FC<CardProps> = memo(({ timeline, title, description, skills, link, imageSrc }) => {
   return (
-    <CardContainer href={link} target="_blank" rel="noopener noreferrer">
+    <CardContainer href={link} target="_blank" rel="noopener noreferrer" aria-label={`${title} - ${description}`}>
       <TimelineColumn>
         {imageSrc ? <ProjectImage src={imageSrc} alt={title} /> : <TimelineText>{timeline}</TimelineText>}
       </TimelineColumn>
       <ContentColumn>
         <TitleContainer>
           <Title>{title}</Title>
-          {link && <ExternalLinkIcon />}
+          {link && <ExternalLinkIcon aria-hidden="true" />}
         </TitleContainer>
         <Description>{description}</Description>
-        <Flex wrap="wrap" gap="0.5rem">
+        <Flex wrap="wrap" gap="0.5rem" role="list" aria-label="Skills">
           {skills.map((skill, index) => (
-            <StyledBadge key={index}>{skill}</StyledBadge>
+            <StyledBadge key={index} role="listitem">
+              {skill}
+            </StyledBadge>
           ))}
         </Flex>
       </ContentColumn>
     </CardContainer>
   );
-};
+});
+
+Card.displayName = 'Card';
