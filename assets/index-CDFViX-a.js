@@ -257,6 +257,7 @@ Error generating stack: `+f.message+`
   max-width: 1480px;
   padding: 0 3rem;
   scroll-behavior: smooth;
+  margin: 0 auto;
 `,hz=Le.div`
   display: flex;
   gap: 10rem;
