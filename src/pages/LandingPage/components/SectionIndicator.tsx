@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 
 interface SectionIndicatorProps {
@@ -37,32 +37,55 @@ const IndicatorItem = styled.div<{ isActive: boolean }>`
 
 export const SectionIndicator: React.FC<SectionIndicatorProps> = ({ sections }) => {
   const [activeSection, setActiveSection] = useState<string>('about');
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      {
-        rootMargin: '-10% 0px -80% 0px',
-        threshold: 0,
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    const options = {
+      rootMargin: '-30% 0px -30% 0px',
+      threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+    };
+
+    const handleIntersection = (entries: IntersectionObserverEntry[]) => {
+      if (isInitialMount.current) {
+        const firstVisible = entries.find((entry) => entry.isIntersecting);
+        if (firstVisible) {
+          setActiveSection(firstVisible.target.id);
+          isInitialMount.current = false;
+          return;
+        }
       }
-    );
+
+      const mostVisibleEntry = entries.reduce(
+        (mostVisible, entry) => {
+          if (!mostVisible) return entry;
+          const mostVisibleRatio = mostVisible.intersectionRatio;
+          const currentRatio = entry.intersectionRatio;
+          return currentRatio > mostVisibleRatio ? entry : mostVisible;
+        },
+        null as IntersectionObserverEntry | null
+      );
+
+      if (mostVisibleEntry && mostVisibleEntry.isIntersecting) {
+        setActiveSection(mostVisibleEntry.target.id);
+      }
+    };
+
+    observerRef.current = new IntersectionObserver(handleIntersection, options);
 
     sections.forEach(({ id }) => {
       const element = document.getElementById(id);
-      if (element) observer.observe(element);
+      if (element) observerRef.current?.observe(element);
     });
 
     return () => {
-      sections.forEach(({ id }) => {
-        const element = document.getElementById(id);
-        if (element) observer.unobserve(element);
-      });
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
   }, [sections]);
 
