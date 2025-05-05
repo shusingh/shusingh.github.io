@@ -25,11 +25,11 @@ export const ABOUT_SECTION_TEXT = {
   SUB_TITLE: 'Full-stack Engineer',
   TAGLINE: 'Building scalable systems with a focus on user experience',
   DESCRIPTION: `
-  I'm Shubham, a Software Development Engineer at Amazon, where I design and build scalable, high-performance systems powering millions of operations daily. Whether optimizing PySpark ETL pipelines for efficiency or orchestrating containerized Go microservices on Kubernetes, my goal is to deliver robust, maintainable, and impactful solutions.
+  I'm Shubham, a Software Engineer at Amazon where I design and build both backend and frontend systems that are reliable, scalable, and easy to maintain. I enjoy simplifying complex problems and creating solutions that improve internal workflows, enhance user experience, and stand the test of time.
   <br /><br />
-  I believe great engineering is rooted in empathy—understanding user needs guides every system I architect, every feature I develop, and every code review I conduct. My work has streamlined complex processes, reducing onboarding timelines from weeks to hours, and enabled self-service through intuitive ingestion pipelines. Passionate about creating elegant systems, I enjoy crafting full-stack side projects that blend responsive UX with reliable backend infrastructure.
+  I believe engineering starts with empathy. Understanding user needs is key to architecting effective systems and features. This approach has helped me streamline complex processes, cutting onboarding times from weeks to hours and empowering users with self-service data ingestion pipelines. Outside of work, I enjoy developing full-stack side projects that combine intuitive UX with solid backend infrastructure.
   <br /><br />
-  When I'm not coding, you'll find me pushing my limits at the gym, capturing life's moments with my Fujifilm X100VI, or buried in a good book, always driven by curiosity and the thrill of mastering something new.
+  When I'm not coding, you can find me at the gym, exploring photography with my Fujifilm X100VI, or lost in a good book. I'm driven by curiosity and the constant pursuit of learning and mastering new skills.
   `,
 };
 
