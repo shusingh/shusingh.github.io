@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 
 interface SectionIndicatorProps {
   sections: {
@@ -7,6 +7,21 @@ interface SectionIndicatorProps {
     title: string;
   }[];
 }
+
+const rippleAnimation = keyframes`
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+`;
 
 const IndicatorContainer = styled.div`
   position: sticky;
@@ -25,24 +40,43 @@ const IndicatorContainer = styled.div`
 const IndicatorItem = styled.div<{ isActive: boolean }>`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
   font-size: ${(props) => (props.isActive ? '1.1rem' : '0.9rem')};
   color: ${(props) => (props.isActive ? 'var(--text-primary)' : 'var(--color-whiteAlpha-700)')};
   transition: all 0.3s ease;
   cursor: pointer;
   padding: 0.25rem 0;
   width: fit-content;
+  position: relative;
 
   &:hover {
     color: var(--text-primary);
   }
 `;
 
-const IndicatorLine = styled.div<{ isActive: boolean }>`
-  width: ${(props) => (props.isActive ? '1.5rem' : '0.5rem')};
-  height: 1px;
+const IndicatorDot = styled.div<{ isActive: boolean }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   background-color: ${(props) => (props.isActive ? 'var(--text-primary)' : 'var(--color-whiteAlpha-700)')};
   transition: all 0.3s ease;
+  position: relative;
+
+  ${IndicatorItem}:hover & {
+    background-color: var(--text-primary);
+  }
+`;
+
+const RippleWave = styled.div<{ isActive: boolean; delay: number }>`
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${(props) => (props.isActive ? 'var(--text-primary)' : 'transparent')};
+  animation: ${(props) => (props.isActive ? rippleAnimation : 'none')} 3.5s infinite;
+  animation-delay: ${(props) => props.delay}s;
+  opacity: 0;
+  transform-origin: center;
 `;
 
 export const SectionIndicator: React.FC<SectionIndicatorProps> = ({ sections }) => {
@@ -117,7 +151,11 @@ export const SectionIndicator: React.FC<SectionIndicatorProps> = ({ sections }) 
     <IndicatorContainer>
       {sections.map(({ id, title }) => (
         <IndicatorItem key={id} isActive={activeSection === id} onClick={() => scrollToSection(id)}>
-          <IndicatorLine isActive={activeSection === id} />
+          <IndicatorDot isActive={activeSection === id}>
+            <RippleWave isActive={activeSection === id} delay={0} />
+            <RippleWave isActive={activeSection === id} delay={1.2} />
+            <RippleWave isActive={activeSection === id} delay={2.4} />
+          </IndicatorDot>
           {title}
         </IndicatorItem>
       ))}
