@@ -1,4 +1,4 @@
-import { ABOUT_SECTION_TEXT, SOCIAL_LINKS } from '@/constants/textConstants';
+import { ABOUT_SECTION_TEXT, SOCIAL_LINKS } from '@/constants';
 import React from 'react';
 import styled from 'styled-components';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';

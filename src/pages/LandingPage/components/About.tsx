@@ -1,4 +1,4 @@
-import { ABOUT_SECTION_TEXT } from '@/constants/textConstants';
+import { ABOUT_SECTION_TEXT } from '@/constants';
 import styled from 'styled-components';
 
 const AboutContainer = styled.div`

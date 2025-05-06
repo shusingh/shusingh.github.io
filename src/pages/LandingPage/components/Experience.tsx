@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { EXPERIENCE_SECTION_TEXT } from '@/constants/textConstants';
+import { EXPERIENCE_SECTION_TEXT } from '@/constants';
 import { Card } from '@/components/Card/Card';
 
 const ExperienceContainer = styled.div`
