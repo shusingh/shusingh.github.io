@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { PROJECT_SECTION_TEXT } from '@/constants/textConstants';
+import { PROJECT_SECTION_TEXT } from '@/constants';
 import { Card } from '@/components/Card/Card';
 
 const ProjectsContainer = styled.div`
