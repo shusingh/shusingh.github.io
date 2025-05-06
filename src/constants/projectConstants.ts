@@ -13,16 +13,6 @@ export interface ProjectSectionText {
 }
 
 export const PROJECT_SECTION_TEXT: ProjectSectionText = {
-  AI_TRIP_PLANNER: {
-    PROJECT_TITLE: 'AI Trip Planner',
-    PROJECT_DESCRIPTION:
-      'Designed and implemented a multi-step trip planning SPA using Vite, React + TypeScript, and Hero UI with a dynamic form flow capturing destinations, dates, and traveler interests through an intuitive UI with real-time progress tracking.',
-    TECH_STACK: ['React', 'TypeScript', 'Go', 'Hugging Face API', 'Vite', 'Hero UI'],
-    PROJECT_LINK: 'https://tripplannerwebsite.onrender.com/',
-    GITHUB_LINK: 'https://github.com/shusingh/TripPlanner',
-    TIMELINE: '2025',
-    IMAGE_SRC: '/ai-trip-planner.png',
-  },
   KANBAN_BOARD: {
     PROJECT_TITLE: 'Drag & Drop Kanban Board',
     PROJECT_DESCRIPTION:
@@ -43,6 +33,16 @@ export const PROJECT_SECTION_TEXT: ProjectSectionText = {
     TIMELINE: '2025',
     IMAGE_SRC: '/chill-pixel.png',
   },
+  AI_TRIP_PLANNER: {
+    PROJECT_TITLE: 'AI Trip Planner',
+    PROJECT_DESCRIPTION:
+      'Designed and implemented a multi-step trip planning SPA using Vite, React + TypeScript, and Hero UI with a dynamic form flow capturing destinations, dates, and traveler interests through an intuitive UI with real-time progress tracking.',
+    TECH_STACK: ['React', 'TypeScript', 'Go', 'Hugging Face API', 'Vite', 'Hero UI'],
+    PROJECT_LINK: 'https://tripplannerwebsite.onrender.com/',
+    GITHUB_LINK: 'https://github.com/shusingh/TripPlanner',
+    TIMELINE: '2025',
+    IMAGE_SRC: '/ai-trip-planner.png',
+  },
   COST_OPTIMIZATION_ANALYZER: {
     PROJECT_TITLE: 'Cloud Cost Optimization Analyzer',
     PROJECT_DESCRIPTION:
@@ -50,4 +50,4 @@ export const PROJECT_SECTION_TEXT: ProjectSectionText = {
     TECH_STACK: ['AWS Cost Explorer API', 'QuickSight', 'Python', 'Lambda', 'CloudWatch', 'SNS'],
     TIMELINE: '2024',
   },
-}; 
+};
