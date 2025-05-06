@@ -23,6 +23,9 @@ const IndicatorContainer = styled.div`
 `;
 
 const IndicatorItem = styled.div<{ isActive: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: ${(props) => (props.isActive ? '1.1rem' : '0.9rem')};
   color: ${(props) => (props.isActive ? 'var(--text-primary)' : 'var(--color-whiteAlpha-700)')};
   transition: all 0.3s ease;
@@ -33,6 +36,13 @@ const IndicatorItem = styled.div<{ isActive: boolean }>`
   &:hover {
     color: var(--text-primary);
   }
+`;
+
+const IndicatorLine = styled.div<{ isActive: boolean }>`
+  width: ${(props) => (props.isActive ? '1.5rem' : '0.5rem')};
+  height: 1px;
+  background-color: ${(props) => (props.isActive ? 'var(--text-primary)' : 'var(--color-whiteAlpha-700)')};
+  transition: all 0.3s ease;
 `;
 
 export const SectionIndicator: React.FC<SectionIndicatorProps> = ({ sections }) => {
@@ -107,6 +117,7 @@ export const SectionIndicator: React.FC<SectionIndicatorProps> = ({ sections }) 
     <IndicatorContainer>
       {sections.map(({ id, title }) => (
         <IndicatorItem key={id} isActive={activeSection === id} onClick={() => scrollToSection(id)}>
+          <IndicatorLine isActive={activeSection === id} />
           {title}
         </IndicatorItem>
       ))}
