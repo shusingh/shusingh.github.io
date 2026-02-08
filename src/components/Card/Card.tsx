@@ -130,7 +130,7 @@ export const Card: React.FC<CardProps> = memo(({ timeline, title, description, s
           <Title>{title}</Title>
           {link && <ExternalLinkIcon aria-hidden="true" />}
         </TitleContainer>
-        <Description>{description}</Description>
+        <Description dangerouslySetInnerHTML={{ __html: description }} />
         <Flex wrap="wrap" gap="0.5rem" role="list" aria-label="Skills">
           {skills.map((skill, index) => (
             <StyledBadge key={index} role="listitem">

@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { About } from './components/About';
+import { ResumeCard } from './components/ResumeCard';
 import { Skills } from './components/Skills';
 import { Experience } from './components/Experience';
 import { Education } from './components/Education';
@@ -42,6 +43,7 @@ export const RightSection = () => {
       <SectionWrapper id="about" aria-labelledby="about-title">
         <SectionTitle id="about-title">About</SectionTitle>
         <About />
+        <ResumeCard />
       </SectionWrapper>
       <SectionWrapper id="skills" aria-labelledby="skills-title">
         <SectionTitle id="skills-title">Skills</SectionTitle>
