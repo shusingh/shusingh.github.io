@@ -37,18 +37,21 @@ const IndicatorContainer = styled.div`
   }
 `;
 
-const IndicatorItem = styled.div<{ isActive: boolean }>`
+const IndicatorItem = styled.button<{ isActive: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.75rem;
   font-family: var(--font-mono);
   font-size: ${(props) => (props.isActive ? '1.1rem' : '0.9rem')};
+  line-height: 1.3;
   color: ${(props) => (props.isActive ? 'var(--text-primary)' : 'var(--color-whiteAlpha-700)')};
   transition: all 0.3s ease;
   cursor: pointer;
   padding: 0.25rem 0;
   width: fit-content;
   position: relative;
+  background: none;
+  border: none;
 
   &:hover {
     color: var(--text-primary);
@@ -149,13 +152,17 @@ export const SectionIndicator: React.FC<SectionIndicatorProps> = ({ sections }) 
   };
 
   return (
-    <IndicatorContainer>
+    <IndicatorContainer role="navigation" aria-label="Page sections">
       {sections.map(({ id, title }) => (
-        <IndicatorItem key={id} isActive={activeSection === id} onClick={() => scrollToSection(id)}>
+        <IndicatorItem
+          key={id}
+          isActive={activeSection === id}
+          onClick={() => scrollToSection(id)}
+          aria-current={activeSection === id ? 'true' : undefined}
+        >
           <IndicatorDot isActive={activeSection === id}>
             <RippleWave isActive={activeSection === id} delay={0} />
-            <RippleWave isActive={activeSection === id} delay={1.2} />
-            <RippleWave isActive={activeSection === id} delay={2.4} />
+            <RippleWave isActive={activeSection === id} delay={1.5} />
           </IndicatorDot>
           {title}
         </IndicatorItem>

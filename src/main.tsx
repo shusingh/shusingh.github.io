@@ -14,6 +14,9 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider>
       <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <a href="#about" className="skip-to-content">
+          Skip to content
+        </a>
         <App />
       </ErrorBoundary>
     </Provider>

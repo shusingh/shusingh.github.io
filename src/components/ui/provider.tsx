@@ -5,6 +5,7 @@ import { ChakraProvider, createSystem, defaultConfig } from '@chakra-ui/react';
 import { ColorModeProvider, type ColorModeProviderProps } from './color-mode';
 
 const system = createSystem(defaultConfig, {
+  cssVarsPrefix: 'chakra',
   theme: {
     tokens: {
       fonts: {

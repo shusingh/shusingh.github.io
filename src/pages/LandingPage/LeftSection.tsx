@@ -5,7 +5,8 @@ const LeftSectionContainer = styled.div`
   position: sticky;
   top: 0;
   height: fit-content;
-  width: 20rem;
+  width: clamp(16rem, 30%, 24rem);
+  flex-shrink: 0;
   align-self: flex-start;
 
   @media (max-width: 1024px) {

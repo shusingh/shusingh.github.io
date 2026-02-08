@@ -63,7 +63,8 @@ const TimelineColumn = styled(Box)`
 const TimelineText = styled.div`
   color: var(--color-whiteAlpha-700);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
 `;
 
 const ProjectImage = styled.img`
@@ -89,13 +90,14 @@ const Title = styled(Text)`
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
+  line-height: 1.3;
 `;
 
 const Description = styled(Text)`
   color: var(--color-whiteAlpha-700);
   margin-bottom: 1rem;
   line-height: 1.6;
-  font-size: 0.8rem;
+  font-size: 0.875rem;
   white-space: pre-line;
 `;
 
@@ -105,17 +107,23 @@ const StyledBadge = styled(Badge)`
   font-family: var(--font-mono);
   border-radius: 0.375rem;
   padding: 0.25rem 0.75rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
 `;
 
 const ExternalLinkIcon = styled(FiExternalLink)`
   color: var(--color-whiteAlpha-700);
   font-size: 0.8rem;
-  transition: transform 0.3s ease;
+  opacity: 0.5;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 
   ${CardContainer}:hover & {
     transform: translate(2px, -2px);
+    opacity: 1;
   }
 `;
 
@@ -123,7 +131,7 @@ export const Card: React.FC<CardProps> = memo(({ timeline, title, description, s
   return (
     <CardContainer href={link} target="_blank" rel="noopener noreferrer" aria-label={`${title} - ${description}`}>
       <TimelineColumn>
-        {imageSrc ? <ProjectImage src={imageSrc} alt={title} /> : <TimelineText>{timeline}</TimelineText>}
+        {imageSrc ? <ProjectImage src={imageSrc} alt={title} loading="lazy" /> : <TimelineText>{timeline}</TimelineText>}
       </TimelineColumn>
       <ContentColumn>
         <TitleContainer>
