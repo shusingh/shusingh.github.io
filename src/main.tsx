@@ -8,6 +8,7 @@ import { Provider } from '@/components/ui/provider';
 import App from './App.tsx';
 import './index.css';
 import '@fontsource-variable/source-code-pro/index.css';
+import '@fontsource-variable/inter/index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

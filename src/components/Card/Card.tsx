@@ -28,9 +28,9 @@ const CardContainer = styled(Link)`
   border: 1px solid transparent;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--card-hover-bg);
+    box-shadow: 0 8px 16px var(--card-hover-shadow);
+    border-color: var(--card-hover-border);
     text-decoration: none;
   }
 
@@ -39,9 +39,9 @@ const CardContainer = styled(Link)`
   }
 
   &:focus-visible {
-    background-color: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    border-color: rgba(255, 255, 255, 0.2);
+    background-color: var(--card-hover-bg);
+    box-shadow: 0 8px 16px var(--card-hover-shadow);
+    border-color: var(--card-hover-border);
   }
 
   @media (max-width: 768px) {
@@ -62,7 +62,8 @@ const TimelineColumn = styled(Box)`
 
 const TimelineText = styled.div`
   color: var(--color-whiteAlpha-700);
-  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
 `;
 
 const ProjectImage = styled.img`
@@ -83,6 +84,7 @@ const TitleContainer = styled.div`
 `;
 
 const Title = styled(Text)`
+  font-family: var(--font-mono);
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -98,8 +100,9 @@ const Description = styled(Text)`
 `;
 
 const StyledBadge = styled(Badge)`
-  background-color: rgba(42, 47, 54, 0.8);
-  color: white;
+  background-color: var(--badge-bg);
+  color: var(--badge-color);
+  font-family: var(--font-mono);
   border-radius: 0.375rem;
   padding: 0.25rem 0.75rem;
   font-size: 0.7rem;
