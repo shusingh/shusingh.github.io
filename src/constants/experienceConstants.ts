@@ -15,28 +15,10 @@ export const EXPERIENCE_SECTION_TEXT: ExperienceSectionText = {
   AMAZON: {
     COMPANY_NAME: 'Amazon Inc.',
     COMPANY_LINK: 'https://www.amazon.com/',
-    JOB_TITLE: 'Software Development Engineer',
-    JOB_DURATION: '2022 - Present',
+    JOB_TITLE: 'Software Development Engineer II',
+    JOB_DURATION: 'Aug 2022 - Present',
     JOB_DESCRIPTION:
-      'At Amazon, I led the end-to-end design and delivery of self-service platforms and automated workflows that empowered teams to onboard data and manage artifacts with minimal effort. I built intuitive UIs backed by scalable microservices in Java, Python, Go, and TypeScript, and crafted robust ETL pipelines in PySpark to meet stringent compliance requirements. Throughout, I partnered closely with cross-functional teams—driving architecture reviews, implementing CI/CD and role-based access controls, and championing best practices—to ensure reliable, maintainable solutions that streamline complex business processes.',
-    SKILLS: ['Java', 'Python', 'Go', 'TypeScript', 'AWS', 'Kubernetes', 'PySpark', 'React'],
-  },
-  ELI_LILLY: {
-    COMPANY_NAME: 'Eli Lilly & Co.',
-    COMPANY_LINK: 'https://www.lilly.com/',
-    JOB_TITLE: 'Data Analyst Intern (Co-op)',
-    JOB_DURATION: 'Jan - Mar 2021',
-    JOB_DESCRIPTION:
-      'Built Python pipelines to automate the analysis of 10K+ cancer-related gene samples, enhancing the accuracy and reproducibility of bioinformatics research.',
-    SKILLS: ['Python', 'Pandas', 'NumPy', 'Matplotlib', 'Seaborn', 'Bioinformatics'],
-  },
-  INDIANA_UNIVERSITY: {
-    COMPANY_NAME: 'Indiana University Bloomington',
-    COMPANY_LINK: 'https://bloomington.iu.edu/index.html',
-    JOB_TITLE: 'Research & Teaching Assistant',
-    JOB_DURATION: 'May - Aug 2021',
-    JOB_DESCRIPTION:
-      'Conducted geospatial analysis using QGIS to identify environmental risk factors for Biosphere Reserves and suggest mitigation strategies.',
-    SKILLS: ['QGIS', 'Geospatial Analysis', 'Data Visualization', 'Tableau', 'D3.js'],
+      'Designed and built a production-grade LLM system using AWS Bedrock and RAG that automated ~80% of manual compliance workflows, enabling natural-language querying across regulatory datasets. Engineered a hybrid search architecture combining OpenSearch (BM25) and vector-based document retrieval (kNN) with secure tool-calling and sub-second AI response latency.\n\nBuilt distributed orchestration using AWS Step Functions, Lambda, and DynamoDB, achieving 4x higher reliability for regulatory pipelines. Architected self-service workflow configuration platforms cutting onboarding time from weeks to hours. Led design of a PySpark-based EU-DSA compliance pipeline processing 30M+ monthly records, reducing incident resolution time by 70%.',
+    SKILLS: ['Java', 'Python', 'Go', 'TypeScript', 'AWS', 'Kubernetes', 'PySpark', 'React', 'AWS Bedrock', 'RAG', 'OpenSearch', 'Docker'],
   },
 };
