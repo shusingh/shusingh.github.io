@@ -16,8 +16,7 @@ const sections = [
 const HeroSectionContainer = styled.div`
   padding-top: 6rem;
   text-align: left;
-  width: 43%;
-  min-width: 24rem;
+  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -48,6 +47,8 @@ const HeroSectionContainer = styled.div`
     font-weight: 600;
     margin: 0;
     color: var(--text-primary);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
 
     @media (max-width: 1024px) {
       font-size: 2.5rem;
@@ -57,7 +58,8 @@ const HeroSectionContainer = styled.div`
     color: var(--color-whiteAlpha-700);
     margin: 0.5rem 0;
     font-family: var(--font-mono);
-    font-size: 0.9rem;
+    font-size: 1rem;
+    line-height: 1.5;
   }
   p:first-of-type {
     color: var(--text-primary);
@@ -108,6 +110,7 @@ const HeroSection: React.FC = () => {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Visit my GitHub profile"
+          title="GitHub"
         >
           <FaGithub />
         </SocialLink>
@@ -116,10 +119,11 @@ const HeroSection: React.FC = () => {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Visit my LinkedIn profile"
+          title="LinkedIn"
         >
           <FaLinkedin />
         </SocialLink>
-        <SocialLink href={SOCIAL_LINKS.Gmail} aria-label="Send me an email">
+        <SocialLink href={SOCIAL_LINKS.Gmail} aria-label="Send me an email" title="Email">
           <MdEmail />
         </SocialLink>
       </SocialLinksContainer>

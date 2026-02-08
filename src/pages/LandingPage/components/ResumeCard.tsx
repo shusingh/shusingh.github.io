@@ -42,15 +42,17 @@ const TextContent = styled.div`
 
 const Title = styled.span`
   font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
+  line-height: 1.3;
 `;
 
 const Subtitle = styled.span`
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--color-whiteAlpha-700);
+  line-height: 1.4;
 `;
 
 const DownloadIcon = styled(FiDownload)`
@@ -75,7 +77,7 @@ export const ResumeCard = () => {
         <FileIcon />
         <TextContent>
           <Title>Resume</Title>
-          <Subtitle>Shubham_Resume.pdf</Subtitle>
+          <Subtitle>PDF &middot; Shubham_Resume.pdf</Subtitle>
         </TextContent>
       </LeftContent>
       <DownloadIcon />

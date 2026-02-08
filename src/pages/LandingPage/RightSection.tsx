@@ -28,12 +28,28 @@ const SectionTitle = styled.h2`
   font-family: var(--font-mono);
   font-size: 1.25rem;
   font-weight: 600;
+  line-height: 1.3;
   margin-bottom: 1.5rem;
   color: var(--text-primary);
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 
   @media (max-width: 1024px) {
-    display: block;
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0 0 1.5rem 0;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
   }
 `;
 

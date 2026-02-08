@@ -11,7 +11,7 @@ const LandingPageWrapper = styled.div`
 
 const LandingPageContainer = styled.div`
   display: flex;
-  gap: 10rem;
+  gap: clamp(3rem, 5vw, 10rem);
   max-width: 75rem;
   margin: 0 auto;
   position: relative;

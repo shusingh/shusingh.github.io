@@ -1,8 +1,6 @@
-import { ChakraProvider, createSystem, defaultConfig, defineConfig } from '@chakra-ui/react';
 import { LandingPage } from './pages/LandingPage/LandingPage';
 import styled from 'styled-components';
 import { useMouseGradient } from './hooks/useMouseGradient';
-import { useCallback } from 'react';
 import { ColorModeButton } from './components/ui/color-mode';
 
 interface GradientPosition {
@@ -41,19 +39,8 @@ const ThemeToggleWrapper = styled.div`
 function App() {
   const mousePosition = useMouseGradient();
 
-  const config = useCallback(
-    () =>
-      defineConfig({
-        ...defaultConfig,
-        cssVarsPrefix: 'chakra',
-      }),
-    []
-  );
-
-  const system = useCallback(() => createSystem(config()), [config]);
-
   return (
-    <ChakraProvider value={system()}>
+    <>
       <AppWrapper gradientPosition={mousePosition} />
       <ThemeToggleWrapper>
         <ColorModeButton />
@@ -61,7 +48,7 @@ function App() {
       <ContentWrapper>
         <LandingPage />
       </ContentWrapper>
-    </ChakraProvider>
+    </>
   );
 }
 
