@@ -30,7 +30,7 @@ const IndicatorContainer = styled.div`
   flex-direction: column;
   gap: 1rem;
   padding-left: 1rem;
-  border-left: 1px solid var(--color-whiteAlpha-200);
+  border-left: 1px solid var(--color-whiteAlpha-200, rgba(255, 255, 255, 0.12));
 
   @media (max-width: 1024px) {
     display: none;
@@ -41,6 +41,7 @@ const IndicatorItem = styled.div<{ isActive: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  font-family: var(--font-mono);
   font-size: ${(props) => (props.isActive ? '1.1rem' : '0.9rem')};
   color: ${(props) => (props.isActive ? 'var(--text-primary)' : 'var(--color-whiteAlpha-700)')};
   transition: all 0.3s ease;

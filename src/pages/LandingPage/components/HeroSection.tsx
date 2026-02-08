@@ -3,11 +3,14 @@ import React from 'react';
 import styled from 'styled-components';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
+import { FiDownload } from 'react-icons/fi';
 import { SectionIndicator } from './SectionIndicator';
 
 const sections = [
   { id: 'about', title: 'About' },
+  { id: 'skills', title: 'Skills' },
   { id: 'experience', title: 'Experience' },
+  { id: 'education', title: 'Education' },
   { id: 'projects', title: 'Projects' },
 ];
 
@@ -41,6 +44,7 @@ const HeroSectionContainer = styled.div`
   }
 
   h1 {
+    font-family: var(--font-mono);
     font-size: 3rem;
     font-weight: 600;
     margin: 0;
@@ -53,6 +57,8 @@ const HeroSectionContainer = styled.div`
   p {
     color: var(--color-whiteAlpha-700);
     margin: 0.5rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
   }
   p:first-of-type {
     color: var(--text-primary);
@@ -116,6 +122,13 @@ const HeroSection: React.FC = () => {
         </SocialLink>
         <SocialLink href={SOCIAL_LINKS.Gmail} aria-label="Send me an email">
           <MdEmail />
+        </SocialLink>
+        <SocialLink
+          href="/Shubham_Resume.pdf"
+          download
+          aria-label="Download resume"
+        >
+          <FiDownload />
         </SocialLink>
       </SocialLinksContainer>
     </HeroSectionContainer>

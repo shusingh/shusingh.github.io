@@ -1,17 +1,28 @@
 :root {
   --text-primary: #fff;
   --color-whiteAlpha-700: rgba(255, 255, 255, 0.64);
+  --color-whiteAlpha-200: rgba(255, 255, 255, 0.12);
   --bg-color: #1f2328;
   --text-color: #ffffff;
   --accent-color: #3b82f6;
   --secondary-color: #64748b;
   --dotted-line-color: rgba(0, 0, 0, 0.15);
+  --card-hover-bg: rgba(255, 255, 255, 0.05);
+  --card-hover-shadow: rgba(0, 0, 0, 0.15);
+  --card-hover-border: rgba(255, 255, 255, 0.2);
+  --badge-bg: rgba(110, 231, 183, 0.15);
+  --badge-color: #6ee7b7;
+  --gradient-accent: rgba(29, 78, 216, 0.15);
+  --selection-bg: rgba(110, 231, 183, 0.3);
+  --selection-color: white;
+  --font-mono: 'Source Code Pro Variable', ui-monospace, monospace;
+  --font-sans: 'Inter Variable', Inter, system-ui, -apple-system, sans-serif;
 
-  font-family: 'Source Code Pro Variable', Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-sans);
   line-height: 1.6;
   font-weight: 400;
 
-  color-scheme: light dark;
+  color-scheme: dark;
   color: var(--text-primary);
   background-color: var(--bg-color);
 
@@ -21,9 +32,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.light {
+  --text-primary: #1a202c;
+  --color-whiteAlpha-700: rgba(0, 0, 0, 0.56);
+  --color-whiteAlpha-200: rgba(0, 0, 0, 0.1);
+  --bg-color: #f7f8fa;
+  --text-color: #1a202c;
+  --accent-color: #2563eb;
+  --secondary-color: #475569;
+  --dotted-line-color: rgba(0, 0, 0, 0.025);
+  --card-hover-bg: rgba(0, 0, 0, 0.03);
+  --card-hover-shadow: rgba(0, 0, 0, 0.08);
+  --card-hover-border: rgba(0, 0, 0, 0.1);
+  --badge-bg: rgba(16, 185, 129, 0.1);
+  --badge-color: #047857;
+  --gradient-accent: rgba(59, 130, 246, 0.08);
+  --selection-bg: rgba(59, 130, 246, 0.25);
+  --selection-color: #1a202c;
+
+  color-scheme: light;
+}
+
 ::selection {
-  background-color: rgba(110, 231, 183, 0.3);
-  color: white;
+  background-color: var(--selection-bg);
+  color: var(--selection-color);
 }
 
 html,
@@ -55,41 +87,10 @@ body {
     linear-gradient(to bottom, var(--dotted-line-color) 1px, transparent 1px);
   background-size: 24px 24px;
   background-position: center center;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
 }

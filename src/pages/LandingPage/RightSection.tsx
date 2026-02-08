@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { About } from './components/About';
+import { Skills } from './components/Skills';
 import { Experience } from './components/Experience';
+import { Education } from './components/Education';
 import { Projects } from './components/Projects';
 
 const RightSectionContainer = styled.div`
@@ -22,6 +24,7 @@ const SectionWrapper = styled.div`
 `;
 
 const SectionTitle = styled.h2`
+  font-family: var(--font-mono);
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
@@ -40,9 +43,17 @@ export const RightSection = () => {
         <SectionTitle id="about-title">About</SectionTitle>
         <About />
       </SectionWrapper>
+      <SectionWrapper id="skills" aria-labelledby="skills-title">
+        <SectionTitle id="skills-title">Skills</SectionTitle>
+        <Skills />
+      </SectionWrapper>
       <SectionWrapper id="experience" aria-labelledby="experience-title">
         <SectionTitle id="experience-title">Experience</SectionTitle>
         <Experience />
+      </SectionWrapper>
+      <SectionWrapper id="education" aria-labelledby="education-title">
+        <SectionTitle id="education-title">Education</SectionTitle>
+        <Education />
       </SectionWrapper>
       <SectionWrapper id="projects" aria-labelledby="projects-title">
         <SectionTitle id="projects-title">Projects</SectionTitle>
