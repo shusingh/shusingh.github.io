@@ -3,7 +3,6 @@ import React from 'react';
 import styled from 'styled-components';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
-import { FiDownload } from 'react-icons/fi';
 import { SectionIndicator } from './SectionIndicator';
 
 const sections = [
@@ -122,13 +121,6 @@ const HeroSection: React.FC = () => {
         </SocialLink>
         <SocialLink href={SOCIAL_LINKS.Gmail} aria-label="Send me an email">
           <MdEmail />
-        </SocialLink>
-        <SocialLink
-          href="/Shubham_Resume.pdf"
-          download
-          aria-label="Download resume"
-        >
-          <FiDownload />
         </SocialLink>
       </SocialLinksContainer>
     </HeroSectionContainer>

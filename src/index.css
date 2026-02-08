@@ -49,7 +49,6 @@
   --gradient-accent: rgba(59, 130, 246, 0.08);
   --selection-bg: rgba(59, 130, 246, 0.25);
   --selection-color: #1a202c;
-
   color-scheme: light;
 }
 
@@ -88,6 +87,11 @@ body {
   background-size: 24px 24px;
   background-position: center center;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.highlight {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 h1 {
