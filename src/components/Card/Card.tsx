@@ -94,6 +94,7 @@ const Description = styled(Text)`
   margin-bottom: 1rem;
   line-height: 1.6;
   font-size: 0.8rem;
+  white-space: pre-line;
 `;
 
 const StyledBadge = styled(Badge)`

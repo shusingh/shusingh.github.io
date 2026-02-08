@@ -13,6 +13,33 @@ export interface ProjectSectionText {
 }
 
 export const PROJECT_SECTION_TEXT: ProjectSectionText = {
+  STRANDS_MULTI_AGENT: {
+    PROJECT_TITLE: 'Strands Multi-Agent Orchestrator',
+    PROJECT_DESCRIPTION:
+      'Built a multi-agent orchestration system using Strands Agents SDK with specialized agent routing (planner, research, data, synthesizer), MCP tool integration, FastAPI streaming, and observability tracing over heterogeneous data sources including SQL, web search, and document corpora.',
+    TECH_STACK: ['Python', 'Strands Agents SDK', 'MCP', 'FastAPI', 'SQL', 'LLM'],
+    GITHUB_LINK: 'https://github.com/shusingh/strands-multi-agent',
+    TIMELINE: '2026',
+    IMAGE_SRC: '/strands-multi-agent.png',
+  },
+  DISTRIBUTED_RATE_LIMITER: {
+    PROJECT_TITLE: 'Distributed Rate Limiter',
+    PROJECT_DESCRIPTION:
+      'Built a distributed rate limiting service in Go using Redis Sorted Sets and atomic Lua sliding window enforcement, exposing an HTTP check API and middleware integration with fail-open behavior and bounded Redis latency.',
+    TECH_STACK: ['Go', 'Redis', 'Lua', 'HTTP API', 'Middleware'],
+    GITHUB_LINK: 'https://github.com/shusingh/distributed-rate-limiter',
+    TIMELINE: '2026',
+    IMAGE_SRC: '/distributed-rate-limiter.png',
+  },
+  RAG_PLATFORM: {
+    PROJECT_TITLE: 'RAG Platform',
+    PROJECT_DESCRIPTION:
+      'Built a multi-tenant RAG platform in Go using OpenSearch (BM25 + kNN) with async ingestion (extract, chunk, embed, index), Redis Streams workers, and citation-grounded answers over large document corpora.',
+    TECH_STACK: ['Go', 'OpenSearch', 'Redis Streams', 'BM25', 'kNN', 'RAG'],
+    GITHUB_LINK: 'https://github.com/shusingh/rag-platform',
+    TIMELINE: '2025',
+    IMAGE_SRC: '/rag-platform.png',
+  },
   KANBAN_BOARD: {
     PROJECT_TITLE: 'Drag & Drop Kanban Board',
     PROJECT_DESCRIPTION:
@@ -42,12 +69,5 @@ export const PROJECT_SECTION_TEXT: ProjectSectionText = {
     GITHUB_LINK: 'https://github.com/shusingh/TripPlanner',
     TIMELINE: '2025',
     IMAGE_SRC: '/ai-trip-planner.png',
-  },
-  COST_OPTIMIZATION_ANALYZER: {
-    PROJECT_TITLE: 'Cloud Cost Optimization Analyzer',
-    PROJECT_DESCRIPTION:
-      'Built a serverless tool to automate EC2/RDS cost analysis using AWS SDK with scheduled daily reports delivered via Lambda and CloudWatch Events.',
-    TECH_STACK: ['AWS Cost Explorer API', 'QuickSight', 'Python', 'Lambda', 'CloudWatch', 'SNS'],
-    TIMELINE: '2024',
   },
 };
