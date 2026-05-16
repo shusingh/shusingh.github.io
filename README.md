@@ -1,63 +1,24 @@
-# Shubham Singh - Portfolio Website
+# Shubham Singh
 
-A modern, responsive portfolio website built with React, TypeScript, and Vite. This website showcases my professional experience, projects, and skills.
+Personal portfolio for [shusingh.github.io](https://shusingh.github.io).
 
-## 🚀 Live Website
+Built with React, Vite, TypeScript, MDX, CSS Modules, and GitHub Pages.
 
-Visit my portfolio at [shusingh.github.io](https://shusingh.github.io/)
+## What is inside
 
-## 🛠️ Tech Stack
+- Case studies in `content/work`
+- Writing in `content/writing`
+- Static sitemap, RSS, Open Graph image generation, and route metadata via `scripts/postbuild.ts`
+- Dark/light themes using `data-theme` and CSS custom properties
 
-- React
-- TypeScript
-- Vite
-- Styled Components
-- Chakra UI
-- GitHub Pages (Hosting)
+## Commands
 
-## 🎯 Features
-
-- Responsive design
-- Modern UI with smooth animations
-- Project showcase with live demos
-- Experience timeline
-- Skills visualization
-- Dark/Light mode support
-
-## 🏗️ Project Structure
-
-```
-src/
-├── pages/
-│   └── LandingPage/
-│       ├── LandingPage.tsx
-│       └── components/
-│           ├── About.tsx
-│           ├── Experience.tsx
-│           ├── Projects.tsx
-│           └── Skills.tsx
-├── components/
-│   ├── Footer/
-│   └── Header/
-└── App.tsx
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+npm run deploy
 ```
 
-## 🚀 Getting Started
-
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-4. Build for production:
-   ```bash
-   npm run build
-   ```
-
-## 📄 License
-
-This project is licensed under the [GPL-3.0 License](https://www.gnu.org/licenses/gpl-3.0.en.html).
+`npm run deploy` publishes `dist` to the `gh-pages` branch.
