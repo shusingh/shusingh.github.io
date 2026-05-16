@@ -1,4 +1,5 @@
-import { Link, NavLink } from 'react-router-dom';
+import type { MouseEvent } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 
 import { useTheme } from '@/lib/theme';
 
@@ -29,13 +30,40 @@ function MoonIcon() {
   );
 }
 
+function isPlainLeftClick(event: MouseEvent<HTMLAnchorElement>): boolean {
+  return (
+    event.button === 0 &&
+    !event.altKey &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.shiftKey
+  );
+}
+
+function scrollToPageTop() {
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+}
+
 export function Nav() {
   const { theme, toggleTheme } = useTheme();
+  const location = useLocation();
+
+  function handleSamePageClick(event: MouseEvent<HTMLAnchorElement>, to: string) {
+    if (!isPlainLeftClick(event)) return;
+    if (location.pathname !== to || location.search || location.hash) return;
+    event.preventDefault();
+    scrollToPageTop();
+  }
 
   return (
     <nav className={styles.nav} aria-label="Primary navigation">
       <div className={styles.inner}>
-        <Link className={styles.logo} to="/" aria-label="Shubham Singh home">
+        <Link
+          className={styles.logo}
+          to="/"
+          aria-label="Shubham Singh home"
+          onClick={(event) => handleSamePageClick(event, '/')}
+        >
           Shubham Singh
         </Link>
         <div className={styles.right}>
@@ -45,6 +73,7 @@ export function Nav() {
                 <NavLink
                   className={({ isActive }) => (isActive ? `${styles.link} ${styles.active}` : styles.link)}
                   to={item.to}
+                  onClick={(event) => handleSamePageClick(event, item.to)}
                 >
                   {item.label}
                 </NavLink>
