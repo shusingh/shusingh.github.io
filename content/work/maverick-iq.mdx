@@ -1,0 +1,147 @@
+---
+title: 'MaverickIQ: agentic Q&A for compliance'
+slug: maverick-iq
+eyebrow: Amazon · Architect & Tech Lead
+description: An agentic Q&A system that lets engineering teams self-serve compliance questions instead of filing tickets, built on hybrid BM25 plus kNN retrieval, citation-grounded answers, and compliance-grade auditability.
+date: 2026-05-15
+tech:
+  - Strands Agents SDK
+  - AWS Bedrock
+  - AgentCore
+  - OpenSearch
+  - BM25 + kNN
+  - Bedrock KB
+  - Python
+stat:
+  number: '90% ↓'
+  label: Manual ticket volume across 5 partner teams
+diagram:
+  nodes:
+    - router
+    - BM25
+    - kNN
+    - answer
+  caption: hybrid retrieval with fail-closed grounding
+featured: true
+order: 2
+---
+
+> This public version keeps sensitive implementation details out of scope, but captures the shape of the system and the engineering decisions behind it.
+
+## The problem
+
+Compliance teams at Amazon's scale are inherently bottlenecks, not because the people are slow, but because the knowledge is theirs. Every product team launching a feature, every engineer wiring up a new integration, every PM scoping a new region has the same kind of question: "Does control X apply here? What does this clause actually mean? How does GDPR Article 17 interact with our retention policy?"
+
+Multiply that by hundreds of partner teams and you get a queue. The queue gets answered by the same handful of compliance experts. Those experts spend their week answering tickets instead of doing the work only they can do: control design, regulatory interpretation, and audit prep. Everyone loses.
+
+The naive fix is "build a chatbot." That fix has a perfect failure rate in regulated domains, and it is worth being precise about why.
+
+### Why a naive LLM chatbot fails here
+
+Three failure modes show up immediately:
+
+**Hallucinated citations.** An LLM asked about a regulation will happily invent one. It can produce confident output that cites GDPR Article 17(3) when no such subsection exists, or attribute a clause to the wrong jurisdiction entirely. In a regulated domain this is not a quirk. It is a liability. Compliance teams cannot trust a system that produces plausible wrong answers, even occasionally.
+
+**No provenance.** Even when the model is right, a plain LLM response is unauditable. A user gets an answer, but nobody can show which paragraph of which regulation the answer is grounded in. For compliance work, an answer without provenance is worth very little. The user has to verify it manually anyway, which defeats the purpose.
+
+**No separation between structured and unstructured knowledge.** Compliance knowledge is bimodal. There is structured data: internal control taxonomies, applicability matrices, and region-by-region rule tables. It is clean, queryable, and authoritative. There is also unstructured data: regulation text, legal interpretation memos, and policy guidance documents. It is verbose, overlapping, and full of context. A single retrieval strategy cannot serve both well.
+
+A working system has to give grounded answers with citations from the right kind of source for the question being asked. That is the design problem.
+
+## The approach
+
+MaverickIQ is an agentic Q&A system built with **Strands Agents SDK** on **AWS Bedrock AgentCore**, with **hybrid BM25 plus kNN retrieval** over structured control metadata and approved internal documentation. Citation-grounded responses were a hard architectural constraint, not a prompt preference.
+
+```text
+question  ->  router  ->  retrieve  ->  ground  ->  answer
+                          ↓                       ↓
+                    [BM25 + kNN]           [with citations]
+```
+
+The agent does not generate factual claims without retrieved evidence. The system is engineered to make that constraint enforceable, not just hopeful.
+
+### Hybrid retrieval: BM25 plus kNN
+
+The most common architectural shortcut in RAG systems is "embed everything, search with kNN." For compliance work, this is the wrong default. A lot of the most useful compliance knowledge is not prose. It is tables, taxonomies, and rules like "in marketplace X, control Y applies to seller category Z if and only if condition W."
+
+That kind of knowledge is damaged by chunking and embedding. The semantic similarity of "does control Y apply in Germany" to a row in a 2,000-row applicability table is poor. You might retrieve adjacent rows that have nothing to do with Germany and miss the row that does.
+
+The fix was hybrid retrieval, with each path tuned for the data shape it actually served:
+
+- **BM25 over structured control metadata.** Control IDs, marketplace filters, applicability matrices, deployment states, version history, and nested configuration details belong in lexical and filtered search. DynamoDB Streams feed a sync Lambda that joins source records into one denormalized OpenSearch document per control. The implementation exposes this path through a constrained `SearchControls` tool, so the agent can ask precise questions without constructing arbitrary backend queries.
+- **kNN over unstructured policy and workflow knowledge.** Regulation text, interpretation memos, SOPs, and launch documentation belong in semantic retrieval. The implementation exposes this path through an `ExplainConcept` tool backed by a Bedrock Knowledge Base, where vector search is useful because users ask "what does this mean?" questions rather than exact key lookups.
+
+A router decides which retrieval path, or both paths, to invoke based on the question shape. "Which controls target the US marketplace?" is BM25-heavy. "What does this launch state mean?" is kNN-heavy. "Why did this control fail launch in this region?" usually hits both.
+
+The agent is constrained to ground every factual claim in verified retrieval output and surface source metadata directly in the answer. Control-data answers include deep links back into the internal control UI. Documentation answers include the source system and entity references needed for verification.
+
+### Citation grounding as an architectural constraint
+
+The system enforces citation grounding at the schema layer, not the prompt layer.
+
+The agent does not produce a free-text answer. It produces a structured response: a sequence of claims, each tied to one or more retrieval results. The presentation layer assembles those claims into prose with inline citations. If a claim has no supporting retrieval, the system either reformulates the answer to drop the unsupported claim or returns an "I do not have evidence to answer that" response.
+
+The user-facing effect: every answer comes with **clickable citations** that link to the specific document and section the claim came from. The user can verify the answer in seconds instead of having to take it on faith.
+
+The architectural effect: hallucinations are structurally inhibited, not merely discouraged. A claim with no citation cannot render. A wrong citation is verifiable. The system fails visibly by saying "I do not know" instead of invisibly returning wrong but confident prose.
+
+### Tool calling with audit boundaries
+
+The agent has access to a small set of tools: `SearchControls` for BM25-backed filtered search and direct lookup over the control index, `ExplainConcept` for kNN-backed documentation retrieval, and a Phase 1 path for mutation tools through MCP Gateway. Each tool call is structured, logged, and audit-traceable.
+
+Tool calls are gated by an explicit allow-list. The agent cannot invent tools, construct arbitrary backend calls, or reach data it does not have explicit permission for. The constraint is enforced at the SDK and gateway layer, not at the prompt layer. Relying on a prompt to keep an LLM out of trouble is not a strategy.
+
+## The infrastructure that made it shippable
+
+The parts of this system that determined whether it would actually be trusted in production:
+
+- **Audit logging on every query.** Who asked, what they asked, which retrieval paths fired, what was retrieved, which claims were grounded in which sources, what the final answer was, which model version produced it, and which prompt template version was in effect.
+- **Explicit latency budgets.** Simple single-source lookups target p90 under 3 seconds; complex multi-source questions target p90 under 6 seconds. Each stage has its own budget: UI/network, agent routing, OpenSearch lookup, KB retrieval, generation, and citation assembly.
+- **Idempotent query handling.** The same question asked twice produces the same answer, given the same retrieval index state. This sounds obvious until you realize most LLM systems trivially fail this property.
+- **Versioned retrieval indices.** When a regulation updates or a control taxonomy changes, the index is rebuilt as a new version, not mutated in place. Answers can be reproduced against the index state at the time they were given, which matters when someone asks, "the system told me X three weeks ago, was that correct?"
+- **Near-real-time freshness.** Source changes flow from DynamoDB Streams through a sync Lambda into OpenSearch, with a target of reflecting control configuration changes in the search index within 60 seconds.
+- **Permission-aware retrieval.** Different teams have access to different policy documents. The retrieval layer filters results by the requesting user's permissions before they reach the agent, so the agent cannot surface or reason over data the user is not entitled to see.
+- **Guardrails for fail-closed behavior.** If a tool returns no usable evidence, the system asks for a more specific control ID or refined query instead of fabricating an answer. Guardrails and schema checks make the refusal path an intended product behavior.
+- **Continuous evaluation against a held-out question set.** Real compliance questions with known-good answers run nightly. Quality regressions get caught against the eval set before users see them.
+
+None of this is the interesting part of a demo. All of it is the part that determined whether compliance leadership would let the system near a real user.
+
+## The results
+
+Across five partner teams piloting the system, MaverickIQ deflected approximately **90% of manual control-interpretation tickets**. Teams stopped filing tickets to compliance for routine questions because the answers were already accessible: grounded, cited, and verifiable in seconds.
+
+Specific patterns worth noting:
+
+- **Time-to-answer** for routine questions dropped from typical multi-day ticket turnaround to seconds.
+- **Compliance team capacity** shifted toward high-judgment work: regulatory interpretation, audit prep, and control design.
+- **Citation engagement is high.** Users actually click citations and verify against source documents. That is the strongest signal that the trust model is working. Users do not take answers on faith, but the system makes verification fast enough that they use it anyway.
+
+The deflection is not because the LLM is smart. It is because retrieval is matched to the shape of the knowledge and the citations are real. The model is doing translation work: turning "show controls with deployment failures" into the right BM25-backed control-index query, or turning "what does this launch state mean?" into a kNN-grounded explanation from approved documentation. That is the right job for the LLM in this system.
+
+## Tradeoffs and limitations
+
+A few honest things.
+
+**Retrieval recall is the ceiling.** When MaverickIQ fails, it is almost never because the agent reasoned badly. It is because the right control document, configuration row, or knowledge-base passage was not retrieved. Improving the read model, query construction, chunking, embeddings, and reranking has a higher ceiling than improving the model. Most of the win is upstream of the LLM.
+
+**The system is conservative by design.** It is much more likely to say "I do not have evidence to answer that" than to answer wrongly. This is the right calibration for compliance. False negatives are recoverable, false positives are not. It does mean users sometimes get refusals on questions a human expert would have answered confidently. Reducing the refusal rate without breaking the trust model is an ongoing tension.
+
+**Ambiguous regulatory questions are hard.** "What does this regulation mean?" is often a question without a single right answer. It is a legal interpretation question that real compliance experts debate. The system handles this by surfacing the relevant text and any internal interpretation memos that touch on it, but it deliberately does not synthesize an opinion. That is a feature, not a bug. The user applies judgment with the relevant context in front of them.
+
+**Index freshness matters more than usual.** A six-month-stale index is fine for many enterprise search use cases. It is not fine for compliance. Regulations change, internal policies update, and an answer based on a stale index can be confidently wrong. Continuous re-indexing on policy updates is non-negotiable.
+
+## What I would do differently
+
+**Build the eval set before building the agent.** Same lesson as the policy generation system. The first version of MaverickIQ shipped with subjective spot-checks for quality. A structured eval set with known-good Q&A pairs would have caught a class of regressions earlier and given the team a more defensible way to talk about quality changes with stakeholders.
+
+**Invest in query planning and re-ranking earlier.** The router and retrieval tools work, but quality depends heavily on mapping the user's natural-language question to the right filters and source plane. A learned re-ranker for documentation relevance and a stronger query planner for control-index filters would meaningfully improve recall@5. Recall is the actual bottleneck.
+
+**Treat the citation UX as a product surface, not a footnote.** Citation grounding is the trust mechanism that makes the whole system usable. Initially the citations were rendered as a list at the end of answers. That was passable, but not engaging. Inline citation rendering with hover-preview of source text dramatically increased verification behavior. Trust is a UX problem as much as a retrieval problem.
+
+## What this work taught me
+
+The interesting design problem in RAG-style systems is not the R or the AG. It is the boundary between them. Retrieval that is too aggressive surfaces noise, and the agent confidently reasons over irrelevant context. Retrieval that is too conservative misses the right document, and the agent has nothing useful to ground against. Most of the engineering work is in calibrating that boundary and making failure modes legible to users when it inevitably miscalibrates.
+
+The other lesson: for high-stakes Q&A, **constraint is a feature**. The system that says "I do not have evidence to answer that" is more trustworthy than the system that always has an answer. Users adapt to a system they can trust faster than they adapt to a system that is brilliant but occasionally hallucinates. The first one becomes infrastructure. The second one stays a demo.
+
+If you are building agentic retrieval systems in a regulated or high-stakes domain and want to compare notes, [get in touch](mailto:ksingh.shubh@gmail.com).

@@ -1,0 +1,162 @@
+.page {
+  padding: 80px 0 60px;
+}
+
+.header {
+  max-width: 760px;
+  margin-bottom: 56px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(48px, 7vw, 80px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  margin-bottom: 24px;
+}
+
+.lede {
+  color: var(--text-secondary);
+  font-size: 20px;
+  line-height: 1.5;
+  max-width: 680px;
+}
+
+.lede strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.body {
+  max-width: 720px;
+  font-size: 17px;
+  line-height: 1.75;
+  color: var(--text-secondary);
+}
+
+.body > * + * {
+  margin-top: 1.25em;
+}
+
+.body strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--accent-dim);
+  text-underline-offset: 3px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  margin: 80px 0 28px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+
+.factList {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 16px 32px;
+  max-width: 720px;
+}
+
+.factLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-top: 4px;
+}
+
+.factValue {
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.photoCell {
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  position: relative;
+  overflow: hidden;
+  background-image:
+    linear-gradient(135deg, var(--accent-bg) 0%, transparent 50%),
+    repeating-linear-gradient(
+      45deg,
+      var(--border) 0px,
+      var(--border) 1px,
+      transparent 1px,
+      transparent 12px
+    );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photoCell::after {
+  content: 'photo placeholder';
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+.photoCaption {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 12px;
+}
+
+@media (max-width: 900px) {
+  .factList {
+    grid-template-columns: 1fr;
+    gap: 8px 0;
+  }
+
+  .factLabel {
+    padding-top: 0;
+  }
+
+  .photoGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

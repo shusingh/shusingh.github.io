@@ -1,0 +1,28 @@
+---
+title: From chained Lambdas to Step Functions
+date: 2026-03-09
+slug: from-chained-lambdas-to-step-functions
+excerpt: 'A migration retrospective: why brittle orchestration patterns fail at scale, how Map states unlocked per-marketplace parallelism, and what we''d do differently.'
+readTime: 14 min read
+tags:
+  - aws
+  - step-functions
+  - migrations
+draft: true
+---
+
+This draft outline is hidden from the public site until the full migration retrospective is ready.
+
+## The original architecture
+
+Chained Lambdas with SNS hops. Where it broke as fan-out grew.
+
+## What Step Functions changed
+
+- Native parallelism via Map state
+- Explicit retry/backoff
+- One source of truth for execution history
+
+## What we'd do differently next time
+
+Lessons on payload sizing, idempotency, and observability.

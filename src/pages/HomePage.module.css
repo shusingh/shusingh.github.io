@@ -1,0 +1,46 @@
+.workGrid {
+  display: grid;
+  gap: 24px;
+}
+
+.workRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.writingGrid {
+  display: grid;
+  gap: 4px;
+}
+
+.sectionFooter {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.sectionFooter a {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition:
+    gap 0.2s ease,
+    color 0.2s ease;
+}
+
+.sectionFooter a:hover,
+.sectionFooter a:focus-visible {
+  gap: 12px;
+  color: var(--accent-strong);
+}
+
+@media (max-width: 900px) {
+  .workRow {
+    grid-template-columns: 1fr;
+  }
+}

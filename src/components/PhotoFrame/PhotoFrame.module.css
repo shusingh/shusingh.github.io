@@ -1,0 +1,48 @@
+.frame {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 4 / 5;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  background-image:
+    linear-gradient(135deg, var(--accent-bg) 0%, transparent 50%),
+    repeating-linear-gradient(
+      45deg,
+      var(--border) 0px,
+      var(--border) 1px,
+      transparent 1px,
+      transparent 12px
+    );
+  transition: background-color 0.3s ease;
+}
+
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.dashed {
+  position: absolute;
+  inset: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

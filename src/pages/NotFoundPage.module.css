@@ -1,0 +1,33 @@
+.page {
+  min-height: 62vh;
+  padding: 100px 0 80px;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(44px, 6vw, 72px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
+}
+
+.link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.link:hover,
+.link:focus-visible {
+  color: var(--accent-strong);
+}

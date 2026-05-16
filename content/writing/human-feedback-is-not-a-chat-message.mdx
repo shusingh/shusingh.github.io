@@ -1,0 +1,323 @@
+---
+title: Human feedback is not a chat message
+date: 2026-05-15
+slug: human-feedback-is-not-a-chat-message
+excerpt: In production agent systems, human feedback should be modeled as a structured state transition, not appended to a conversation transcript.
+readTime: 10 min read
+tags:
+  - agents
+  - human-in-the-loop
+  - architecture
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+The easiest way to add human feedback to an agent is to append it to the chat.
+
+The model produces a draft. The user says, "make section 3 stricter on data retention." The system adds that sentence to the conversation history. The model reads the prior draft plus the new message and writes another version.
+
+For a demo, this feels natural. It is fast, flexible, and impressive.
+
+For production systems, it is usually the wrong abstraction.
+
+If human feedback changes the artifact, approval, recommendation, or workflow state, it should not live only as a chat message. It should become a structured operation against durable state.
+
+That is the whole argument:
+
+**Human feedback is a state transition, not a transcript append.**
+
+## The common pattern
+
+Most chat-based refinement loops look like this:
+
+<LoopDiagram
+  steps={[
+    'Model produces artifact',
+    'User writes feedback',
+    'Feedback joins chat history',
+    'Model rewrites from transcript',
+  ]}
+  decision="User satisfied?"
+  yes="ship the latest answer"
+  no="append another message"
+/>
+
+This works when the stakes are low. If you are rewriting a paragraph, polishing an email, or brainstorming names, there is nothing wrong with this loop. The transcript is the product surface, and the output can be judged by the user in the moment.
+
+The problem starts when the artifact matters after the conversation ends.
+
+Examples:
+
+- A policy document that needs review history
+- A compliance answer that needs citations
+- A support recommendation that affects a customer
+- A workflow step that requires approval
+- A generated config that will be deployed
+- A risk decision that needs an owner
+
+In those cases, the artifact has a life outside the chat. The system needs to know what changed, why it changed, who changed it, and which version is canonical.
+
+Conversation history is a poor place to store that.
+
+## Why chat feedback breaks
+
+There are five failure modes I see over and over.
+
+### No target
+
+"Make this stricter" is meaningful to a human reading the screen. It is ambiguous to a system.
+
+Which section? Which clause? Which evidence? Which recommendation? Which approval step?
+
+When feedback is stored as plain text in a transcript, the target has to be inferred later. That may work for one revision. It gets brittle after ten.
+
+### No ownership
+
+Production systems need to know who requested a change.
+
+Not just "the user." Which reviewer? Acting in which role? With what permission? Was the person approving, commenting, overriding, or asking for a draft suggestion?
+
+The difference matters.
+
+### No durable audit trail
+
+A transcript can show that someone typed something. It usually cannot answer the audit question cleanly:
+
+> Which specific change to which artifact version did this feedback produce?
+
+If the answer requires reading a conversation and reconstructing intent manually, the system is not audit-ready.
+
+### Compounding drift
+
+Long conversations accumulate model outputs, user corrections, partial rewrites, abandoned directions, and stale assumptions.
+
+By turn fifteen, the model is often reasoning over its own earlier mistakes. Each new revision is influenced by the full mess, not just the current canonical artifact and the specific operation requested.
+
+### Hard evaluation
+
+If feedback is unstructured, evaluation becomes fuzzy.
+
+Did the agent apply the feedback? Did it touch the right section? Did it preserve citations? Did it change unrelated content? Did it introduce unsupported claims?
+
+Those questions are much easier to test when feedback is a structured operation.
+
+## The better model
+
+The better model separates three things:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Conversation',
+      items: ['Natural user input', 'Clarifying questions', 'UI affordance'],
+    },
+    {
+      title: 'Operation',
+      items: ['Target', 'Intent', 'Actor', 'Justification'],
+    },
+    {
+      title: 'State',
+      items: ['Canonical artifact', 'Version history', 'Audit log'],
+    },
+  ]}
+/>
+
+The user can still type naturally. The system should parse that feedback into a structured operation before it changes the artifact.
+
+For example:
+
+```json
+{
+  "actor": "reviewer_123",
+  "role": "policy_reviewer",
+  "target": {
+    "artifactId": "policy_456",
+    "version": 4,
+    "section": "3.2"
+  },
+  "intent": "tighten_retention_exception_language",
+  "instruction": "Make the exception language stricter for unsupported retention cases.",
+  "justification": "Current wording allows an exception without evidence.",
+  "createdAt": "2026-05-15T10:30:00Z"
+}
+```
+
+That record is not the final answer. It is the operation the system will apply.
+
+Now the refiner agent has a clean job:
+
+- Read the canonical artifact version
+- Read the structured feedback operation
+- Apply the smallest valid change
+- Produce a diff
+- Preserve or update citations
+- Run validation
+- Write a new artifact version
+
+The loop becomes:
+
+<FlowDiagram
+  nodes={[
+    'Natural feedback',
+    'Parse operation',
+    'Apply to state',
+    'Validate diff',
+    'Commit new version',
+  ]}
+/>
+
+This is a much better production boundary. The chat is still useful, but it is not the source of truth.
+
+## What the refiner agent should do
+
+A refiner agent should not be a general-purpose rewriter.
+
+It should be a narrow worker that applies one structured operation to one canonical artifact version.
+
+Good refiner inputs:
+
+- Current artifact version
+- Target section or object
+- Feedback operation
+- Relevant source evidence
+- Output schema
+- Validation rubric
+
+Good refiner outputs:
+
+- Proposed patch or diff
+- Updated section text
+- Preserved citations
+- New citations if needed
+- Explanation of changes
+- Validation status
+- Reasons if it refused
+
+The key is locality. A request to tighten section 3.2 should not casually rewrite section 7. The refiner needs permission to change the target and a high bar for touching anything else.
+
+This makes the system easier to trust and easier to evaluate.
+
+## The critic becomes more useful
+
+Structured feedback also makes the critic agent more useful.
+
+If the critic only sees a rewritten document, it can judge the document. That is helpful, but broad.
+
+If the critic sees the operation plus the diff, it can ask sharper questions:
+
+- Did the patch address the stated intent?
+- Did it modify the requested target?
+- Did it preserve unrelated sections?
+- Did it preserve required citations?
+- Did it introduce unsupported claims?
+- Did it violate tone or policy rules?
+
+That is a better validation surface.
+
+<LoopDiagram
+  steps={[
+    'Feedback operation',
+    'Refiner proposes diff',
+    'Critic validates diff',
+    'Application commits version',
+  ]}
+  decision="Patch valid?"
+  yes="new canonical version"
+  no="return findings"
+/>
+
+The critic is no longer giving vague writing feedback. It is validating a state transition.
+
+## The UX can still feel conversational
+
+None of this means the user experience has to become a form.
+
+The user can still type:
+
+> Make the data-retention exception stricter. It should require evidence from the regional policy owner.
+
+The interface can still feel like chat.
+
+Underneath, the system should do the structured work:
+
+- Identify the target section
+- Ask a clarifying question if the target is ambiguous
+- Convert the request into an operation
+- Apply the operation to canonical state
+- Show the diff
+- Let the reviewer accept, reject, or revise
+
+The point is not to make humans speak JSON. The point is to avoid pretending that natural language feedback is enough of a system record.
+
+Good product design hides structure from the user. Good system design preserves it underneath.
+
+## When chat feedback is fine
+
+There are cases where transcript feedback is fine.
+
+If feedback only affects the next response, keep it in context.
+
+Examples:
+
+- "Explain that more simply."
+- "Use a shorter answer."
+- "Give me another example."
+- "Switch to bullet points."
+
+Those instructions do not necessarily change durable state. They shape the interaction.
+
+If feedback changes an artifact, a workflow, an approval, a recommendation, or a durable decision, it belongs in state.
+
+That is the rule of thumb:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Context feedback',
+      items: ['Tone', 'Length', 'Format', 'Clarification'],
+    },
+    {
+      title: 'State feedback',
+      items: ['Artifact edits', 'Approvals', 'Risk decisions', 'Workflow changes'],
+    },
+    {
+      title: 'System response',
+      items: ['Keep context light', 'Commit state deliberately', 'Log transitions'],
+    },
+  ]}
+/>
+
+## What this unlocks
+
+Once feedback is structured, a lot of useful things become possible.
+
+You can show clean diffs. You can replay a refinement step. You can measure whether feedback was applied correctly. You can analyze which sections get the most reviewer edits. You can route different feedback types to different agents. You can ask humans to approve exactly the changed lines, not reread the whole artifact.
+
+Most importantly, you can explain the system.
+
+When someone asks why a document says what it says, you can show:
+
+- The source version
+- The feedback operation
+- The actor
+- The refiner output
+- The critic findings
+- The final committed version
+
+That is a real production story. "The user told the chatbot to change it" is not.
+
+## The production lesson
+
+Human feedback is not dangerous because humans are unclear. Humans are allowed to be natural, partial, and imprecise. That is the whole reason the interface is useful.
+
+The danger is letting that imprecision become the system of record.
+
+Production agents need a boundary where natural language becomes structured intent. For human feedback, that boundary is the difference between a helpful demo and a system people can review, audit, and trust.
+
+Let the user speak naturally.
+
+Make the system commit deliberately.

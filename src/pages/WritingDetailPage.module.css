@@ -1,0 +1,141 @@
+.page {
+  padding: 80px 0 60px;
+}
+
+.backLink {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 40px;
+  transition:
+    gap 0.2s ease,
+    color 0.2s ease;
+}
+
+.backLink:hover,
+.backLink:focus-visible {
+  gap: 12px;
+  color: var(--accent);
+}
+
+.header {
+  max-width: 720px;
+  margin: 0 auto 56px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+
+.excerpt {
+  color: var(--text-secondary);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.tags {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.tag {
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-secondary);
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  background: var(--bg);
+  text-decoration: none;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.tag:hover,
+.tag:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  background: var(--accent-bg);
+}
+
+.nav {
+  max-width: 720px;
+  margin: 80px auto 0;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.navItem {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.navItem.next {
+  text-align: right;
+}
+
+.navLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.navTitle {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text-primary);
+  transition: color 0.2s ease;
+}
+
+.navItem:hover .navTitle,
+.navItem:focus-visible .navTitle {
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .nav {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .navItem.next {
+    text-align: left;
+  }
+}

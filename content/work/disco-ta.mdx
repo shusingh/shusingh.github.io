@@ -1,0 +1,142 @@
+---
+title: Compliance testing orchestrator
+slug: disco-ta
+eyebrow: Amazon · Step Functions Architecture
+description: A Step Functions orchestration layer for end-to-end compliance test execution, with marketplace-level isolation, test-data locking, callback-based execution, and compensation guarantees.
+date: 2025-03-01
+tech:
+  - Step Functions
+  - Lambda
+  - DynamoDB
+  - EventBridge
+  - Test Executor
+stat:
+  number: 100%
+  label: Marketplace failures tolerated without losing other results
+diagram:
+  nodes:
+    - acquire data
+    - run tests
+    - release data
+    - aggregate
+  caption: per-marketplace compensation
+order: 4
+---
+
+> This public version focuses on the orchestration model and failure-handling decisions, not internal APIs or data schemas.
+
+## The problem
+
+The testing automation platform needed to orchestrate end-to-end test execution for Maverick compliance controls. A single test run could span multiple test suites and marketplaces. Each combination needed test data, an asynchronous test execution, result processing, and cleanup.
+
+The tricky part was not starting tests. The tricky part was preserving isolation.
+
+If the UK execution failed, US results should still be preserved. If one marketplace could not acquire test data, other marketplaces should continue. If a workflow failed after locking test data, the system had to release only the data it owned. And if the test executor ran for hours, the orchestrator should not burn compute polling for completion.
+
+The design goal was clear: run combinations in parallel, tolerate partial failure, preserve detailed results, and guarantee test-data cleanup.
+
+## The approach
+
+The orchestrator is a new Step Functions workflow inside an existing orchestration service. It reuses the shared account, pipeline, and infrastructure, but keeps test-automation Lambdas in separate packages from existing configuration Lambdas.
+
+That package split was deliberate:
+
+- A faulty test-automation deployment can be rolled back without affecting configuration deployment.
+- Test-specific dependencies do not bloat unrelated Lambda packages.
+- The blast radius of test execution stays separate from configuration orchestration.
+
+### Map state over test suite and marketplace
+
+The core workflow uses a Step Functions Map state over the cartesian product of `testSuiteId × marketplace`.
+
+```text
+Fetch definitions
+  → Map(testSuiteId × marketplace)
+      → Acquire test data
+      → Trigger test execution
+      → Release test data
+  → Aggregate results
+```
+
+Each Map iteration receives a minimal payload: `testRunId`, `testSuiteId`, `marketplace`, and retry count. Detailed test results live in DynamoDB, not in the workflow payload, so the state machine stays well under Step Functions payload limits.
+
+The Map state tolerates individual iteration failures. Failed marketplace executions return standardized failure results to the collector. They do not terminate the whole workflow. This was the key product behavior: a UK timeout should not erase US and DE results.
+
+### Test-data locking
+
+Test data is a shared, limited pool. A configuration represents a complete set of concrete bindings for one test suite and marketplace. Two concurrent executions cannot safely use the same data.
+
+The orchestrator locks test data with DynamoDB conditional writes:
+
+- acquire only if the configuration is `ACTIVE`;
+- mark it `LOCKED` with `lockedBy = testRunId`;
+- set a `lockExpiresAt` safety timestamp;
+- release only when `lockedBy` matches the current execution.
+
+On retry, the acquisition Lambda first checks whether this execution already owns a lock for the same suite and marketplace. If it does, acquisition is idempotent and skips duplicate work.
+
+Lock contention does not fail immediately. The workflow waits 30 minutes and retries, up to 48 attempts. That gives long-running test executions up to 24 hours to release data before the waiting execution fails with a clear lock-timeout result.
+
+### Callback over polling
+
+The orchestrator uses `waitForTaskToken` to integrate with the test executor.
+
+The flow:
+
+1. Step Functions enters `TriggerTestExecution` and generates a task token.
+2. The Lambda starts the Test Executor state machine and passes the task token.
+3. Step Functions pauses without consuming compute.
+4. The test executor runs the underlying test infrastructure, writes detailed results to DynamoDB, and calls `SendTaskSuccess` or `SendTaskFailure`.
+5. The orchestrator resumes with a minimal completion payload.
+
+This avoids a polling loop. For a four-hour run with 60-second polling, one marketplace would require roughly 240 Lambda invocations and hundreds of state transitions. With three to five marketplaces running in parallel, polling cost and complexity multiply quickly. Callback keeps the orchestrator simple and lets DynamoDB remain the source of progress visibility.
+
+## Failure handling
+
+Every failure falls into one of three categories:
+
+- **Transient:** DynamoDB throttling, Lambda service errors, downstream 503s. Retry with bounded exponential backoff.
+- **Deterministic:** invalid input, inactive suite, missing test data, missing artifact. Fail immediately with a descriptive result.
+- **Catastrophic:** workflow infrastructure failure or unrecoverable release failure. Emit alarms and rely on defense-in-depth cleanup.
+
+The invariant is simple: **any test data acquired for a marketplace must be released before that marketplace iteration terminates.**
+
+Within each Map iteration, failures after acquisition route through `ReleaseTestDataCompensation`. That Lambda queries DynamoDB for locks owned by this `testRunId`, `testSuiteId`, and `marketplace`, then releases only those locks. Other marketplace iterations continue unaffected.
+
+There is also a stale-lock cleanup Lambda outside the workflow, triggered by EventBridge. If a workflow is cancelled or compensation itself fails, the cleanup path releases expired locks without deleting the underlying test-data configuration. TTL was not appropriate because the data item must remain available. Only the lock fields should be removed.
+
+## The results
+
+The design produced a workflow with clear operational properties:
+
+- **Marketplace-level isolation.** A failure in one marketplace does not block results from others.
+- **Precise compensation.** Failed iterations release only the test data they own.
+- **Long-running execution support.** Test Executor callbacks allow up to seven-day runs without polling compute.
+- **Result durability.** Detailed test counts and reports are persisted in DynamoDB during execution; aggregation reads from storage rather than relying on callback payloads.
+- **Observable state transitions.** Every state emits structured logs and metrics for debugging and alerting.
+
+The most important result is not that the workflow can run tests. It is that the workflow can fail without corrupting shared test data or losing unrelated marketplace results.
+
+## Tradeoffs and limitations
+
+**Map state adds ASL complexity.** A single bundled test run would have been simpler on paper. The Map design introduces more states and more per-iteration error handling. I accepted that complexity because it buys isolation, compensation precision, and marketplace-level observability.
+
+**Multiple test executions can increase orchestration overhead.** The workflow may start one execution per test suite and marketplace. That is more orchestration than a single bundled run, but each execution is smaller and failures are scoped.
+
+**Callback has weak heartbeat semantics.** If the Test Executor crashes early and never calls back, Step Functions waits until the configured timeout. Progress visibility lives in DynamoDB, not in the callback. That is acceptable, but it means the UI and alarms must read execution progress from storage.
+
+**Locking is deliberately simple.** DynamoDB conditional writes are enough for the current concurrency profile. A dedicated locking service would add operational complexity without clear benefit.
+
+## What I would do differently
+
+**Design the stale-lock path at the same time as the happy path.** It is tempting to add cleanup later, but in orchestration systems cleanup is part of correctness. The stale-lock Lambda should be treated as a first-class component from day one.
+
+**Make compensation visible in the UI.** Operators should be able to see that a failed marketplace released its test data cleanly. That turns a scary failure into a known terminal state.
+
+**Write failure-category docs before ASL.** Once failure modes are categorized as transient, deterministic, or catastrophic, the state machine becomes easier to reason about.
+
+## What this work taught me
+
+Good orchestration is mostly about bounded failure. The happy path is usually straightforward. The design quality shows up when only one marketplace fails, when a callback never arrives, when test data is scarce, or when cleanup has to run after partial progress.
+
+Step Functions gave us the right primitives: Map state for isolation, callback tokens for long-running execution, retries for transient failures, and explicit compensation paths for cleanup. The engineering work was deciding where to spend that complexity so the workflow remained debuggable.

@@ -1,0 +1,147 @@
+---
+title: ZeroTouch / RISC Central UI
+slug: zero-touch
+eyebrow: Amazon · Sole HLD Author
+description: A redesigned control launch portal for dynamic DAG workflows, multi-tenant artifact management, role-gated actions, and lock-aware review flows across workflow and content backends.
+date: 2025-08-01
+tech:
+  - React
+  - TypeScript
+  - RTK Query
+  - Step Functions
+  - Artifact APIs
+stat:
+  number: 2,000+
+  label: Control launches targeted in 2026
+diagram:
+  nodes:
+    - Workflow API
+    - Content API
+    - Agent platform
+  separator: '+'
+  caption: one operator surface
+featured: true
+order: 3
+---
+
+> This public version generalizes internal names and integration details, but preserves the architecture and product decisions I owned.
+
+## The problem
+
+ZeroTouch was moving from a rigid linear workflow to a config-driven DAG model for launching safety and compliance controls. The old RISC Central UI had been built around the old assumption: a fixed wizard, hardcoded sub-steps, limited visibility into in-flight work, and no clean way to reuse or bring user-provided artifacts.
+
+That model broke down as soon as the backend became dynamic. Controls could now have different graph shapes, skippable steps, rewind behavior, generated artifacts, user-uploaded artifacts, and approval paths that varied by control type. At the same time, artifact storage was moving out of the workflow service into a separate multi-tenant content service.
+
+The UI had to become the operator surface across two backends:
+
+- **The workflow service** owned workflow state: which steps exist, how they depend on each other, what state each step is in, and which action is currently legal.
+- **The content service** owned content state: artifact versions, comments, refinement, upload/download, approval status, and artifact locks.
+
+The hard part was not drawing a workflow tree. The hard part was preventing users from taking the wrong action while two backend planes evolved asynchronously.
+
+## The approach
+
+I authored the high-level design for a complete RISC Central UI redesign and drove the product architecture with three constraints:
+
+1. **Render workflows dynamically from backend configuration.** The UI cannot assume a fixed sequence or a known set of steps. It consumes `ListSteps` and renders the backend-authored group hierarchy, per-step metadata, dependencies, and available actions.
+2. **Treat workflow and content as separate sources of truth.** The UI does not pretend there is one backend. It orchestrates reads and writes across both, and it makes the handoff between workflow state and artifact state visible to users.
+3. **Make every mutation lock-aware and role-gated.** The interface must remain readable while work is in flight, but it must not offer stale or illegal actions.
+
+### Dynamic DAG workflows
+
+The new workflow model is a DAG, not a wizard. A user can select any available step, review generated artifacts, provide feedback, approve, reject, upload a replacement artifact, or rewind a step when content needs correction.
+
+The UI renders this as a grouped workflow tree rather than a generic graph. That was a deliberate product tradeoff. A full node-link DAG looked impressive but made routine work harder to scan. A nested indentation view gave operators the information they needed: group, step, current state, waiting-on labels, and action affordances.
+
+The important rule: the UI does not infer the workflow graph. It reads backend-authored visualization metadata. If a step depends on another step, or if a step is skipped, locked, waiting, generating, in review, pending approval, archived, or complete, the UI renders from server state rather than local reasoning.
+
+### Two backends, one interaction model
+
+Almost every meaningful action touches both the workflow service and the content service, but not in the same way.
+
+Before a step starts, the UI may write user input to the workflow service. Once a step has started and artifacts exist, artifact mutations go through the content service. Refinement, comments, inline edits, uploads, version selection, and approval status changes are content-owned. The workflow service learns about those changes through backend notifications and reflects the new workflow state on the next poll.
+
+This separation created a class of UX edge cases:
+
+- The content service may mark an artifact approved while the workflow service is still processing downstream routing.
+- A step may be in user review while an artifact is temporarily locked by the content service.
+- A control may be globally locked while another user's mutation is propagating.
+- A user may rewind a step and need to understand which artifacts are preserved versus regenerated.
+
+The design handles those cases with explicit gates rather than scattered conditionals.
+
+## The gating model
+
+The core UX design is a five-part gating model:
+
+1. **Step state gate.** `stepStatus`, `currentPhase`, and `userActionList` determine the base screen and available actions.
+2. **Control-level lock.** The entire control becomes read-only while a global mutation is processing.
+3. **Step-level lock.** One step can become inert while other steps remain interactive.
+4. **Artifact-level lock.** The content service can lock a specific artifact while edit or refinement is in flight.
+5. **Cross-plane pending gate.** If the content and workflow services disagree temporarily during downstream routing, the UI disables terminal actions and explains the pending state.
+
+These gates are UX safety rails, not security boundaries. Both backends still revalidate every mutation server-side. The point of the UI gates is to prevent users from walking into known-bad states and to explain why an action is not available.
+
+### Lock-aware UI
+
+Locks exist at three scopes:
+
+- **Control lock:** all mutating actions across the control are disabled, but users can still navigate and read.
+- **Step lock:** a single step is locked independently of the rest of the workflow.
+- **Artifact lock:** edit/refine actions on one artifact are paused while the content service processes a transition.
+
+The UI composes those scopes into one decision model. Components do not manually check every field. They consume a derived lock view and render banners, disabled actions, or read-only surfaces accordingly.
+
+That sounds small. It is not. Lock clarity is the difference between "the system is broken" and "the system is processing a change from another user."
+
+## State management
+
+The low-level design split UI state across clear owners:
+
+- **URL state** owns where the user is: route, control ID, selected step.
+- **RTK Query** owns server state: controls, steps, artifacts, comments, locks, versions.
+- **Redux session state** owns authenticated user and active program selection.
+- **Local component state** owns form drafts, modal state, editor buffers, and optimistic flags.
+
+The critical decision was to keep backend-authored state in RTK Query, not duplicate it in custom Redux slices. Locks, artifact versions, step phases, and workflow status are all server state. Duplicating them creates a second source of truth and almost guarantees stale UI.
+
+Polling is also deliberate. Control state, step state, and artifact state each have their own cadence. Polling continues while locks are active because polling is how the UI detects that a lock has cleared. Background fetches are deduped to avoid no-op rerenders.
+
+## What made the design hard
+
+The hard parts were all at the edges:
+
+**Rewind preview.** Rewinding a step can regenerate downstream artifacts. The user needs a preview of what will be preserved, what will be regenerated, and what work may be invalidated before they commit.
+
+**BYOA.** Bring Your Own Artifact sounds simple until you decide where the artifact reference lives before a step starts, where versions live after a step starts, and which backend owns completion.
+
+**External approval exception.** Most approval flows move through the content service. Some control types require an external approval workflow initiated by the workflow service. The UI needs to surface the difference without making users learn backend topology.
+
+**Cross-tab correctness.** Users can open the same control in two tabs. Lock state and polling need to keep both tabs honest so a stale page does not imply access that no longer exists.
+
+**Role-gated navigation.** System Admins, Program Admins, Risk Managers, and Ops users have different capabilities. The UI hides or disables actions based on role context, while backends remain the source of enforcement.
+
+## The results
+
+The design gave three partner teams a shared implementation contract:
+
+- One user journey from dashboard to dynamic workflow detail to step-level review.
+- One gate model for locks, pending states, artifacts, and role constraints.
+- One state-management model for workflow state, content state, and local UI state.
+- One set of API sequences for generate, refine, edit, approve, reject, upload, rewind, and approval workflows.
+
+The value was not only the final UI. The value was removing ambiguity across teams. Backend owners, content-service owners, and frontend implementers could reason from the same document about who owned which state, when the UI should poll, which backend receives which mutation, and what the user sees during every in-flight transition.
+
+## What I would do differently
+
+**Prototype the workflow tree earlier.** The biggest product risk was not API wiring. It was whether operators could understand a DAG workflow without a full graph visualization. A clickable prototype would have exposed the scanability tradeoff earlier.
+
+**Write the gate matrix before the page specs.** Most complexity in this system came from action availability. Writing the step-state and lock-state matrix first would have simplified the later page design.
+
+**Name the two-plane ownership model sooner.** Once we had the sentence "workflow owns step state; content owns artifact state," many debates got easier. That phrase should have been on page one.
+
+## What this work taught me
+
+Complex internal tools fail when they hide state. Operators can tolerate waiting, locks, pending transitions, and backend constraints if the UI tells the truth about what is happening.
+
+The best design work here was not visual polish. It was making distributed state legible: which backend owns the truth, which actions are legal right now, what is still processing, and what the user can do next.

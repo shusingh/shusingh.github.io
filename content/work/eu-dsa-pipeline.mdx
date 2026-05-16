@@ -1,0 +1,159 @@
+---
+title: EU DSA compliance pipeline
+slug: eu-dsa-pipeline
+eyebrow: Amazon · Regulatory Data
+description: A PySpark pipeline processing 30M+ monthly records for EU Digital Services Act transparency reporting, built around schema versioning, replayable error isolation, and audit-grade traceability.
+date: 2026-05-15
+tech:
+  - PySpark
+  - AWS Glue
+  - Python
+  - Distributed Systems
+stat:
+  number: '70% ↓'
+  label: Incident resolution time
+diagram:
+  nodes:
+    - ingest
+    - validate
+    - transform
+    - aggregate
+    - submit
+  caption: isolate errors, preserve audit state
+featured: false
+order: 5
+---
+
+> This public version keeps sensitive implementation details out of scope, but captures the shape of the system and the engineering decisions behind it.
+
+## The problem
+
+The EU Digital Services Act requires large online platforms to submit detailed transparency reports about content-moderation decisions on a fixed cadence. The reports are not optional, and the requirements are precise: each reported item needs territorial scope, policy reason codes, decision type, report source, and enough structure for downstream regulatory review.
+
+The pipeline I led the design for processes moderation events from multiple internal sources, applies DSA-mandated transformations, validates against an evolving rule set, and produces structured monthly reporting outputs.
+
+The scale was meaningful, but not the hard part: **30M+ records per month** is well within what a properly tuned PySpark job can process. The harder problem was survivability. A regulatory pipeline has different failure economics than an analytics pipeline. Dropped records are a compliance risk. Silent corruption is worse. A single malformed record cannot be allowed to halt the entire reporting window, but it also cannot disappear.
+
+The core tensions:
+
+1. **Schema evolution is regulated.** As requirements change, product categories expand, and territorial rules shift, the schema changes. The pipeline needs to process current and historical formats without breaking reconstructability.
+2. **Error isolation is mandatory.** A malformed record cannot halt the batch and cannot be silently discarded. Both fail-fast and drop-and-continue are wrong.
+3. **The audit trail is part of the deliverable.** When someone asks why a specific event was reported a specific way, the system needs to show which schema version, mapping version, validation rules, and transformation path produced that output.
+
+### Why naive data pipelines fail here
+
+Three patterns that are acceptable in ordinary batch pipelines become liabilities in regulated data systems.
+
+**Fail fast is wrong.** Standard data engineering advice says to validate strictly, fail loudly, fix the source, and replay. That is reasonable when the cost of a failed run is internal delay. For regulatory reporting, one malformed class of records can block the entire monthly submission. The better pattern is: isolate fast, continue, escalate.
+
+**Schema-as-code without versioning is wrong.** Many pipelines define the current schema in code and migrate when the shape changes. That breaks down when historical reports may need to be reconstructed months later. The system needs to understand every schema version it has produced, not just the one currently deployed.
+
+**Implicit aggregation is wrong.** DSA reporting outputs include counts by policy category, geography, decision type, and reporting window. Those aggregations are not incidental implementation details. They are part of the regulatory output. Treating them casually makes audits and amendments painful.
+
+## The approach
+
+The pipeline is a PySpark batch system structured around three architectural commitments: per-record schema versioning, replayable error isolation, and composable validation.
+
+```text
+ingest -> validate -> transform -> aggregate -> submit
+             ↓            ↓             ↓
+       error store   schema route   audit trail
+         + replay    per record     per transform
+```
+
+### Per-record schema versioning
+
+Every record carries an explicit schema version. Transformation logic is selected by lookup:
+
+```text
+schema version -> transformation path
+```
+
+When a new reporting requirement lands, the system adds a new schema version and transformation path. Older transformations remain valid. Older data continues to process under the rules that were active when it was produced.
+
+That design has an important consequence: **the pipeline can run multiple transformation versions in the same monthly batch.** Records route by version, transform in parallel, and unify at the aggregation layer.
+
+This turned schema migration from a breaking cutover into an additive change. A new field gets a new version. The new transformation reads it. The old transformation does not. Nobody needs to coordinate a brittle all-at-once migration across every upstream producer.
+
+It is the sort of design decision that looks optional until the first regulatory schema change arrives. After that, it becomes the thing that keeps the pipeline alive.
+
+### Error isolation with replay
+
+Validation splits the batch into two streams:
+
+- **Compliant records** continue through transformation, aggregation, and submission.
+- **Errored records** route to a separate persisted store with structured failure reasons, such as missing mandatory fields, invalid territorial scope, or dependent attribute violations.
+
+The critical property is that errored records are **persisted, classified, and replayable**. They are not dropped, and they do not block the clean portion of the batch.
+
+An operations surface tracks error counts, error classes, affected sources, and schema versions. When the root cause is fixed, usually an upstream data-quality issue, the errored records can be corrected and replayed as a separate run. The replay output can merge with the original run without losing traceability.
+
+This pattern drove most of the **70% reduction in incident resolution time**. Before this design, a bad record class could halt the run, force a debugging cycle, require a code or mapping fix, and trigger a full rerun. Afterward, compliant records continued downstream while the bad records were isolated with precise failure reasons. The operator path changed from "stop the world" to "triage, fix, replay."
+
+### Composable validation
+
+Validation is implemented as composable rule classes, each with one responsibility:
+
+- `MandatoryFieldCheck` verifies required fields are present and non-empty.
+- `UniqueAttributeValidation` enforces uniqueness where the schema requires it.
+- `DependentAttributesValidation` handles "at least one of this group must be present" constraints.
+- `TerritorialScopeValidation` restricts territorial scope to the DSA-supported market set.
+
+Each validator returns an annotated result, not a boolean. Errors accumulate instead of short-circuiting. A record can fail multiple validations, and operators see the full failure set rather than the first error encountered.
+
+New requirements typically add a validator. They do not require rewriting the validation layer. That matters because regulatory systems age by accumulating rules. If every new rule requires editing the core pipeline, the design will eventually collapse under its own change rate.
+
+## The infrastructure that made it shippable
+
+The production value came from the less glamorous parts:
+
+- **Partitioning by marketplace and region.** Natural skew across larger markets is handled deliberately instead of letting Spark hide it behind larger clusters.
+- **Salting on heavy partitions.** The highest-volume regions get additional distribution so a few hot keys do not dominate job time.
+- **Broadcast joins for small lookup tables.** Policy reason mappings and territorial reference data move to executors cheaply, cutting shuffle cost.
+- **Caching at expensive boundaries.** Intermediate outputs are cached where multiple downstream aggregations reuse the same transformed data.
+- **Executor right-sizing.** Spark will happily spend whatever cluster you give it. Cost is monitored at executor and stage level, not just at job level.
+- **Idempotent batch boundaries.** A rerun of a given reporting window produces the same output, aside from explicitly replayed error records.
+- **Alarms on the actual risk signals.** Validation failure rate, output volume drift, schema-version mismatch, partition skew, and submission acknowledgment latency all matter more than a generic job-failed alarm.
+- **Audit logging per transformation.** The pipeline records which schema version applied, which mapping table version was active, which validators ran, which records were isolated, and when.
+
+None of that is flashy. All of it determines whether a monthly regulatory pipeline survives contact with real data.
+
+## The results
+
+The pipeline sustained **30M+ records processed monthly** against evolving reporting requirements, schema versions, and validation rules.
+
+The headline result was a **70% reduction in incident resolution time**. The reduction came from three sources:
+
+- **Error isolation.** Clean records continued downstream while malformed records were isolated for triage and replay.
+- **Schema versioning.** Changes that previously risked emergency code patches became additive transformation paths.
+- **Queryable audit state.** Debugging no longer required reconstructing a run from scattered logs. The trace was explicit.
+
+The broader win was operational. Monthly reporting stopped behaving like a recurring fire drill and started behaving like infrastructure. The team could spend more time improving the system and less time recovering from the reporting window.
+
+## Tradeoffs and limitations
+
+**The system optimizes for correctness over latency.** This is a batch architecture, not a streaming decisioning system. For monthly DSA reporting, that is the right tradeoff. For use cases where decisions need to happen in seconds, the architecture would need to change.
+
+**Schema versioning has carrying cost.** Every retained transformation path is code that must keep working. The escape valve is deliberate version retirement: backfill or reconcile the affected historical data, then sunset old transformations. That needs planning. It is not free.
+
+**Error isolation can hide systemic upstream problems.** A pipeline that gracefully isolates errors can also normalize them if alerting is weak. Error-rate alarms need careful calibration. Too sensitive and on-call gets noise. Too loose and a real upstream regression reaches reporting time.
+
+**Skew can turn into cost quickly.** Spark can mask skew by throwing compute at it. That keeps the job green while the bill climbs. Partition-size monitoring matters as much as runtime monitoring.
+
+## What I would do differently
+
+**Build the error-handling path before the happy path.** The system's resilience comes from malformed records, late-arriving data, schema mismatches, and replay. Those are exactly the parts teams are tempted to defer in a prototype. They should not be deferred in regulated systems.
+
+**Treat audit traceability as an output, not telemetry.** For regulatory pipelines, the audit trail is not only for debugging. It is part of what the system produces. Every transformation should emit traceable facts from the beginning.
+
+**Invest in synthetic data earlier.** Real regulatory data carries access restrictions, audit overhead, and reproducibility constraints. A synthetic corpus that preserves structure, skew, schema versions, and error classes makes iteration dramatically faster.
+
+## What this work taught me
+
+Regulatory data engineering inverts several familiar instincts. Fail fast becomes isolate fast. Schema migration becomes schema versioning. Aggregations become deliverables. Audit trails become outputs.
+
+The engineering is not necessarily harder than ordinary data engineering. The cost of being wrong is different. In most domains, bad data creates operational pain. In regulated domains, bad data can create regulatory liability.
+
+The other lesson: a 30M-record monthly run that "succeeds" without instrumentation is not trustworthy. Every transformation needs to be countable, comparable across runs, and explainable after the fact. The boring parts are the product.
+
+If you are building data infrastructure for regulated domains or want to compare notes on schema evolution at scale, [get in touch](mailto:ksingh.shubh@gmail.com).
