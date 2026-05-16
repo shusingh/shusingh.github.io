@@ -39,20 +39,24 @@ export function WorkIndexPage() {
               <Link
                 className={`${styles.filter} ${selectedTech ? '' : styles.activeFilter}`}
                 to="/work"
+                aria-current={selectedTech ? undefined : 'true'}
               >
                 All
               </Link>
-              {techItems.map((tech) => (
-                <Link
-                  key={tech}
-                  className={`${styles.filter} ${
-                    selectedTech === tech ? styles.activeFilter : ''
-                  }`}
-                  to={`/work?tech=${encodeURIComponent(tech)}`}
-                >
-                  {tech}
-                </Link>
-              ))}
+              {techItems.map((tech) => {
+                const isActive = selectedTech === tech;
+                const href = isActive ? '/work' : `/work?tech=${encodeURIComponent(tech)}`;
+                return (
+                  <Link
+                    key={tech}
+                    className={`${styles.filter} ${isActive ? styles.activeFilter : ''}`}
+                    to={href}
+                    aria-current={isActive ? 'true' : undefined}
+                  >
+                    {tech}
+                  </Link>
+                );
+              })}
             </nav>
           ) : null}
         </div>
