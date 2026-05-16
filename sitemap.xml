@@ -121,6 +121,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://shusingh.github.io/projects/giskard-oss</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://shusingh.github.io/writing/agentic-systems-basics</loc>
     <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
