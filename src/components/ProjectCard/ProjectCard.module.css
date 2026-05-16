@@ -33,7 +33,7 @@
   color: var(--accent);
 }
 
-/* Compact variant — used in the lower Projects / Open Source sections. */
+/* Compact variant for the lower Projects / Open Source sections. */
 .compact {
   padding: 18px 22px 16px;
 }
