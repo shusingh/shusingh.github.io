@@ -1,0 +1,28 @@
+---
+title: 'Hybrid retrieval at scale: BM25 + kNN tradeoffs'
+date: 2026-04-18
+slug: hybrid-retrieval-bm25-knn-tradeoffs
+excerpt: When to reach for vector search, when keyword retrieval still wins, and the architectural decisions behind a citation-grounded compliance Q&A system.
+readTime: 9 min read
+tags:
+  - retrieval
+  - search
+  - opensearch
+draft: true
+---
+
+This draft outline is hidden from the public site until the full post is ready.
+
+## When BM25 is still the right answer
+
+A short list of corpora and query types where lexical retrieval beats vectors on both recall and latency.
+
+## Where vectors actually help
+
+Semantic queries that lexical recall misses. Cross-domain rewordings. Long, conversational user inputs.
+
+## Putting them together
+
+- Score fusion vs. reranking
+- Index sizing
+- Audit trail and citation grounding

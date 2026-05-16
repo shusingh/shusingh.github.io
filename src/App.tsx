@@ -1,55 +1,28 @@
-import { LandingPage } from './pages/LandingPage/LandingPage';
-import styled from 'styled-components';
-import { useMouseGradient } from './hooks/useMouseGradient';
-import { ColorModeButton } from './components/ui/color-mode';
+import { Route, Routes } from 'react-router-dom';
 
-interface GradientPosition {
-  x: number;
-  y: number;
-}
+import { SiteLayout } from '@/components/Layout/SiteLayout';
+import { AboutPage } from '@/pages/AboutPage';
+import { HomePage } from '@/pages/HomePage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
+import { NowPage } from '@/pages/NowPage';
+import { WorkDetailPage } from '@/pages/WorkDetailPage';
+import { WorkIndexPage } from '@/pages/WorkIndexPage';
+import { WritingDetailPage } from '@/pages/WritingDetailPage';
+import { WritingIndexPage } from '@/pages/WritingIndexPage';
 
-const AppWrapper = styled.div<{ gradientPosition: GradientPosition }>`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(
-    600px at ${(props) => props.gradientPosition.x}px ${(props) => props.gradientPosition.y}px,
-    var(--gradient-accent),
-    transparent 80%
-  );
-  pointer-events: none;
-  z-index: 0;
-  will-change: background;
-`;
-
-const ContentWrapper = styled.div`
-  position: relative;
-  z-index: 1;
-`;
-
-const ThemeToggleWrapper = styled.div`
-  position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
-  z-index: 100;
-`;
-
-function App() {
-  const mousePosition = useMouseGradient();
-
+export default function App() {
   return (
-    <>
-      <AppWrapper gradientPosition={mousePosition} />
-      <ThemeToggleWrapper>
-        <ColorModeButton />
-      </ThemeToggleWrapper>
-      <ContentWrapper>
-        <LandingPage />
-      </ContentWrapper>
-    </>
+    <Routes>
+      <Route element={<SiteLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="work" element={<WorkIndexPage />} />
+        <Route path="work/:slug" element={<WorkDetailPage />} />
+        <Route path="writing" element={<WritingIndexPage />} />
+        <Route path="writing/:slug" element={<WritingDetailPage />} />
+        <Route path="about" element={<AboutPage />} />
+        <Route path="now" element={<NowPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }
-
-export default App;

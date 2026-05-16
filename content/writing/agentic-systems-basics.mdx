@@ -1,0 +1,495 @@
+---
+title: Agentic systems, explained from first principles
+date: 2026-05-15
+slug: agentic-systems-basics
+excerpt: A plain-English map of agents, tools, MCP servers, streaming responses, agent frameworks, runtime infrastructure, memory, state, and the engineering choices that make agentic systems production-ready.
+readTime: 13 min read
+tags:
+  - agents
+  - architecture
+  - production
+---
+
+import {
+  FlowDiagram,
+  HubDiagram,
+  LayerDiagram,
+  LoopDiagram,
+  SequenceDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Most explanations of agentic systems start in the wrong place. They start with frameworks, model names, or diagrams full of boxes labeled "planner" and "executor."
+
+The simpler starting point is this:
+
+**An agentic system is a software system where an LLM is allowed to choose the next step inside a controlled loop.**
+
+That is the whole idea. The rest is engineering.
+
+A normal LLM call looks like this:
+
+<FlowDiagram nodes={['Input', 'Model', 'Output']} />
+
+An agentic system looks more like this:
+
+<LoopDiagram
+  steps={[
+    'Observe context',
+    'Decide next step',
+    'Call a tool or model',
+    'Update durable state',
+  ]}
+  decision="Enough evidence?"
+  yes="final answer"
+  no="loop with new state"
+  caption="The model decides inside a loop, but the application owns execution and state."
+/>
+
+The model is not just producing text. It is helping decide what to do next: search a document store, call an API, ask a clarifying question, draft a section, run a test, critique an answer, or stop because it has enough evidence.
+
+That extra freedom is what makes agents useful. It is also what makes them risky. A model that can choose actions needs boundaries, state, observability, and a clear runtime contract. Otherwise you have a demo that looks smart until it hits the first ambiguous request.
+
+This post is a plain-English map of the pieces.
+
+## Agent, workflow, and assistant
+
+The word "agent" gets used loosely, so it helps to separate three related ideas.
+
+### Assistant
+
+An assistant answers a user directly. It may have some context, but the basic shape is request and response.
+
+<FlowDiagram
+  nodes={['User asks a question', 'Model writes the answer', 'User reads the answer']}
+  direction="vertical"
+/>
+
+This is enough for summarization, rewriting, brainstorming, explanation, and many lightweight support flows.
+
+### Workflow
+
+A workflow is a fixed sequence of steps. The application decides the path, and the model performs narrow jobs inside that path.
+
+<FlowDiagram
+  nodes={['Classify', 'Retrieve', 'Generate', 'Validate', 'Send']}
+  caption="The application owns every transition, retry policy, and timeout."
+/>
+
+Workflows are underrated. If the path is known ahead of time, use a workflow. It is easier to test, cheaper to run, and easier to explain in an incident review.
+
+### Agent
+
+An agent has some control over the path. It can choose tools, decide whether it needs more information, loop over intermediate results, and stop when the task is complete.
+
+<HubDiagram
+  left={{ title: 'Loaded context', body: 'User goal, state, docs, permissions' }}
+  center="Model decision engine"
+  right={[
+    { title: 'Answer user' },
+    { title: 'Search documents' },
+    { title: 'Call safe API' },
+    { title: 'Ask clarification' },
+    { title: 'Stop' },
+  ]}
+  caption="The model chooses from a bounded action surface. The application validates and executes."
+/>
+
+That autonomy should be scoped. A production agent should not be "a model that can do anything." It should be "a model that can choose from a small set of safe actions to accomplish a specific job."
+
+The smaller the job, the better the agent.
+
+## The agent loop
+
+Most agentic systems are variations of the same loop:
+
+<LoopDiagram
+  steps={[
+    'Receive goal',
+    'Load context',
+    'Choose action',
+    'Execute action',
+    'Record result',
+  ]}
+  decision="Done?"
+  yes="return final response"
+  no="load updated context"
+/>
+
+Each step has a different owner. That is the part many diagrams hide.
+
+| Step | Model owns | Application owns |
+| --- | --- | --- |
+| Load context | Nothing directly | Fetch state, documents, permissions |
+| Choose action | Pick from allowed actions | Define the allowed actions |
+| Execute action | Request a tool call | Validate, authorize, run, retry |
+| Record result | Interpret result | Persist logs and durable state |
+| Stop or continue | Decide if enough evidence exists | Enforce budgets and loop limits |
+
+The important phrase is "the application executes." The model should decide from allowed options, but your software should own execution, permissions, retries, timeouts, and state transitions.
+
+A good agent loop feels boring in code. That is a compliment.
+
+## Tools
+
+Tools are how agents touch the outside world.
+
+A tool can be simple:
+
+```text
+search_documents(query)
+```
+
+Or operational:
+
+```text
+create_ticket(title, severity, owner)
+```
+
+Or highly domain-specific:
+
+```text
+get_control_applicability(controlId, marketplace)
+```
+
+The model does not call these functions directly. It asks to call them by producing structured arguments. Your application validates those arguments, checks permissions, executes the tool, and returns the result.
+
+This matters because tool calling is where agentic systems become real software. Without tools, an agent can only talk. With tools, it can inspect state and take action.
+
+That is useful. It is also dangerous.
+
+For production systems, every tool needs:
+
+- **A narrow purpose.** One tool should do one job.
+- **A typed input schema.** The model should not invent request shapes.
+- **Permission checks.** The user may be allowed to read something but not mutate it.
+- **Audit logs.** You should know who triggered the tool, with what input, and what happened.
+- **Idempotency.** Retried tool calls should not create duplicate side effects.
+- **Clear failure behavior.** The agent should know whether to retry, ask for clarification, or stop.
+
+If this sounds like normal backend engineering, that is the point. Agents do not remove backend discipline. They raise the cost of not having it.
+
+## MCP servers
+
+MCP stands for **Model Context Protocol**. The easiest way to think about it:
+
+**MCP is a standard way for AI applications to connect to external tools and context.**
+
+Instead of every AI app inventing its own custom integration format, an MCP server exposes capabilities through a shared protocol. An AI client can connect to that server and discover what it provides.
+
+MCP servers commonly expose three kinds of things:
+
+- **Tools:** actions the model can ask to run, such as querying a database or calling an API.
+- **Resources:** context the model can read, such as files, documents, database records, or generated reports.
+- **Prompts:** reusable task templates, such as "summarize this incident" or "prepare this code review."
+
+The key idea is separation. The agent client handles the conversation and model calls. The MCP server owns access to a specific system.
+
+For example:
+
+<HubDiagram
+  left={{ title: 'Agent client', body: 'Conversation and model calls' }}
+  center="MCP protocol"
+  right={[
+    { title: 'GitHub server', body: 'PRs, issues, branches' },
+    { title: 'Docs server', body: 'Runbooks, specs, internal docs' },
+    { title: 'Deploy server', body: 'Rollout status and service health' },
+  ]}
+/>
+
+Each server exposes a clean contract. The agent does not need hardcoded knowledge of every backend API.
+
+The mistake is treating MCP as magic. MCP does not make tools safe by itself. A dangerous tool exposed through MCP is still dangerous. You still need auth, allow-lists, confirmation flows, logging, rate limits, and output validation.
+
+MCP is the connector standard. It is not the safety model.
+
+## Streaming responses
+
+Streaming means the system sends partial output while the agent is still working.
+
+For simple chat, streaming looks like text appearing word by word. In agentic systems, streaming is more useful than that. It can show the shape of the work as it happens.
+
+A good streamed agent response might include:
+
+<SequenceDiagram
+  leftTitle="Client UI"
+  rightTitle="Agent runtime"
+  events={[
+    { side: 'left', label: 'submit question' },
+    { side: 'right', label: 'status.reading' },
+    { side: 'right', label: 'tool.started(search)' },
+    { side: 'right', label: 'tool.completed(12 hits)' },
+    { side: 'right', label: 'text.delta' },
+    { side: 'right', label: 'citation.added' },
+    { side: 'right', label: 'done' },
+  ]}
+/>
+
+Streaming is not only a UX improvement. It is also an observability surface.
+
+Users trust a system more when they can see progress. Engineers debug a system faster when intermediate events are visible. Product teams can design better experiences when tool calls, retrieval steps, and completion events are explicit.
+
+The engineering rule: stream events, not just tokens.
+
+Token streaming says:
+
+```text
+"The answer is..."
+```
+
+Event streaming says:
+
+```text
+{ type: "tool.started", name: "searchControls" }
+{ type: "tool.completed", resultCount: 12 }
+{ type: "text.delta", text: "The answer is..." }
+{ type: "citation.added", source: "policy-doc-17" }
+```
+
+That event stream can drive a UI, logs, traces, and analytics. It also lets you separate what the model is saying from what the system is doing.
+
+## Agentic libraries
+
+Agentic libraries are developer frameworks for building the loop.
+
+Examples include Strands Agents, LangGraph, CrewAI, LlamaIndex, Semantic Kernel, and the OpenAI Agents SDK. The names change quickly, but the jobs are similar.
+
+Most agentic libraries help with some combination of:
+
+- Defining tools
+- Calling models
+- Maintaining conversation or state
+- Routing between agents
+- Streaming events
+- Handling structured outputs
+- Building multi-step graphs
+- Integrating memory or retrieval
+
+The important thing is to know what the library owns and what your application owns.
+
+A library can help you wire an agent. It should not own your product semantics.
+
+Your application should still own:
+
+- Authorization
+- Business rules
+- Durable state
+- Audit logs
+- Data contracts
+- Evaluation criteria
+- Deployment and rollback
+- User-visible failure behavior
+
+The best agent frameworks make the loop easier to express without hiding the loop from you.
+
+If a framework makes it hard to see what happened, hard to test a step, or hard to bound tool access, it is probably optimizing for demos instead of production.
+
+## Runtime infrastructure
+
+Local agents are easy. Production agents are not.
+
+Once an agent leaves your laptop, you need runtime infrastructure:
+
+- Where does the agent code run?
+- How are sessions isolated?
+- How long can a task run?
+- How do you stream partial results?
+- How are tool credentials managed?
+- How do you observe tool calls and model calls?
+- How do you roll out a new version?
+- How do you stop one user's context from leaking into another user's session?
+
+That is the layer services like **Amazon Bedrock AgentCore Runtime** are trying to address.
+
+In simple terms, AgentCore Runtime is a managed place to host agent or tool code. It handles concerns like session management, isolation, scaling, streaming, long-running work, protocol support, and observability so teams do not have to assemble all of that from scratch.
+
+The high-level contract is useful:
+
+<LayerDiagram
+  groups={[
+    { title: 'Developer', items: ['Writes agent code', 'Packages deployment'] },
+    { title: 'Runtime', items: ['Session isolation', 'Streaming responses', 'Long-running tasks'] },
+    { title: 'Operations', items: ['Observability', 'Versioned rollout', 'Rollback path'] },
+  ]}
+  caption="A runtime gives the agent a managed place to execute. It does not make the agent good by itself."
+/>
+
+For enterprise agents, this runtime layer matters. Stateful agent workloads are not exactly like stateless HTTP handlers. They may need to preserve session context, perform multi-step work, call external tools, stream progress, and run longer than a typical request-response cycle.
+
+The runtime does not make the agent good. It gives the agent a safer place to run.
+
+## Memory, context, and state
+
+People use these words interchangeably, but they are different.
+
+### Context
+
+Context is what the model sees right now. It includes the user request, system instructions, retrieved documents, tool outputs, and any prior messages included in the prompt.
+
+Context is temporary. It is the model's working set.
+
+### Memory
+
+Memory is information saved across turns or sessions. It might include user preferences, facts the user asked the system to remember, or summaries of prior work.
+
+Memory should be intentional. Saving everything is not memory. It is clutter with privacy risk.
+
+### State
+
+State is the durable truth your application owns. A document draft, workflow status, ticket ID, approval decision, retrieved source version, or audit log entry is state.
+
+State should be queryable, versioned when needed, and controlled by your application.
+
+The best production pattern is:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Context',
+      items: ['What the model sees now', 'Prompt', 'Retrieved docs', 'Tool outputs'],
+    },
+    {
+      title: 'State',
+      items: ['What survives the turn', 'Drafts', 'Workflow status', 'Audit logs'],
+    },
+    {
+      title: 'Memory',
+      items: ['What may be recalled later', 'Explicit', 'Scoped', 'Permissioned'],
+    },
+  ]}
+/>
+
+Many agent failures come from confusing these. A chat transcript is not a database. A model's hidden reasoning is not an audit trail. A summary of prior turns is not the same as durable state.
+
+## Planning and multi-agent systems
+
+Some agents plan before they act. Some systems split work across multiple agents.
+
+For example:
+
+<FlowDiagram
+  nodes={[
+    'Planner',
+    'Researcher',
+    'Drafter',
+    'Critic',
+    'Refiner',
+  ]}
+  caption="The value is separation of concerns, not simply having more agents."
+/>
+
+This can be useful when the job has separable responsibilities. A planner can create an outline. A researcher can gather evidence. A drafter can produce text. A critic can check the output against a rubric. A refiner can apply feedback.
+
+The benefit is not that "more agents equals more intelligence." The benefit is separation of concerns.
+
+Each agent should have:
+
+- A narrow role
+- A clear input schema
+- A clear output schema
+- A quality bar
+- A reason to exist
+
+If two agents are both vague generalists, you probably do not need both. You need a better workflow.
+
+## Guardrails
+
+Guardrails are constraints around what the system can do.
+
+Some guardrails are model-facing:
+
+- Instructions
+- Output schemas
+- Refusal rules
+- Citation requirements
+
+Some guardrails are application-facing:
+
+- Tool allow-lists
+- Auth checks
+- Human approval steps
+- Rate limits
+- Transaction boundaries
+- Retry policies
+- Data-loss prevention checks
+
+The application-facing guardrails are usually more important.
+
+A prompt that says "do not call dangerous tools" is weaker than an application that does not expose dangerous tools. A prompt that says "cite your sources" is weaker than a renderer that refuses to display uncited claims.
+
+The strongest systems make the correct behavior the easiest behavior.
+
+## Evaluation
+
+You cannot ship serious agents by clicking around the UI and seeing if they feel good.
+
+Agent evaluation needs test sets:
+
+- Known-good questions and answers
+- Tool-call expectations
+- Retrieval recall checks
+- Citation correctness checks
+- Regression tests for prompts
+- Latency and cost budgets
+- Human review for judgment-heavy cases
+
+The eval should match the job.
+
+For a compliance Q&A agent, citation correctness matters more than charm. For a coding agent, patch correctness matters more than explanation quality. For a customer support agent, policy compliance and escalation behavior may matter more than answer length.
+
+Good evals turn agent quality from a vibe into an engineering conversation.
+
+## A production checklist
+
+If I were reviewing an agentic system design, I would ask these questions first:
+
+- What job is the agent responsible for?
+- Why does this need agency instead of a fixed workflow?
+- What tools can it call?
+- Which tools can mutate state?
+- Where is durable state stored?
+- What is the session boundary?
+- What does the user see while the agent is working?
+- Can we replay what happened?
+- What happens when retrieval finds nothing?
+- What happens when the model produces invalid output?
+- What is the latency budget?
+- What is the cost budget?
+- What is the eval set?
+- Which failure modes require human approval?
+
+If those answers are vague, the system is probably not ready.
+
+## The simplest mental model
+
+Here is the model I keep coming back to:
+
+<LayerDiagram
+  groups={[
+    { title: 'Reasoning', items: ['Model', 'Loop'] },
+    { title: 'Action surface', items: ['Tools', 'State', 'Guardrails'] },
+    { title: 'Operation', items: ['Runtime', 'Evals', 'Telemetry'] },
+  ]}
+/>
+
+Leave out the model and nothing reasons.
+
+Leave out the loop and nothing is agentic.
+
+Leave out tools and nothing happens outside the chat box.
+
+Leave out state and nothing is durable.
+
+Leave out guardrails and the system is unsafe.
+
+Leave out runtime and the system is hard to operate.
+
+Leave out evals and you do not know whether it works.
+
+The model is the exciting part. The rest is what makes it shippable.
+
+## Further reading
+
+- [Model Context Protocol: introduction](https://modelcontextprotocol.io/docs/getting-started/intro)
+- [Model Context Protocol: server concepts](https://modelcontextprotocol.io/docs/learn/server-concepts)
+- [Amazon Bedrock AgentCore Runtime](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agents-tools-runtime.html)
+- [Strands Agents SDK: streaming events](https://strandsagents.com/docs/user-guide/concepts/streaming/)

@@ -1,0 +1,345 @@
+---
+title: What production agents need that demos do not
+date: 2026-05-15
+slug: what-production-agents-need
+excerpt: The gap between an impressive agent demo and a trustworthy production system is not model intelligence. It is state, tools, evals, permissions, observability, retries, and human feedback design.
+readTime: 11 min read
+tags:
+  - agents
+  - production
+  - architecture
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Agent demos are easy to enjoy.
+
+The model reads a request, calls a tool, streams a confident answer, and the room nods. For five minutes, it feels like software has become fluid. The agent can search, plan, write, explain, maybe even update something on your behalf.
+
+Then someone asks the production questions:
+
+- Who is allowed to run that tool?
+- What happens if the tool call times out after mutating state?
+- Can we replay the decision?
+- Which prompt version produced this output?
+- Why did the agent choose that source?
+- What happens when retrieval returns nothing?
+- How do we know the next model version did not make quality worse?
+
+That is where most demos end.
+
+The gap between an agent demo and a production agent is not usually model intelligence. It is the engineering around the model: state, tools, evals, permissions, observability, retries, and human feedback design.
+
+The model is the interesting part. The system is the important part.
+
+## The demo shape
+
+A demo agent usually has a shape like this:
+
+<FlowDiagram
+  nodes={['User asks', 'Model reasons', 'Tool runs', 'Answer streams']}
+  caption="A good demo optimizes for visible intelligence."
+/>
+
+This is a useful prototype. It proves the model can follow the task, the tool can be called, and the user experience can feel interactive.
+
+But production is not a longer demo. It is a different contract.
+
+A production agent needs to survive repeat usage, bad inputs, partial outages, permission boundaries, ambiguous goals, audit requests, cost pressure, and model drift. It needs to be understandable to the team operating it after the original builder has moved on.
+
+That means the architecture has to answer questions the demo never had to face.
+
+## State is the product boundary
+
+The first production mistake is treating conversation history as state.
+
+Chat history is useful context. It is not a database. It is not a workflow record. It is not an audit trail. It is not the canonical version of a document, a ticket, a policy, an approval, or a business decision.
+
+Production agents need durable state owned by the application.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Context',
+      items: ['What the model sees', 'Temporary', 'Prompt-shaped'],
+    },
+    {
+      title: 'State',
+      items: ['What the app owns', 'Durable', 'Versioned when needed'],
+    },
+    {
+      title: 'Audit',
+      items: ['What happened', 'Who triggered it', 'Why it changed'],
+    },
+  ]}
+/>
+
+This distinction matters most during refinement.
+
+Suppose a reviewer says, "make section 3 stricter on retention exceptions." In a demo, that feedback becomes another chat message. The model sees the old draft, the user comment, and produces a new draft.
+
+In production, that feedback should become a state transition:
+
+- Which section changed?
+- Who requested the change?
+- What was the intent?
+- What was the prior version?
+- What validation ran after the change?
+- Which output became canonical?
+
+If the answer is "read the transcript and infer it," the system is not production-ready.
+
+The clean pattern is simple: the model sees context, but the application owns state. Every meaningful change updates durable state with enough metadata to reconstruct what happened.
+
+## Tools are backend APIs, not magic
+
+Tool calling is where agents stop being chat and start being software.
+
+That is also where risk enters.
+
+A tool is not just a function the model can call. It is a capability exposed to an uncertain decision-maker. The model may choose the wrong tool, choose the right tool with wrong arguments, retry at the wrong time, or interpret a partial failure as success.
+
+Production tools need boring contracts:
+
+- Typed inputs
+- Permission checks
+- Idempotency keys
+- Timeouts
+- Retries
+- Safe failure modes
+- Structured outputs
+- Audit logs
+
+The tool surface should be small and domain-specific.
+
+Bad tool:
+
+```text
+query_database(sql)
+```
+
+Better tool:
+
+```text
+find_applicable_controls(marketplace, product_type, launch_date)
+```
+
+The second tool has a business boundary. It can validate inputs, enforce permissions, log intent, and return a typed result. The model does not need arbitrary database access. It needs a safe way to ask a domain question.
+
+This is the basic rule: **make tools match business actions, not infrastructure primitives.**
+
+## Human feedback is not a chat turn
+
+Human-in-the-loop is one of those phrases that sounds safe until you inspect what it means.
+
+In many agent systems, human feedback is just appended to the conversation:
+
+<LoopDiagram
+  steps={[
+    'Model produces output',
+    'Human gives feedback',
+    'Feedback joins chat history',
+    'Model revises from transcript',
+  ]}
+  decision="Reliable enough?"
+  yes="maybe, for low-stakes work"
+  no="not for audit-heavy systems"
+/>
+
+That works for low-stakes drafting. It fails when the output needs provenance.
+
+Human feedback should be modeled as an operation against state. A reviewer is not merely chatting with the model. They are changing a document, approving a recommendation, rejecting a claim, narrowing scope, or adding evidence.
+
+Those are product events. Treat them that way.
+
+A better feedback record looks like:
+
+```text
+actor: reviewer id
+target: section 3.2
+operation: tighten exception language
+reason: current wording allows unsupported retention case
+source_version: draft v4
+created_at: timestamp
+```
+
+Now the refiner agent can run against canonical state, not a growing transcript. The critic can validate the revised section. The audit log can explain why the change happened.
+
+The user experience can still feel conversational. The underlying system should not be.
+
+## Retrieval needs failure behavior
+
+Retrieval-augmented generation is often described as "give the model relevant context."
+
+That is true, but incomplete.
+
+Production retrieval needs to define what happens when context is missing, stale, conflicting, unauthorized, or too broad.
+
+The common failure mode is quiet overconfidence. Retrieval returns something adjacent to the question, the model reasons over it, and the answer sounds plausible. The user does not see the miss.
+
+For high-stakes systems, retrieval should fail visibly.
+
+Good retrieval systems answer:
+
+- What corpus was searched?
+- Which filters were applied?
+- What was the index version?
+- Which sources were used?
+- Which claims cite which source?
+- What happens when no source supports a claim?
+
+In regulated or operational domains, "I do not have evidence to answer that" is not a weak answer. It is a trust-preserving answer.
+
+The retrieval layer should make unsupported claims hard to render, not merely discouraged by prompt text.
+
+## Evals are the release gate
+
+You cannot ship a serious agent by asking a few people whether it feels good.
+
+Agent quality needs evaluation sets.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Task quality',
+      items: ['Known-good answers', 'Rubrics', 'Human review'],
+    },
+    {
+      title: 'System behavior',
+      items: ['Tool-call expectations', 'Refusal paths', 'Retry behavior'],
+    },
+    {
+      title: 'Operational budgets',
+      items: ['Latency', 'Cost', 'Failure rate'],
+    },
+  ]}
+/>
+
+The eval should match the job.
+
+For a Q&A agent, citation correctness and retrieval recall matter more than eloquence. For a policy-generation agent, structured findings and traceable edits matter more than pretty prose. For an operational agent, safe failure behavior matters more than always having an answer.
+
+The best evals become a shared language with stakeholders. Instead of arguing whether the agent "seems better," you can say:
+
+- Recall@5 improved on policy questions.
+- Unsupported claims dropped.
+- Refusal rate went up, but false positives went down.
+- p90 latency regressed after adding reranking.
+- The new prompt version broke two approval-edge cases.
+
+That is how agent quality becomes an engineering conversation instead of a vibe.
+
+## Observability is the trust surface
+
+In normal software, observability tells engineers what happened.
+
+In agentic systems, observability also tells users and reviewers why they should trust the output.
+
+At minimum, a production agent should record:
+
+- User request
+- Session or task id
+- Prompt template version
+- Model and model version
+- Tool calls and arguments
+- Tool outputs or summaries
+- Retrieved source ids and index versions
+- State transitions
+- Validation results
+- Final output
+- Error and retry behavior
+
+This is not only for debugging. It is for accountability.
+
+When an agent produces a wrong answer, "the model did it" is not an incident report. You need to know whether the failure came from retrieval, tool selection, permissions, state, prompt wording, model behavior, or UI presentation.
+
+Without traces, every agent failure looks like model weirdness. With traces, many failures become ordinary software bugs.
+
+## Runtime matters more than people expect
+
+Agents are awkward workloads.
+
+They can run longer than a normal request. They may need session isolation. They may stream progress. They may call tools with different credentials. They may need cancellation. They may need human approval halfway through. They may need to resume after waiting.
+
+That is why runtime infrastructure matters.
+
+A useful production runtime gives you:
+
+- Session boundaries
+- Streaming events
+- Tool execution boundaries
+- Secrets handling
+- Concurrency controls
+- Timeouts
+- Cancellation
+- Logs and traces
+- Versioned deployment
+
+The runtime does not make the agent intelligent. It makes the agent operable.
+
+That difference matters. A brilliant local notebook is not an enterprise system. A slightly less clever agent with clean runtime boundaries, evals, and observability is much closer to something a team can depend on.
+
+## The production shape
+
+The production shape looks less magical and more like normal distributed systems:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Decision loop',
+      items: ['Model', 'Planner', 'Router', 'Critic'],
+    },
+    {
+      title: 'Control plane',
+      items: ['Tools', 'Auth', 'State', 'Guardrails'],
+    },
+    {
+      title: 'Operations',
+      items: ['Runtime', 'Evals', 'Telemetry', 'Rollbacks'],
+    },
+  ]}
+/>
+
+That is the point.
+
+Production agents are mostly distributed systems with an LLM in the decision loop. The LLM changes the interaction model, but it does not remove the need for state management, type contracts, idempotency, retries, security, monitoring, and release discipline.
+
+If anything, it makes those things more important.
+
+## A useful checklist
+
+When I look at an agent design, I want answers to these questions:
+
+- What is the agent's job?
+- Why does this need agency instead of a fixed workflow?
+- What state does the application own?
+- Which tools can the model request?
+- Which tools mutate state?
+- What is the permission boundary?
+- What happens on timeout?
+- What happens on retry?
+- What happens when retrieval finds nothing?
+- Which claims require citations?
+- How does human feedback update state?
+- Can we replay the task?
+- What is the eval set?
+- What are the latency and cost budgets?
+- What would make us roll back a prompt or model change?
+
+If those answers are crisp, the agent may be production-shaped.
+
+If the answers are "the model will figure it out," it is still a demo.
+
+## The real lesson
+
+The agent demo asks: can the model do the task once?
+
+The production system asks: can the team trust it repeatedly, operate it safely, explain its behavior, and improve it without breaking users?
+
+That second question is the real work.
+
+The future of agents will not be won by the systems with the fanciest demos. It will be won by the systems that make intelligent behavior boring enough to operate.
