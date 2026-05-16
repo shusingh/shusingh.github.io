@@ -5,8 +5,10 @@ import { fileURLToPath } from 'node:url';
 import matter from 'gray-matter';
 
 import {
+  parseProjectFrontmatter,
   parseWorkFrontmatter,
   parseWritingFrontmatter,
+  type ProjectFrontmatter,
   type WorkFrontmatter,
   type WritingFrontmatter,
 } from '../../src/content/types';
@@ -63,6 +65,20 @@ export function loadWorkFrontmatter(): WorkFrontmatter[] {
       if (orderA !== undefined) return -1;
       if (orderB !== undefined) return 1;
       return new Date(b.date).valueOf() - new Date(a.date).valueOf();
+    });
+}
+
+export function loadProjectFrontmatter(): ProjectFrontmatter[] {
+  return readMdxFrontmatter('content/projects')
+    .map(({ filePath, data }) => parseProjectFrontmatter(data, filePath))
+    .filter((fm) => !fm.draft)
+    .sort((a, b) => {
+      const orderA = a.order;
+      const orderB = b.order;
+      if (orderA !== undefined && orderB !== undefined) return orderA - orderB;
+      if (orderA !== undefined) return -1;
+      if (orderB !== undefined) return 1;
+      return b.year - a.year;
     });
 }
 

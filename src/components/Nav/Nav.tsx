@@ -6,6 +6,7 @@ import styles from './Nav.module.css';
 
 const navItems = [
   { to: '/work', label: 'Work' },
+  { to: '/projects', label: 'Projects' },
   { to: '/writing', label: 'Writing' },
   { to: '/about', label: 'About' },
   { to: '/now', label: 'Now' },

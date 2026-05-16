@@ -22,13 +22,13 @@ export function Hero() {
               Shubham <span className={styles.accent}>Singh</span>
             </h1>
             <p className={styles.role}>
-              I build <strong>production agentic AI systems</strong> and distributed infrastructure on
-              AWS.
+              I build <strong>production software end-to-end</strong>: backend services,
+              full-stack platforms, and (currently) agentic AI systems on AWS.
             </p>
             <p className={styles.description}>
-              Leading ZeroTouch platform work for compliance control launches: config-driven
-              workflows, role-gated review, artifact orchestration, and operational paths built for
-              thousands of launches.
+              Previously shipped: regulatory data pipelines processing 30M+ records a month,
+              citation-grounded retrieval systems on Bedrock, and full-stack platforms used across
+              three Amazon partner teams.
             </p>
             <div className={styles.ctas}>
               <a
@@ -51,9 +51,9 @@ export function Hero() {
           <div className={styles.right}>
             <PhotoFrame src="/shubham.jpg" alt="Shubham Singh at Lake Union, Seattle" />
             <StatusCard label="Currently">
-              Building the platform Amazon teams use to launch compliance controls: guided workflows,
-              review gates, reusable evidence, and recovery paths when a launch needs to change
-              midstream.
+              Leading frontend architecture for ZeroTouch, the control launch platform that
+              coordinates ownership, review status, blockers, and launch artifacts across partner
+              teams so 2,000+ controls can move without spreadsheet-driven handoffs.
             </StatusCard>
           </div>
         </div>

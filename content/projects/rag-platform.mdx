@@ -1,0 +1,34 @@
+---
+title: "RAG platform"
+slug: "rag-platform"
+description: "A production-shaped retrieval platform in Go with OpenSearch, Postgres, and Redis, built to explore the infrastructure around citation-grounded AI systems."
+kind: "personal"
+link: "https://github.com/shusingh/rag-platform"
+repo: "https://github.com/shusingh/rag-platform"
+tags: ["Go", "OpenSearch", "Postgres", "Redis", "RAG"]
+year: 2026
+status: "wip"
+featured: true
+order: 1
+diagram:
+  nodes: ["API", "retrieval", "ranking", "citations"]
+  caption: "A side project for practicing the parts of RAG that usually decide whether the system is useful: retrieval boundaries, metadata, caching, and traceability."
+---
+
+## Why I built it
+
+Most RAG examples stop at "embed a document and ask a question." The interesting work starts after that: indexing strategy, metadata filters, citation assembly, cache invalidation, query traces, and the path from a user question to a source-backed answer.
+
+This repo is my workbench for those production concerns. The goal is not to build a polished SaaS product. The goal is to keep sharpening the systems instincts behind retrieval-heavy AI products.
+
+## What it explores
+
+- Go service boundaries around ingestion, retrieval, and answer assembly.
+- OpenSearch for hybrid retrieval and metadata-aware search.
+- Postgres for durable records and query trace state.
+- Redis for cache paths where repeated questions should not pay the full retrieval cost every time.
+- Citation-first response shape, where the system treats evidence as part of the output instead of a footnote.
+
+## Next improvements
+
+The pieces I would keep pushing are query evaluation, reranking, and observability. A retrieval platform is only as good as the evidence it retrieves, and the only honest way to improve that is to make failures visible.

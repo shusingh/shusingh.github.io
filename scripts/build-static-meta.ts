@@ -6,7 +6,12 @@ import {
   SITE_ORIGIN,
   SITE_TITLE,
 } from '../src/lib/site';
-import { distDir, loadWorkFrontmatter, loadWritingFrontmatter } from './lib/content';
+import {
+  distDir,
+  loadProjectFrontmatter,
+  loadWorkFrontmatter,
+  loadWritingFrontmatter,
+} from './lib/content';
 
 interface StaticRouteMeta {
   path: string;
@@ -113,6 +118,14 @@ export function buildStaticMeta(): void {
       image: `${SITE_ORIGIN}/og/default.png`,
     },
     {
+      path: '/projects',
+      title: 'Projects',
+      description:
+        'Open source contributions and side projects by Shubham Singh, including RAG infrastructure, distributed systems experiments, and developer tools.',
+      type: 'website',
+      image: `${SITE_ORIGIN}/og/default.png`,
+    },
+    {
       path: '/about',
       title: 'About',
       description:
@@ -145,7 +158,15 @@ export function buildStaticMeta(): void {
     image: `${SITE_ORIGIN}/og/writing-${frontmatter.slug}.png`,
   }));
 
-  const routes = [...staticRoutes, ...workRoutes, ...writingRoutes];
+  const projectRoutes: StaticRouteMeta[] = loadProjectFrontmatter().map((frontmatter) => ({
+    path: `/projects/${frontmatter.slug}`,
+    title: frontmatter.title,
+    description: frontmatter.description,
+    type: 'article',
+    image: `${SITE_ORIGIN}/og/project-${frontmatter.slug}.png`,
+  }));
+
+  const routes = [...staticRoutes, ...workRoutes, ...projectRoutes, ...writingRoutes];
   routes.forEach((meta) => writeRoute(template, meta));
   console.log(`[static-meta] wrote ${routes.length} HTML entry points`);
 }

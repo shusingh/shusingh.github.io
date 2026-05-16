@@ -1,0 +1,33 @@
+---
+title: "Distributed rate limiter"
+slug: "distributed-rate-limiter"
+description: "A Go and Redis implementation of an atomic sliding-window rate limiter, focused on predictable behavior under concurrent traffic."
+kind: "personal"
+link: "https://github.com/shusingh/distributed-rate-limiter"
+repo: "https://github.com/shusingh/distributed-rate-limiter"
+tags: ["Go", "Redis", "Distributed Systems"]
+year: 2026
+status: "released"
+featured: false
+order: 4
+diagram:
+  nodes: ["request", "Lua script", "Redis ZSET", "allow or throttle"]
+  caption: "Atomic Redis operations keep each decision consistent even when multiple app instances are handling traffic."
+---
+
+## Why I built it
+
+Rate limiting is one of those small infrastructure problems that exposes a lot of distributed-systems thinking. You need fairness, atomicity, cleanup, and predictable failure behavior. You also need the implementation to stay simple enough that an on-call engineer can reason about it quickly.
+
+This project implements a sliding-window limiter backed by Redis sorted sets. Each request is evaluated against a time window, stale entries are trimmed, and the allow-or-throttle decision happens atomically.
+
+## Design notes
+
+- Redis sorted sets store request timestamps per key.
+- A Lua script keeps trim, count, insert, and TTL update inside one atomic operation.
+- The algorithm avoids local process memory so multiple service instances share the same limit state.
+- The API shape is intentionally boring: give it a key, a limit, and a window. Get back a decision.
+
+## What it practices
+
+The repo is small, but the design maps directly to real backend work: shared state, concurrent callers, deterministic decisions, and operational clarity.

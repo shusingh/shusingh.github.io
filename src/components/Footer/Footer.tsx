@@ -28,7 +28,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://www.linkedin.com/in/shubham--singh/"
+                  href="https://www.linkedin.com/in/shusingh/"
                   target="_blank"
                   rel="noreferrer"
                   aria-label="LinkedIn (opens in new tab)"
@@ -46,6 +46,9 @@ export function Footer() {
             <ul>
               <li>
                 <Link to="/work">Work</Link>
+              </li>
+              <li>
+                <Link to="/projects">Projects</Link>
               </li>
               <li>
                 <Link to="/writing">Writing</Link>

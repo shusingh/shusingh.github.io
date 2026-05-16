@@ -1,0 +1,31 @@
+---
+title: "Dify: clean up unnecessary None defaults"
+slug: "dify"
+description: "Replaced unnecessary None defaults with empty-string defaults in OAuth and Swagger code paths where absence was already being checked by truthiness, removing a class of subtle type ambiguity."
+kind: "contribution"
+link: "https://github.com/langgenius/dify/pull/36254"
+upstream: "langgenius/dify"
+prUrl: "https://github.com/langgenius/dify/pull/36254"
+prNumber: 36254
+tags: ["Python", "OAuth", "Open Source"]
+year: 2026
+status: "open"
+featured: false
+order: 8
+---
+
+## What the PR changes
+
+A small but meaningful cleanup across `libs/oauth.py`, `controllers/console/auth/oauth.py`, `dev/generate_swagger_specs.py`, and their associated unit and integration tests.
+
+The pattern being fixed: function parameters declared with `Optional[str] = None` defaults, when the consuming code only checks truthiness (`if value:`) rather than `is None`. In those cases, an empty string is the more honest default: it makes the type signature match the actual usage, removes a category of `None`-vs-`""` confusion, and tightens the OAuth state handling and login query parameters.
+
+## Why it matters
+
+OAuth state handling and Swagger spec generation are exactly the places where a sloppy `Optional[str]` becomes a latent bug. A future refactor could easily start treating `None` as a meaningful "unset" signal instead of "falsy," and at that point you have undefined behavior in the auth path.
+
+The PR is small. The audit is the work. Reading through every `Optional[str] = None` and deciding whether `None` actually carries meaning is the kind of cleanup that makes a codebase easier to extend later.
+
+## Status
+
+Open as of submission.
