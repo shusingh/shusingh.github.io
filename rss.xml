@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Shubham Singh | Software Engineer</title>
+    <link>https://shusingh.github.io/writing</link>
+    <atom:link href="https://shusingh.github.io/rss.xml" rel="self" type="application/rss+xml" />
+    <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
+    <language>en-us</language>
+    <managingEditor>ksingh.shubh@gmail.com (Shubham Singh)</managingEditor>
+    <lastBuildDate>Sat, 16 May 2026 00:19:53 GMT</lastBuildDate>
+    <pubDate>Fri, 15 May 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Agentic systems, explained from first principles</title>
+      <link>https://shusingh.github.io/writing/agentic-systems-basics</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/agentic-systems-basics</guid>
+      <pubDate>Fri, 15 May 2026 00:00:00 GMT</pubDate>
+      <description>A plain-English map of agents, tools, MCP servers, streaming responses, agent frameworks, runtime infrastructure, memory, state, and the engineering choices that make agentic systems production-ready.</description>
+      <category>agents</category>
+      <category>architecture</category>
+      <category>production</category>
+    </item>
+    <item>
+      <title>Human feedback is not a chat message</title>
+      <link>https://shusingh.github.io/writing/human-feedback-is-not-a-chat-message</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/human-feedback-is-not-a-chat-message</guid>
+      <pubDate>Fri, 15 May 2026 00:00:00 GMT</pubDate>
+      <description>In production agent systems, human feedback should be modeled as a structured state transition, not appended to a conversation transcript.</description>
+      <category>agents</category>
+      <category>human-in-the-loop</category>
+      <category>architecture</category>
+    </item>
+    <item>
+      <title>What production agents need that demos do not</title>
+      <link>https://shusingh.github.io/writing/what-production-agents-need</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/what-production-agents-need</guid>
+      <pubDate>Fri, 15 May 2026 00:00:00 GMT</pubDate>
+      <description>The gap between an impressive agent demo and a trustworthy production system is not model intelligence. It is state, tools, evals, permissions, observability, retries, and human feedback design.</description>
+      <category>agents</category>
+      <category>production</category>
+      <category>architecture</category>
+    </item>
+  </channel>
+</rss>
