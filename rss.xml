@@ -7,8 +7,38 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>ksingh.shubh@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Sat, 16 May 2026 19:55:52 GMT</lastBuildDate>
-    <pubDate>Fri, 15 May 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Sat, 16 May 2026 20:31:37 GMT</lastBuildDate>
+    <pubDate>Sun, 17 May 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Writing an HLD that survives cross-team review</title>
+      <link>https://shusingh.github.io/writing/hld-cross-team-review</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/hld-cross-team-review</guid>
+      <pubDate>Sun, 17 May 2026 00:00:00 GMT</pubDate>
+      <description>Most high-level design documents are skimmed, signed, and forgotten. The ones that survive are written for specific readers, not a generic reviewer. Here is what changes when you take that seriously.</description>
+      <category>hld</category>
+      <category>design-docs</category>
+      <category>cross-team</category>
+    </item>
+    <item>
+      <title>Error isolation for batch pipelines: when fail-fast is wrong</title>
+      <link>https://shusingh.github.io/writing/error-isolation-batch-pipelines</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/error-isolation-batch-pipelines</guid>
+      <pubDate>Sat, 16 May 2026 00:00:00 GMT</pubDate>
+      <description>Standard data-engineering advice says validate strictly, fail loudly, and replay. That advice is wrong for any pipeline where one bad record cannot be allowed to block the run. Here is the pattern that replaces it.</description>
+      <category>distributed-systems</category>
+      <category>data-pipelines</category>
+      <category>production</category>
+    </item>
+    <item>
+      <title>The schema problem in LLM outputs</title>
+      <link>https://shusingh.github.io/writing/schema-problem-llm-outputs</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/schema-problem-llm-outputs</guid>
+      <pubDate>Sat, 16 May 2026 00:00:00 GMT</pubDate>
+      <description>Structured output from LLMs is treated as a solved problem. It is not. The JSON looks right, but the contract underneath is fragile in ways that only show up under volume. Here is what actually has to be true at the boundary.</description>
+      <category>llm</category>
+      <category>validation</category>
+      <category>api-design</category>
+    </item>
     <item>
       <title>Agentic systems, explained from first principles</title>
       <link>https://shusingh.github.io/writing/agentic-systems-basics</link>
@@ -38,6 +68,26 @@
       <category>agents</category>
       <category>production</category>
       <category>architecture</category>
+    </item>
+    <item>
+      <title>Hybrid retrieval at scale: BM25 + kNN tradeoffs</title>
+      <link>https://shusingh.github.io/writing/hybrid-retrieval-bm25-knn-tradeoffs</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/hybrid-retrieval-bm25-knn-tradeoffs</guid>
+      <pubDate>Sat, 18 Apr 2026 00:00:00 GMT</pubDate>
+      <description>When to reach for vector search, when keyword retrieval still wins, and the architectural decisions behind a citation-grounded compliance Q&amp;A system.</description>
+      <category>retrieval</category>
+      <category>search</category>
+      <category>opensearch</category>
+    </item>
+    <item>
+      <title>From chained Lambdas to Step Functions</title>
+      <link>https://shusingh.github.io/writing/from-chained-lambdas-to-step-functions</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/from-chained-lambdas-to-step-functions</guid>
+      <pubDate>Mon, 09 Mar 2026 00:00:00 GMT</pubDate>
+      <description>A migration retrospective: why brittle orchestration patterns fail at scale, how Map states unlocked per-marketplace parallelism, and what we would do differently.</description>
+      <category>aws</category>
+      <category>step-functions</category>
+      <category>migrations</category>
     </item>
   </channel>
 </rss>

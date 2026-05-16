@@ -127,6 +127,24 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://shusingh.github.io/writing/hld-cross-team-review</loc>
+    <lastmod>2026-05-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://shusingh.github.io/writing/error-isolation-batch-pipelines</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://shusingh.github.io/writing/schema-problem-llm-outputs</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://shusingh.github.io/writing/agentic-systems-basics</loc>
     <lastmod>2026-05-15</lastmod>
     <changefreq>monthly</changefreq>
@@ -141,6 +159,18 @@
   <url>
     <loc>https://shusingh.github.io/writing/what-production-agents-need</loc>
     <lastmod>2026-05-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://shusingh.github.io/writing/hybrid-retrieval-bm25-knn-tradeoffs</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://shusingh.github.io/writing/from-chained-lambdas-to-step-functions</loc>
+    <lastmod>2026-03-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
