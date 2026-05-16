@@ -67,6 +67,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://shusingh.github.io/projects/agentops-rag</loc>
+    <lastmod>2026-05-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://shusingh.github.io/projects/rag-platform</loc>
     <lastmod>2026-05-16</lastmod>
     <changefreq>monthly</changefreq>
