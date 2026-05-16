@@ -2,27 +2,203 @@
 title: From chained Lambdas to Step Functions
 date: 2026-03-09
 slug: from-chained-lambdas-to-step-functions
-excerpt: 'A migration retrospective: why brittle orchestration patterns fail at scale, how Map states unlocked per-marketplace parallelism, and what we''d do differently.'
-readTime: 14 min read
+excerpt: 'A migration retrospective: why brittle orchestration patterns fail at scale, how Map states unlocked per-marketplace parallelism, and what we would do differently.'
+readTime: 12 min read
 tags:
   - aws
   - step-functions
   - migrations
-draft: true
 ---
 
-This draft outline is hidden from the public site until the full migration retrospective is ready.
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-## The original architecture
+Most AWS orchestration starts as chained Lambdas.
 
-Chained Lambdas with SNS hops. Where it broke as fan-out grew.
+The first version of the pipeline has one Lambda that does the work. The second version has two Lambdas, glued together by an SNS topic. The third version has four Lambdas, glued together by two SNS topics, an SQS queue, and a DynamoDB table that nobody is quite sure who owns. It works. It is in production. It would be embarrassing to migrate it because the team has bigger problems.
+
+Then the fan-out grows. The pipeline that used to process hundreds of items now processes tens of thousands. The retries that nobody noticed start to show up as cost. The "transient" errors start to show up as data quality issues. The on-call playbook for "rerun the third Lambda for marketplace X between 9pm and midnight" gets longer.
+
+That is when you migrate to Step Functions.
+
+This is a retrospective on doing that migration for a regulatory data pipeline at Amazon. The shape of the system shifted from chained Lambdas with SNS hops to a Step Functions state machine with Map states and explicit retry policies. The lessons generalize beyond AWS.
+
+## What the original architecture looked like
+
+The old system had grown organically. Each Lambda did one logical thing. SNS topics connected them. An external scheduler kicked off the first Lambda on a cron.
+
+<FlowDiagram
+  nodes={['Cron', 'Ingest', 'Validate', 'Transform', 'Aggregate', 'Submit']}
+  caption="Each box is a Lambda. The transitions are SNS publish-and-subscribe hops."
+/>
+
+This shape is common. It looks reasonable on a whiteboard. It has real problems in production.
+
+### Failure recovery is implicit
+
+When the Validate Lambda fails halfway through processing a batch, the SNS hop to Transform never happens for the unprocessed records. There is no record of "we got partway through and stopped." Recovery means looking at CloudWatch, figuring out where the run died, and manually triggering the downstream Lambda with the right payload.
+
+The team's runbook for this was four pages long. Most of it was "look at the logs and figure out what stopped."
+
+### Retries are global, not per-record
+
+The Lambda's retry policy applies to the whole invocation. If one record in a batch of 500 throws, the whole batch retries. The 499 records that were fine get processed twice on the retry. The 1 record that was broken throws again, and now the whole batch is in DLQ with no signal about which record caused it.
+
+### Payload size is a recurring crisis
+
+SNS messages are limited to 256KB. The pipeline's natural payload was a list of record IDs and metadata. Once the list got long enough, SNS started rejecting publishes. The team worked around this by chunking, but the chunking logic lived in each producer Lambda, with its own bugs.
+
+### Execution history is fragmented
+
+To understand a single end-to-end run, you had to correlate logs across five Lambdas, two SNS topics, one SQS queue, and a DynamoDB table. The correlation ID was a UUID that someone added in version 2. Logs older than 14 days were gone because nobody had budgeted for log retention.
+
+### Concurrency is uncontrolled
+
+The pipeline naturally fanned out by marketplace. Each marketplace produced its own batch of records. The Lambdas processed them in parallel because SNS fanout is parallel by default. There was no central place to say "do not exceed 200 concurrent invocations against the downstream API" because there was no central anything.
+
+When the downstream API rate-limited us, every Lambda saw the same 429s at roughly the same time. The error rate spiked, the team got paged, and the fix was to scale down the pipeline by hand.
 
 ## What Step Functions changed
 
-- Native parallelism via Map state
-- Explicit retry/backoff
-- One source of truth for execution history
+The migration moved the pipeline to a Step Functions state machine. The Lambdas remained, mostly with the same internal logic. What changed was the connective tissue.
 
-## What we'd do differently next time
+<FlowDiagram
+  nodes={['State machine', 'Map state', 'Per-record tasks', 'Result aggregation']}
+  caption="The Map state runs a sub-workflow per record, with bounded concurrency and explicit failure handling."
+/>
 
-Lessons on payload sizing, idempotency, and observability.
+Four things became cleaner.
+
+### Per-record execution with the Map state
+
+Map is the feature that made the migration worth doing.
+
+A Map state takes a list and runs a sub-workflow for each item, in parallel, with a configurable concurrency limit. Critically, each item's execution is tracked independently. If item 247 fails, item 248 keeps running. The failure is recorded against item 247 specifically, not against the whole batch.
+
+```json
+{
+  "Type": "Map",
+  "ItemsPath": "$.records",
+  "MaxConcurrency": 200,
+  "Iterator": {
+    "StartAt": "Validate",
+    "States": {
+      "Validate": { },
+      "Transform": { },
+      "Aggregate": { }
+    }
+  }
+}
+```
+
+The marketplace fan-out turned into a Map over marketplaces. Within each marketplace's iteration, a nested Map iterated over the records for that marketplace. Concurrency was bounded at both levels. The downstream API rate limiting stopped being a paging event because the state machine controlled the parallelism.
+
+### Retry and catch as first-class concepts
+
+Step Functions has built-in retry and catch. You write them as state-machine config, not as Lambda code.
+
+```json
+"Retry": [
+  {
+    "ErrorEquals": ["RateLimitExceeded"],
+    "IntervalSeconds": 5,
+    "MaxAttempts": 6,
+    "BackoffRate": 2.0
+  }
+],
+"Catch": [
+  {
+    "ErrorEquals": ["ValidationError"],
+    "ResultPath": "$.error",
+    "Next": "QuarantineRecord"
+  }
+]
+```
+
+The retry is on the specific error class. Rate-limit errors back off exponentially. Validation errors go to a quarantine state where the record is persisted with its failure reason. The Lambda itself no longer has to know anything about retry semantics. It throws the right exception class and the state machine handles the rest.
+
+This moved retry policy from "implicit in Lambda configuration, with a six-month-old default" to "explicit in version-controlled state machine definition."
+
+### Execution history is one record
+
+Every state machine execution has an execution ID. Every transition between states is recorded against that execution. Looking at one execution shows the whole run: which inputs went into which states, which retries happened, where the failure was, and which output came out.
+
+CloudWatch logs are still there if you need them, but you rarely need them for the orchestration. The state machine UI is the operational surface. When the on-call engineer gets paged, they open the failed execution, see the state that errored, see the input that produced the error, and decide what to do.
+
+The four-page runbook became a half-page runbook.
+
+### Payload references, not payloads
+
+For large data, Step Functions integrates with S3. The state machine passes references (`s3://bucket/key`) instead of inlining the data. The Map state can iterate over an S3-backed list, processing tens of thousands of items without hitting the 256KB inline limit.
+
+The chunking-by-hand logic disappeared. The new pattern is: write the data to S3, pass the key, fetch the data inside the Lambda. It is more boring. It also works.
+
+## The migration mechanics
+
+The migration was incremental. We did not rewrite the pipeline in one cutover.
+
+<LoopDiagram
+  steps={[
+    'Pick one stage of the old pipeline',
+    'Build a Step Functions equivalent',
+    'Run both in shadow for one cycle',
+    'Compare outputs',
+    'Cut over when matched',
+  ]}
+  decision="Match rate at 100%?"
+  yes="cut over"
+  no="diagnose and adjust"
+/>
+
+Three things made this work.
+
+**Per-stage shadow runs.** We migrated the Validate stage first, running the new Step Functions version in shadow alongside the old Lambda chain. Both produced output. We compared outputs for one full reporting cycle. The matches were 99.7%. The 0.3% delta was a Lambda timeout issue in the old version that the new version did not hit, which counts as a quiet win.
+
+**An adapter at the SNS boundary.** The old pipeline's downstream stages expected to be triggered by SNS messages. The new state machine could publish those messages, or it could call the downstream Lambda directly. We kept the SNS interface during the transition so the unmigrated downstream stages did not need to change. This is the kind of decision that feels ugly during the migration and looks correct in retrospect.
+
+**Feature flags on stage selection.** Each stage had a flag that selected the old or new implementation. Cutover was a flag flip, not a code deploy. Rollback was a flag flip back. We never had to do a code deploy under pressure to fix a migration issue.
+
+The total migration took about six weeks of part-time work. The first two stages took four of those weeks. The remaining stages took two weeks combined, because the patterns repeated and the team had built confidence.
+
+## What we would do differently
+
+Hindsight is the only honest framing for migrations.
+
+### Type the boundaries first
+
+The biggest source of subtle bugs during the migration was implicit assumptions about payload shape. The old Lambdas had grown up with informal contracts. Each producer knew what each consumer expected, but the contract was not written down anywhere. When we rebuilt the orchestration, we discovered that several Lambdas were tolerating malformed inputs because they had been getting malformed inputs for years.
+
+We should have written explicit JSON Schema contracts for every stage boundary before starting the migration. Then the migration would have been "make the new implementation conform to the schema" instead of "match the undocumented behavior of the old implementation."
+
+### Build the error-isolation layer earlier
+
+The migration unlocked per-record error isolation through the Map state. We did not actually use it well until several months later, when we built out the proper error-store and replay mechanism. The Map state can route errored items to a dedicated stage, persist them with structured failure reasons, and allow replay as a separate execution. We treated this as a follow-up. It should have been part of the migration scope.
+
+### Observability from day one
+
+The first version of the new state machine emitted enough metrics for the team to operate it. It did not emit enough metrics for downstream consumers to know which records had been processed. We added that observability later, after a regulatory review asked questions we could not answer crisply.
+
+If you are migrating a pipeline that other systems depend on, treat the observability surface as part of the migration scope. Counts in, counts out, error counts, latency per stage, last-successful-run timestamp. All of it.
+
+### Resist the urge to combine stages
+
+There was a moment during the migration when consolidating two stages looked attractive. Step Functions makes it cheap to call multiple Lambdas in one state, and the two stages were "always" run together.
+
+We did not consolidate them. That turned out to be correct. The two stages had different failure modes, different retry policies, and different observability requirements. Keeping them separate gave us per-stage retry and per-stage error classification. When one of them started failing six months later, the diagnosis was instant because the failure was localized.
+
+Migrations are when the temptation to refactor is highest and the cost of getting it wrong is also highest. Resisting that temptation is part of doing the migration well.
+
+## The bigger lesson
+
+The migration was not really about Lambda or Step Functions.
+
+The migration was about moving orchestration from implicit (logs, retries-by-configuration, ad-hoc DynamoDB tables) to explicit (state machine definitions, declarative retry policies, execution history as a first-class object).
+
+Implicit orchestration is fast to write and slow to operate. Explicit orchestration is slower to write and fast to operate. For a pipeline that is going to run for years and be touched by people who did not build it, that tradeoff is the right one.
+
+The same lesson applies to most "we will migrate to a real orchestrator someday" decisions. The right time to migrate is when the implicit orchestration has gotten complex enough that nobody on the team can confidently say what happens when a specific stage fails on a specific record. Once that point arrives, the migration pays for itself in the first major incident the new system handles cleanly.
+
+In our case, it paid for itself in the first month.

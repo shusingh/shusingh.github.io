@@ -54,6 +54,8 @@
 
 html {
   scroll-behavior: smooth;
+  /* Keep anchor-jumped headings out from under the sticky Nav. */
+  scroll-padding-top: 7rem;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   scrollbar-width: thin;
 }

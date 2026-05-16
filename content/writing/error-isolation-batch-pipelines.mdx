@@ -1,0 +1,201 @@
+---
+title: 'Error isolation for batch pipelines: when fail-fast is wrong'
+date: 2026-05-16
+slug: error-isolation-batch-pipelines
+excerpt: Standard data-engineering advice says validate strictly, fail loudly, and replay. That advice is wrong for any pipeline where one bad record cannot be allowed to block the run. Here is the pattern that replaces it.
+readTime: 9 min read
+tags:
+  - distributed-systems
+  - data-pipelines
+  - production
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+The standard advice for batch pipelines is fail-fast.
+
+Validate strictly. If a record does not match the schema, throw. The principle is that bad data should not silently corrupt downstream systems, and the cheapest place to catch the problem is at the boundary. Fix the source, replay the batch, move on.
+
+This advice is correct for analytics pipelines, internal dashboards, and most data engineering work. It is wrong for any pipeline where one malformed record cannot be allowed to halt the entire run.
+
+That second category is bigger than people expect. Regulated reporting, compliance systems, payment processing, customer-facing event ingestion, fraud detection, audit logging: in all of these, a single bad record stopping the batch is a worse outcome than processing the rest while quarantining the bad one. Fail-fast in those domains is not engineering rigor. It is engineering negligence.
+
+This post is about the pattern that replaces fail-fast: **isolate-fast, persist-and-classify, replay-separately**. It is the design decision that drove most of the operational improvement on a regulatory data pipeline at Amazon, and the pattern generalizes far beyond compliance.
+
+## Why fail-fast breaks in these systems
+
+The fail-fast philosophy assumes three things that often are not true.
+
+**Assumption 1: failed batches can be replayed cheaply.** In an analytics pipeline, this is mostly fine. The dashboard is one day out of date, the team fixes the source data, the batch replays, the world moves on. In regulatory reporting, the batch has a submission deadline. Missing the deadline is the failure, not the bad record.
+
+**Assumption 2: the source of bad data can be fixed quickly.** This is true when "the source" is a single upstream producer that you control. It is false when the source is fifty upstream producers, each with their own schema evolution path, each owned by a different team, each with their own deployment cadence. The bad record may be a six-month-old data quality issue that nobody is going to fix this quarter.
+
+**Assumption 3: it is acceptable to drop the batch and start over.** This is the deepest assumption, and the one that breaks first. Many regulated and operational pipelines have to demonstrate that every record was either processed, classified as errored, or explicitly excluded. Silently dropping the batch and replaying it leaves no audit trail for the failed run. The fact that the second run succeeded does not erase the fact that the first run ended in an unknown state.
+
+In domains where audit trail is part of the deliverable, fail-fast is incompatible with the contract.
+
+## The isolate-fast pattern
+
+The replacement pattern has three commitments.
+
+**Isolate fast.** When validation fails for a record, the rest of the batch keeps moving. The failure is recorded against that specific record, not the run.
+
+**Persist and classify.** The errored record goes to a durable store with a structured failure reason. Not a log line. A row in a table with the failure category, the offending value, the schema version, and a correlation ID.
+
+**Replay separately.** Once the root cause is fixed (or the bad record is exempted), the persisted errors are replayed as a separate run. The replay output is reconcilable with the original run so the audit trail is intact.
+
+<FlowDiagram
+  nodes={['Batch', 'Validate', 'Split', 'Process clean stream', 'Persist error stream']}
+  caption="The validation step splits into two streams. The clean stream continues. The error stream lands in durable storage."
+/>
+
+This sounds simple. The implementation details are where the design earns its keep.
+
+## The error store
+
+The most important piece is the error store. It is what turns a "failed record" from an exception to a row.
+
+The schema is opinionated. Each errored record carries:
+
+- The original record (raw payload, however it arrived)
+- The schema version it was validated against
+- The validator class that rejected it
+- A structured failure reason (an enum, not a free-form string)
+- The execution ID it came from
+- The timestamp
+- A replay state (`pending`, `replayed`, `exempted`, `manually_fixed`)
+
+```json
+{
+  "original_payload": { },
+  "schema_version": "v17",
+  "validator": "TerritorialScopeValidation",
+  "failure_reason": "UNSUPPORTED_MARKETPLACE",
+  "execution_id": "exec_2026_05_15_run_001",
+  "timestamp": "2026-05-15T03:14:22Z",
+  "replay_state": "pending"
+}
+```
+
+That structure is the difference between "we failed on something" and "we failed on this specific class of issue, here are the 247 records that hit it, here is the validator that rejected them, here is the replay path."
+
+The structured failure reason is the part that gets cut from most implementations. A string like `"validation failed: missing field"` is not actionable at scale. An enum value like `MANDATORY_FIELD_MISSING` plus the field name in a separate column lets you query for the distribution: 90% of today's errors are missing `policy_category` for marketplace X. That tells you where to fix the source.
+
+## Composable validation
+
+The validators themselves are worth being deliberate about.
+
+The naive shape is one big validation function that throws on the first error. The better shape is composable validators, each with one responsibility, that accumulate errors rather than short-circuit.
+
+```python
+class MandatoryFieldCheck:
+    def validate(self, record): ...
+
+class TerritorialScopeValidation:
+    def validate(self, record): ...
+
+class DependentAttributesValidation:
+    def validate(self, record): ...
+```
+
+Each validator returns a list of findings (possibly empty). The pipeline runs every validator on every record. A record can fail multiple validations and the failure record captures all of them.
+
+The benefit shows up during triage. If `MANDATORY_FIELD_MISSING` and `INVALID_TERRITORIAL_SCOPE` always co-occur for marketplace X, that is a different upstream problem than if they appear independently. You cannot see that pattern if validation short-circuits on the first failure.
+
+New requirements add a validator. They do not require editing the central validation function. Regulatory systems age by accumulating rules, and the validation layer has to age with them. Composable validators make that aging cheap.
+
+## The replay loop
+
+The replay path is what makes the error store useful.
+
+<LoopDiagram
+  steps={[
+    'Operator inspects error store',
+    'Diagnoses root cause',
+    'Fixes source or marks exempted',
+    'Triggers replay execution',
+    'Replay run processes only errored records',
+  ]}
+  decision="Replay successful?"
+  yes="merge with original run"
+  no="record new failure reasons"
+/>
+
+Three properties matter.
+
+**The replay is its own execution.** It has its own execution ID. The relationship to the original run is recorded (the replay's metadata points back to the original), but the replay is a first-class run with its own audit trail. Two reasons: regulators can see both attempts cleanly, and the system can replay the same errored records against an updated rule set without confusing the audit log.
+
+**The replay can only touch records flagged for replay.** It is not a "rerun everything" path. The clean records from the original run are already downstream. A second pass over them risks double-counting. The replay path is scoped to the errored set.
+
+**Partial replay is normal.** If 100 records errored and 87 of them are now fixed, the replay processes those 87. The remaining 13 update their failure reasons. The system does not assume that all failures will eventually clear, because some of them will not.
+
+## The operator surface
+
+The operator surface for error isolation is usually undersold.
+
+A pipeline that produces structured errors but has no UI for inspecting them is barely better than one that throws. The errors might as well be in CloudWatch.
+
+The minimal operator surface is:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Aggregates',
+      items: ['Errors per failure_reason', 'Errors per source', 'Errors per schema version'],
+    },
+    {
+      title: 'Drill-down',
+      items: ['Recent error records', 'Original payload', 'Validator findings'],
+    },
+    {
+      title: 'Actions',
+      items: ['Mark exempted', 'Trigger replay', 'Add note for auditor'],
+    },
+  ]}
+/>
+
+Aggregates tell the operator what is wrong. Drill-down lets them confirm. Actions let them resolve. This is not magic. It is the same shape as a good incident-response console for any operational system.
+
+The mistake is treating the error store as a write-only sink that someone might query later with SQL. By the time someone is querying it with SQL, the deadline has already moved.
+
+## The metric that improved
+
+On the regulatory data pipeline I helped lead, the isolate-fast pattern drove a 70% reduction in incident resolution time over the year following the migration.
+
+The before-and-after is not subtle. Before: a malformed record class causes the validation Lambda to throw. The batch DLQs. The on-call engineer pages, triages from CloudWatch logs, identifies the bad records, writes a one-off fix or exemption, redeploys the validation Lambda, replays the batch, and stays on call until it clears. Median resolution time: several hours.
+
+After: a malformed record class causes those specific records to land in the error store with a structured failure reason. The clean records continue downstream and the batch completes on time. The operations dashboard shows the new error class. The on-call engineer triages from the dashboard, either fixes the upstream source or marks the records exempted with a justification, and triggers a replay. Median resolution time: tens of minutes.
+
+The 70% reduction is not from a magic primitive. It is from moving error handling out of the on-call's head and into the system.
+
+## When fail-fast is still right
+
+Fail-fast is the right pattern in real cases. Three to keep in mind:
+
+**Internal analytics where freshness is not the contract.** If the dashboard can be a day late while the source gets fixed, fail-fast is operationally simpler.
+
+**Schema migrations.** When you are intentionally rejecting old-shape records to force upstream producers to update, fail-fast is the mechanism. Quarantining the old records is the wrong message.
+
+**Development environments.** The whole point of the dev pipeline is to surface issues loudly so they get fixed before production.
+
+The principle is "fail-fast when failures are signal you want to amplify; isolate-fast when failures are inevitable noise the system has to absorb without losing them."
+
+For production pipelines in regulated, operational, or customer-facing domains, the failure mode is the second one. The design decision is whether the team admits that to itself early or learns it during the first major incident.
+
+## The takeaway
+
+The most underrated thing about a batch pipeline is not its throughput. It is what happens when things go wrong.
+
+Fail-fast says: things will not go wrong, and if they do, we will catch it cleanly at the boundary. That is a beautiful story.
+
+Isolate-fast says: things will go wrong, often, in ways we cannot fully predict, and the system has to keep working anyway. That is the production story.
+
+The shift from one to the other is mostly mechanical. It is an error store, a set of structured failure reasons, a replay path, and an operator surface. None of these are hard to build. The hard part is admitting they are necessary before the first incident proves they are.
+
+The teams that admit it early ship pipelines that age well. The teams that wait write a four-page runbook and call it "operational maturity."
+
+For systems that have to demonstrate they processed every record, classified every failure, and preserved the audit trail of both, fail-fast is not engineering rigor. It is engineering nostalgia for a simpler world that the production version does not inhabit.
