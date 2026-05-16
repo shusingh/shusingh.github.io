@@ -1,0 +1,65 @@
+---
+title: "AgentOps RAG"
+slug: "agentops-rag"
+description: "A production-style agentic retrieval platform with tenant isolation, async ingestion, DLQ replay, evals, traces, rate limits, benchmarks, and citation-grounded refusals."
+kind: "personal"
+link: "https://github.com/shusingh/agentops-rag"
+repo: "https://github.com/shusingh/agentops-rag"
+tags: ["Python", "FastAPI", "OpenSearch", "Redis", "Postgres", "OpenTelemetry", "RAG"]
+year: 2026
+status: "released"
+featured: true
+order: 0
+stat:
+  number: "8+"
+  label: "production concerns modeled"
+diagram:
+  nodes: ["FastAPI", "tenant auth", "ingestion queue", "agent runtime", "evals + traces"]
+  caption: "The project treats RAG as an operational system, not a chatbot demo: auth, ingestion, retrieval, critique, refusal, and observability are first-class paths."
+---
+
+## Why I built it
+
+Most RAG demos prove that retrieval can work once. AgentOps RAG asks a more useful question: what does the system look like when retrieval fails, ingestion breaks, tenants must be isolated, answers need citations, and expensive endpoints need operational controls?
+
+The goal was to build a portfolio-grade AI infrastructure project that shows the production surface area around agentic retrieval. It is intentionally not a chatbot-first demo. The useful part is the discipline around the agent.
+
+## What it includes
+
+- **Tenant isolation** with JWT-derived tenant IDs at API and retrieval boundaries.
+- **Async ingestion** through Redis Streams, with worker processing and DLQ replay.
+- **Hybrid retrieval** using BM25 and vector search in OpenSearch.
+- **Explicit agent runtime** with planner, retriever, critic, and finalizer stages.
+- **Citation-grounded answers** with evidence-based refusals when support is missing.
+- **Eval harness** with JSONL cases and generated reports.
+- **OpenTelemetry traces** across auth, ingestion, retrieval, model calls, critic checks, and finalization.
+- **Redis Lua rate limiting** for tenant and endpoint-level control.
+- **Benchmark reports** for throughput, latency, failures, refusals, and rate-limit blocks.
+
+## Architecture
+
+The runtime is explicit Python orchestration rather than a framework-hidden graph. That makes the infrastructure decisions visible:
+
+1. The planner decides whether to retrieve, refuse, or ask for clarification.
+2. The retriever runs tenant-filtered hybrid search.
+3. The critic checks citation coverage and answer support.
+4. The finalizer returns either a grounded answer or a refusal.
+
+The ingestion path is similarly explicit. Uploads become queued jobs, workers chunk and index content, metadata lands in Postgres, and failures go to a DLQ with tenant ID, document ID, stage, and retry count.
+
+## Why it matters
+
+This project is valuable because it demonstrates the parts of AI systems that senior engineering teams actually care about:
+
+- Can the system fail visibly instead of returning unsupported answers?
+- Can a tenant ever retrieve another tenant's documents?
+- Can an operator replay failed ingestion jobs without rerunning everything?
+- Can evals catch regressions before they hit users?
+- Can traces explain why an answer was refused or why retrieval missed?
+- Can rate limits degrade differently for read-heavy and write-heavy paths?
+
+Those are the questions that separate a useful AI platform from a demo that looks good on a laptop.
+
+## What I would do next
+
+The natural next step is to harden it like a real deployment: managed Postgres, Redis, and OpenSearch; Alembic migrations; OTLP trace export; retrieval drift monitoring; offline eval gates in CI; worker autoscaling; and stronger audit logs around tenant onboarding and replay actions.
