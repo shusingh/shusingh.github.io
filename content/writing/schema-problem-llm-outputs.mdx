@@ -1,0 +1,206 @@
+---
+title: The schema problem in LLM outputs
+date: 2026-05-16
+slug: schema-problem-llm-outputs
+excerpt: Structured output from LLMs is treated as a solved problem. It is not. The JSON looks right, but the contract underneath is fragile in ways that only show up under volume. Here is what actually has to be true at the boundary.
+readTime: 10 min read
+tags:
+  - llm
+  - validation
+  - api-design
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+The pitch for structured output from LLMs is clean: tell the model the schema, get JSON back, parse it, use it. The provider APIs make this look easy. OpenAI's response format, Anthropic's tool use, the various OSS shims around them. The demos work. The first 1,000 calls in production work.
+
+The trouble starts later.
+
+A field that is supposed to be a string comes back as a string-shaped JSON value. An enum that has five allowed values returns a sixth one that the model invented. An array of objects has one object missing a required field. The JSON parses successfully but the contract is wrong in a way that only shows up downstream.
+
+This is the schema problem. It is not solved. It is one of the layers where production AI systems leak.
+
+This post is about the schema problem at the boundary between an LLM and the rest of your application. What actually fails, what defenses help, and where the right boundary actually sits.
+
+## What "structured output" actually does
+
+When you ask an LLM for structured output, three things happen.
+
+First, the model is conditioned by the schema. The system prompt or tool definition tells the model what shape is expected. The model's output distribution is shifted toward outputs that match that shape.
+
+Second, the decoding may be constrained. Some providers enforce the schema during sampling: the model can only emit tokens that keep the output on a path that ends in a valid schema-conforming string. This is real schema enforcement, not prompting.
+
+Third, the provider parses the result and may surface failures. If the model produced something that does not parse, the API may return an error rather than the raw text.
+
+This sounds airtight. It is not.
+
+<FlowDiagram
+  nodes={['Prompt + schema', 'Constrained decoding', 'JSON parse', 'Your application']}
+  caption="Each step reduces the failure surface but does not eliminate it."
+/>
+
+The constrained decoding only enforces structural validity. The JSON parse only catches syntax errors. Everything past the JSON parse is your problem, and the failure modes that matter most are semantic, not syntactic.
+
+## The failure modes
+
+Five failure modes are worth naming separately because the mitigation for each is different.
+
+### Structural failure
+
+The output is not valid JSON. Brackets do not match. A string is not closed. With constrained decoding, this is rare. Without it, it is common, especially with smaller or older models.
+
+The defense is straightforward: parse and catch. If parsing fails, retry the call with an explicit "your previous output was not valid JSON" message, possibly with the failed output included. Cap the retries.
+
+This is the failure mode that gets the most attention because it is the most visible. It is also the easiest to fix.
+
+### Type drift
+
+The output is valid JSON, but a field that should be a number comes back as a string. `"price": "12.99"` instead of `"price": 12.99`. An array that should be of integers contains a string. An object that should be `{ name: string }` is just `"name"`.
+
+Type drift slips past JSON parsing because the JSON itself is fine. It is caught by schema validation in the next stage.
+
+The defense is a real validator: Pydantic on the Python side, Zod on the TypeScript side, JSON Schema if you want a language-agnostic contract. The validator runs after the parse and rejects the output if the types do not match. Then either retry or escalate.
+
+### Missing required fields
+
+The schema says a field is required. The output omits it. Sometimes the model includes it as `null` instead. Sometimes it just leaves it out.
+
+This is annoyingly common when the field is optional in spirit but required by the schema for downstream consumers. The model "decides" the field does not apply and skips it. Schema validation catches this. The retry has to be explicit: "you must include field X even if you do not have a value for it; use null if so."
+
+### Extra fields
+
+The model invents fields that are not in the schema. This is mostly harmless for the consumer if your validator is strict about ignoring unknown fields. It becomes a real problem if you forward the output to another system that does not expect those fields, or if you store the output without normalization.
+
+The defense is a validator that strips unknown fields explicitly, or that fails closed when unknown fields appear. Choose based on whether unknown fields are "data we didn't ask for" (strip) or "evidence the model is going off-script" (fail).
+
+### Enum hallucination
+
+This is the worst one because it looks like success.
+
+The schema says a field is one of `["LOW", "MEDIUM", "HIGH"]`. The model returns `"CRITICAL"`. JSON parses fine. The field is a string. If your validator only checks types, it passes. The downstream system gets a value it does not know how to handle.
+
+Constrained decoding can prevent this if the provider supports JSON Schema with enum constraints during sampling. Many do not, or do not for all schema features. If you are relying on this defense, verify it actually works against the API you are calling. The way you verify is to construct a prompt that pressures the model to invent an enum value and check whether the constrained decoding actually rejects it.
+
+If constrained decoding does not enforce enums, your validator has to. Treat enum membership as a first-class validation step, not a string check.
+
+## The layers that should exist
+
+A production boundary between an LLM and the rest of your system has more layers than people initially write.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Model boundary',
+      items: ['Prompt with schema', 'Constrained decoding (if available)', 'Raw output'],
+    },
+    {
+      title: 'Parse boundary',
+      items: ['JSON parse', 'Retry on syntactic failure'],
+    },
+    {
+      title: 'Validation boundary',
+      items: ['Schema validation', 'Enum membership', 'Required fields', 'Type coercion rules'],
+    },
+    {
+      title: 'Application boundary',
+      items: ['Domain validation', 'Business rules', 'Permission checks'],
+    },
+  ]}
+/>
+
+The temptation is to collapse these. Validators get treated as "the same thing as parsing." Domain rules get checked inside the JSON-shaped Pydantic model. Enum checks get done in `if` statements scattered through the application code.
+
+This collapses badly. When a failure happens, you cannot tell at which layer it failed. Did the model produce wrong types? Did the validator accept something it should have rejected? Did the domain logic miss a case?
+
+Each layer has a different failure response. The parse layer retries with a clarifying message. The validation layer rejects and either retries or escalates. The domain layer is your application logic and a failure here is a real bug, not a model issue.
+
+Keeping the layers distinct is what lets you build operational visibility into which one is failing.
+
+## A concrete example: JSON validity in Giskard
+
+I recently contributed a `JsonValid` check to [Giskard](/projects/giskard-oss), an open-source library for testing AI systems. The check validates whether a value is a valid JSON string or a JSON-compatible object, with optional JSON Schema validation.
+
+The interesting design decision was distinguishing **schema configuration errors** from **validation failures**.
+
+A schema configuration error means the schema itself is malformed. The author wrote a schema that does not parse as JSON Schema, or has an internal contradiction. The check cannot validate anything until that is fixed. This is a setup bug.
+
+A validation failure means the schema is fine but the value does not conform. This is a data bug, and the actionable response is different (look at the input, not the schema).
+
+Most libraries conflate these. They throw the same exception type for both, with a message that does not distinguish them. The operator sees a failure and does not know whether to look at their schema or their data.
+
+The Giskard implementation surfaces them as separate failure types. The operator gets:
+
+- `SchemaConfigurationError: jsonschema rejected the schema definition`
+- `JsonValidationError: value does not conform to schema, field X failed at Y`
+
+That distinction matters at scale. When you are validating thousands of LLM outputs against a set of schemas, you need to know whether the schema is broken (rare, fix once) or whether the model is producing bad outputs (common, ongoing tuning work).
+
+This is the kind of design detail that does not show up in the README but determines whether the validation layer is operationally useful.
+
+## Pydantic, Zod, JSON Schema: where each shines
+
+There is no universal answer for which validator to use. They have different strengths.
+
+**Pydantic (Python).** Strong on data shaping. Coerces types when it can, rejects when it cannot. Excellent error messages. The natural choice when the LLM output flows into Python code. Pairs well with FastAPI for API boundaries. Costs: schemas are Python classes, which means they are not portable to other languages without code generation.
+
+**Zod (TypeScript).** Strong on runtime types that match TypeScript types. Schemas double as type definitions, so the inferred types flow through the rest of the codebase. Excellent for frontend or Node backend code that needs to validate LLM output before using it. Costs: TypeScript-only. JSON Schema export is a separate compile step.
+
+**JSON Schema.** Language-agnostic. Portable. The lingua franca for cross-team contracts. If two services (one Python, one Node) both need to validate the same LLM output shape, JSON Schema is what they share. Costs: the developer experience is worse than either Pydantic or Zod. The error messages are technical. Tooling varies in quality across languages.
+
+The common pattern in production: write the schema in one of these and use codegen or compile-time conversion to produce the others. Pydantic models that compile to JSON Schema. Zod schemas that derive from JSON Schema. The validator at each language boundary is generated from the canonical contract.
+
+## When schemas are the wrong tool
+
+Schemas are not always the right answer.
+
+If the LLM output is feeding into another LLM call, structured output may actively hurt. The downstream model needs context, not constrained shape. Forcing the upstream output into a JSON shape can strip nuance that the downstream model would have used.
+
+If the output is going directly to a user, free-form text with optional structured metadata is often better than pure structured output. The user reads the text. The metadata flows into the analytics or the rendering layer.
+
+If the output is one of many fan-out paths and the schemas would differ per path, sometimes the right boundary is upstream of the schema: route first, then constrain the output for the routed path.
+
+The principle is that schemas live at boundaries where the next consumer needs structured input. Inside LLM-to-LLM flows, structure is sometimes loss of information.
+
+## The boundary, more carefully
+
+The deepest design decision is not "should we use structured output." It is "where does structure enter, and how is it enforced."
+
+The naive shape is structure-at-the-model: ask the model to produce JSON, validate it, pass to the application. This is the default and is fine for many cases.
+
+The more robust shape is structure-at-the-seam: the model produces something close to structured, and a dedicated normalization step produces the canonical structured form. The normalization step can do retries, coercions, smart defaults, and explicit rejection.
+
+<FlowDiagram
+  nodes={['Model output', 'Normalize', 'Validate', 'Application']}
+  caption="The normalize step is where messy model behavior gets shaped into a clean contract."
+/>
+
+Why split normalize and validate?
+
+The normalize step is allowed to be lenient. It can coerce `"12.99"` to `12.99`. It can map `"critical"` to `"HIGH"` if there is an obvious mapping. It can fill missing fields with explicit `null`. It is application-aware.
+
+The validate step is strict. After normalization, the contract is what the rest of the application expects. Any failure here is escalated, not retried.
+
+This split prevents the worst pattern, which is validators that quietly coerce things in ways the application did not intend. If your validator is "fixing" model outputs invisibly, you have lost the signal about where the model is unreliable.
+
+## What this means in practice
+
+The practical takeaways:
+
+**Treat structured output as a first-class production interface.** Not as "JSON the model gave us." It is the contract between an unreliable producer and the rest of your system. Design accordingly.
+
+**Layer your validation.** Parse, validate types, validate enums, validate domain. Keep the layers distinct so you can tell which one is failing.
+
+**Distinguish schema bugs from data bugs.** Different remediation paths, different operational responses.
+
+**Watch for enum hallucination specifically.** It is the most invisible failure mode and the one that produces the worst downstream effects.
+
+**Pick the validator that matches the language at the seam.** Pydantic for Python, Zod for TS, JSON Schema for cross-language contracts.
+
+**Consider the normalize-then-validate split.** It is more work upfront and pays off when the model's behavior drifts.
+
+The schema problem is not solved. It is managed. The teams that take it seriously build systems that age well as the underlying models change. The teams that treat it as a checkbox build systems that work in the first quarter and break in the second.
+
+The good news is the engineering is not exotic. It is the same kind of boundary-design work that has always made the difference between code that works on a happy path and code that works in production. The fact that an LLM sits on one side of the boundary does not change the principles. It just makes the boundary more important.

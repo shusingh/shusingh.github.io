@@ -3,26 +3,203 @@ title: 'Hybrid retrieval at scale: BM25 + kNN tradeoffs'
 date: 2026-04-18
 slug: hybrid-retrieval-bm25-knn-tradeoffs
 excerpt: When to reach for vector search, when keyword retrieval still wins, and the architectural decisions behind a citation-grounded compliance Q&A system.
-readTime: 9 min read
+readTime: 11 min read
 tags:
   - retrieval
   - search
   - opensearch
-draft: true
 ---
 
-This draft outline is hidden from the public site until the full post is ready.
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+The default answer to retrieval has become "embed it and use a vector store."
+
+That default is wrong often enough that it is worth taking seriously. Vectors are not retrieval. They are one tool inside retrieval. Treating them as the whole pipeline trades real recall and real latency for a story that is easy to put on a slide.
+
+This post is a working engineer's view of when BM25 still beats vectors, when vectors actually earn the complexity, and how to fuse them in a way that survives production. It draws on building a citation-grounded compliance Q&A system on OpenSearch, where hybrid retrieval was the architectural decision that mattered most.
+
+## The shape of the problem
+
+A retrieval system has one job: given a query, return the chunks that should support the next step. That next step might be a generated answer, a ranked search results page, an agent's tool call, or a human reviewer's evidence list. The mechanics shift with the consumer, but the contract is the same.
+
+<FlowDiagram
+  nodes={['Query', 'Retrieval', 'Ranking', 'Consumer']}
+  caption="Retrieval is upstream of everything. If it is wrong, the rest cannot recover."
+/>
+
+Most production retrieval failures are not "the model said something dumb." They are "the model said something reasonable given what retrieval handed it, and what retrieval handed it was wrong."
+
+That is why the choice between BM25 and kNN is consequential. Picking the wrong default at this layer means every downstream system inherits the failure mode.
 
 ## When BM25 is still the right answer
 
-A short list of corpora and query types where lexical retrieval beats vectors on both recall and latency.
+BM25 is the old workhorse: a lexical scoring function that ranks documents by term frequency, inverse document frequency, and length normalization. People treat it as the boring baseline. In several common cases, it is also the right baseline to stay on.
+
+### Exact-match queries
+
+If a user types `CCPA section 1798.105`, the right document is the one that contains those exact tokens. A vector model will return documents that are semantically related to "California consumer privacy data deletion." Many of those will be wrong. BM25 will return the one that mentions the section.
+
+This is not a niche case. Regulated domains are full of statute numbers, policy IDs, control codes, and ticket references. Engineering corpora are full of error codes, API names, and stack traces. Internal docs are full of acronyms that mean something specific. None of those are paraphrased well.
+
+### Named entities and jargon
+
+A user searching for `Bedrock AgentCore` wants documents that mention Bedrock AgentCore. Not documents about agent orchestration in general. Embedding models learn statistical similarity in a representation space. They tend to over-generalize on names and acronyms, especially recent ones the embedding model was not trained on.
+
+### Short, intent-bearing queries
+
+When the query is two or three tokens, BM25 has more signal per character than a vector model does. The vector model averages over a sparse signal and produces an embedding that is close to many documents. BM25 ranks on the tokens you typed.
+
+### Latency-sensitive paths
+
+A well-tuned BM25 query on a properly sized inverted index returns in single-digit milliseconds. A vector search over a non-trivial corpus, even with HNSW, is rarely faster than tens of milliseconds and often slower. For interactive systems with strict p99 budgets, the lexical path is not optional.
+
+### Audit and explainability
+
+Lexical retrieval is inspectable. You can show a reviewer which terms hit which documents and why a score landed where it did. Vector similarity is a number that came out of a model. For systems that need to defend their retrieval decisions to a human reviewer or an auditor, that distinction is not cosmetic.
 
 ## Where vectors actually help
 
-Semantic queries that lexical recall misses. Cross-domain rewordings. Long, conversational user inputs.
+Vectors are not the wrong tool. They are the right tool for a specific failure mode that BM25 cannot fix.
 
-## Putting them together
+### Paraphrase recall
 
-- Score fusion vs. reranking
-- Index sizing
-- Audit trail and citation grounding
+A user asks: "what do we do when a customer asks us to forget their data?" The relevant document is titled "Right-to-erasure handling procedures." There is no lexical overlap. BM25 misses this entirely. A vector model trained on natural language understands they are about the same thing.
+
+This is the canonical case for vector retrieval, and it is genuinely important. It is also the case that gets cited as if it were every case.
+
+### Cross-formulation, cross-language
+
+When the corpus and the query are formulated differently (one is conversational, one is formal; one is English, one is mixed multilingual), vectors handle the gap more gracefully. BM25 collapses if the vocabulary distributions differ.
+
+### Long natural-language queries
+
+If a user types two sentences explaining their situation, the lexical signal is noisy. A vector model can ignore stop-word patterns and capture the substantive content. The longer and more conversational the query, the more vectors earn their cost.
+
+### Semantic similarity over surface form
+
+For finding "similar tickets to this one" or "documents like this draft," there is no query at all in the lexical sense. Vector similarity is the entire mechanism. This is the underrated use case for embeddings inside retrieval systems: not the user-facing search box, but the analyst's "find me more like this" surface.
+
+## The fusion question
+
+The right answer in most production systems is not "BM25 or vectors." It is "BM25 and vectors, fused well."
+
+That word "well" hides the design space. There are two main shapes.
+
+### Parallel retrieval with score fusion
+
+Run both retrievers, get back two ranked lists, fuse them into a single ranked list before passing to the consumer.
+
+<FlowDiagram
+  nodes={['Query', 'BM25 + kNN in parallel', 'Score fusion', 'Top-k']}
+  caption="Each retriever runs to completion. The fusion step decides what wins."
+/>
+
+The classic fusion method is Reciprocal Rank Fusion. For each document, you sum a function of its rank in each list (typically `1 / (k + rank)`). RRF works well as a default because it does not require calibrating scores between retrievers that produce them on different scales.
+
+The downside: you pay the latency of both retrievers on every query.
+
+### Cascading retrieval with rerank
+
+Use the cheaper retriever to fetch a broad candidate set, then rerank the top-N with the more expensive method.
+
+<FlowDiagram
+  nodes={['Query', 'BM25 top-100', 'kNN rerank top-25', 'Consumer']}
+  caption="A funnel. The first stage maximizes recall. The second stage maximizes precision."
+/>
+
+This pattern is what most production systems eventually converge to. BM25 has high recall and low cost. It is excellent at "get me the 100 documents that are plausibly relevant." Vector reranking is good at "of these 100, which 25 actually answer the question." You can also reverse the cascade in some shapes, but BM25 first tends to be more efficient because the inverted-index path is so much cheaper per candidate.
+
+A third pattern, increasingly common, is to add a cross-encoder reranker on top of the vector rerank. That is heavier still, but for citation-grounded systems where precision matters more than throughput, it earns the latency.
+
+## What this looks like in production
+
+The MaverickIQ Q&A platform runs hybrid retrieval over a compliance corpus. The architecture has the shape above but with specific commitments that came from production lessons.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Index',
+      items: ['BM25 on OpenSearch', 'kNN (HNSW) on OpenSearch', 'Shared schema'],
+    },
+    {
+      title: 'Query',
+      items: ['Parallel retrieval', 'RRF fusion', 'Cross-encoder rerank'],
+    },
+    {
+      title: 'Output',
+      items: ['Top-k chunks', 'Source IDs', 'Provenance metadata'],
+    },
+  ]}
+/>
+
+Three decisions were structural.
+
+**One index, two views.** Both the BM25 and the kNN paths read from the same indexed documents with the same chunk identifiers. That means a document chunk has exactly one ID, regardless of which retriever surfaced it. Fusion at the rank-list level is trivial because the IDs are shared. Provenance does not have to reconcile two different ID spaces.
+
+**Retrieval returns IDs and provenance, not text.** The retrieval layer returns chunk IDs plus enough metadata to reconstruct where they came from (source document, section, version, last-indexed timestamp). The text content is fetched separately. This lets the downstream consumer make decisions about freshness, caching, and authorization without re-running retrieval.
+
+**Citation grounding is enforced downstream, not in the retriever.** The retriever does not know which chunks the answer will cite. It returns candidates. The answer assembly stage is responsible for ensuring that every claim in the generated text maps to at least one retrieved chunk, with the chunk's source ID surfaced to the reader. This separation matters: it lets the retriever optimize for recall, and the assembly stage optimize for precision.
+
+## The latency budget
+
+Hybrid retrieval has a real cost.
+
+In the parallel pattern, query latency is `max(BM25, kNN) + fusion + rerank`. In practice, kNN dominates unless the index is small. With a well-tuned HNSW index on the order of a few million chunks, kNN tends to land in the 20-50ms range. BM25 lands under 10ms. RRF fusion is free. Cross-encoder rerank on 25 candidates is the biggest variable: 100-300ms depending on the model.
+
+End-to-end retrieval budget in our system: ~400ms p95. That is acceptable for an interactive Q&A surface where the LLM call that follows is going to take 2-5 seconds anyway. It would be unacceptable for a typeahead.
+
+The budget is the constraint that decides whether you can afford the rerank step. If you cannot, you ship without it, and the answer-assembly stage has to be more conservative about citation precision.
+
+## Index sizing and refresh
+
+The architectural decision people forget to think about is index lifecycle.
+
+A vector index is more expensive to rebuild than an inverted index. For corpora that change frequently (policy documents that get reviewed monthly, incident postmortems that accumulate continuously), the rebuild cadence matters. Vectors that are weeks stale produce subtly wrong answers in a way that is hard to detect from a user's seat.
+
+The pattern we landed on:
+
+<LoopDiagram
+  steps={[
+    'New or updated document arrives',
+    'Compute chunks',
+    'Write BM25 index (immediate)',
+    'Enqueue vector embed (async)',
+    'Vector index updated when complete',
+  ]}
+  decision="Both indexes current?"
+  yes="serve from hybrid"
+  no="serve from BM25 only, log degradation"
+/>
+
+The BM25 path is always current. The vector path may lag by minutes. If the vector index is behind for a specific document, we serve from BM25 only for queries that hit that document, and we log the degradation so it shows up in the operational dashboard.
+
+This is not elegant. It is honest about the fact that vector indexes have a real refresh cost and that pretending otherwise gets you stale answers.
+
+## When to skip vectors entirely
+
+For some retrieval problems, vectors are not worth the operational weight.
+
+- **The corpus is small enough that BM25 with good chunking and field weighting handles it.** Under a few thousand chunks, the lexical baseline often wins on both quality and operational simplicity.
+- **The query distribution is dominated by exact-match or named-entity queries.** Vectors add cost without recall.
+- **The application can tolerate "no answer found" as a frequent path.** If the system is allowed to refuse on low-confidence retrieval, BM25 alone with a strict recall threshold gets you a long way.
+- **The freshness constraint is tight.** If documents need to be searchable within seconds of being indexed, the vector pipeline becomes the bottleneck.
+
+These are not unusual cases. They are the majority of search problems inside enterprises. The interesting question is not "do we need vectors" but "what do we lose if we do not have them, and can we tolerate that loss."
+
+## What this means for system design
+
+The substantive design takeaway is that retrieval is a pipeline, not a single decision.
+
+The pipeline has at least four layers: indexing, retrieval, fusion or cascade, and consumer assembly. Each layer has its own failure modes. BM25 fails on paraphrase. Vectors fail on exact-match. Fusion fails when score scales drift. Assembly fails when retrieved chunks are good but the generator hallucinates anyway.
+
+A production retrieval system is the engineering choices about how each layer fails and how those failures are made visible.
+
+The vector-first default treats retrieval as if it is one decision: which index. That framing is what produces systems that work well in demos and degrade quietly in production.
+
+The hybrid-first default treats retrieval as a stack with explicit failure modes, where the layers are chosen to compensate for each other's weaknesses, and where the failure cases are observable rather than hidden inside a similarity score.
+
+That second framing is the production one. It is also the more boring one. Both of those things are true at once.

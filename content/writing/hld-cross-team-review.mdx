@@ -1,0 +1,177 @@
+---
+title: Writing an HLD that survives cross-team review
+date: 2026-05-17
+slug: hld-cross-team-review
+excerpt: Most high-level design documents are skimmed, signed, and forgotten. The ones that survive are written for specific readers, not a generic reviewer. Here is what changes when you take that seriously.
+readTime: 10 min read
+tags:
+  - hld
+  - design-docs
+  - cross-team
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+The most undervalued artifact in engineering is the high-level design document.
+
+People treat it as a gate to clear. Write the doc, get the sign-offs, start coding. Six months later, when someone asks why the system makes a specific decision, nobody can find the doc, and the answer is "I think we discussed that in a meeting?"
+
+The few HLDs that survive are different. They get cited in code reviews. They get linked from runbooks. They get pulled up in incident retrospectives. New engineers read them and start contributing within a week instead of three months. They are referenced in interviews, in budgeting conversations, and in regulatory audits.
+
+That difference is not about formatting or template choice. It is about who you are writing for.
+
+This post is about what changes when you treat the HLD as a document that has to survive, and what that looks like in practice. Most of the lessons come from authoring the HLD for ZeroTouch, an internal launch platform at Amazon, as the sole HLD author across three partner teams and three timezones.
+
+## The reader is not a "reviewer"
+
+The mistake almost every HLD makes is writing for the abstract reviewer.
+
+The abstract reviewer is the engineering manager who reads the doc to decide whether to approve it. That person exists. They are not your primary reader.
+
+Your real readers are:
+
+- Each partner team's tech lead, who needs to know what their team is being asked to do
+- The security reviewer, who has a small set of questions and limited patience
+- The operations engineer, who is going to wear the pager when this ships
+- The product owner, who is reading for scope and timeline
+- Future you, who will read it six months from now to remember why a specific decision was made
+
+Each of these readers has a different question. Each of them will spend a different amount of time on the doc. None of them will read it linearly from top to bottom.
+
+A good HLD is structured for non-linear reading. A great HLD is structured so the right reader can find their answer in 90 seconds.
+
+## The 90-second test
+
+Pick the most senior reader you can think of. Imagine they have 90 seconds and an HLD-shaped document on their screen. Can they:
+
+- Tell what is being proposed
+- Tell why it is being proposed now
+- Tell what the major risks are
+- Tell what they specifically need to decide
+
+If yes, the doc is structured. If no, the doc is going to require a meeting to be understood, which means the doc has failed at its job.
+
+The 90-second test is not about reducing length. The ZeroTouch HLD was around 25 pages. It passed the 90-second test because the structure was disciplined: the first three paragraphs answered the four questions above, the next page had the one-diagram architecture, and the rest of the document was depth that readers could opt into based on their role.
+
+The structure that worked, in order:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'First page',
+      items: ['Problem', 'Proposal', 'Why now', 'Key risks', 'Decision asks'],
+    },
+    {
+      title: 'Architecture',
+      items: ['One canonical diagram', 'Component responsibilities', 'Data flow'],
+    },
+    {
+      title: 'Detail',
+      items: ['Alternatives considered', 'Data model', 'API contracts', 'Rollout plan'],
+    },
+    {
+      title: 'Operating',
+      items: ['Observability', 'Failure modes', 'On-call surface', 'Migration risk'],
+    },
+  ]}
+/>
+
+The first section is the only one most readers will finish. Optimize accordingly.
+
+## Sections that earn their keep
+
+Some sections survive every HLD I have seen go well. Some sections cause more damage than they prevent. Both lists are short.
+
+### The sections that earn their keep
+
+**Problem statement.** Not "what we are building." Why does this exist as a problem? Who has this problem right now? What does it cost them today? If the problem statement is "we want to build X," the reader cannot evaluate whether X is the right answer. If the problem statement is "team A spends 12 hours a week reconciling launch state across three systems because nobody owns the canonical view," the reader can argue with the diagnosis instead of the solution.
+
+**Alternatives considered.** This is the single most important section for cross-team work. Three or four alternatives, each with a one-paragraph description and a one-paragraph reason for not picking it. Including the alternatives that were obviously wrong, because the reader was probably going to suggest them. The alternatives section is what tells the reader you did the work and saves them from having to suggest things you already ruled out.
+
+**Rollout plan with explicit phases.** Not "we will roll this out gradually." A list of phases with entry and exit criteria. Phase 1 includes these features for these users with these guardrails. Phase 2 expands to these additional users when Phase 1 has hit these metrics. Phase 3 is the general availability state. Each phase should be safely revertable.
+
+**Failure modes and recovery.** What happens when each major component fails. Not a generic "we will have monitoring." Concrete: "if the policy lookup service is unavailable, the launch console falls back to the cached snapshot from the last successful sync, with a banner indicating the data may be stale. Launches are blocked on cache age more than 4 hours."
+
+**The "what changes for each team" section.** This is the cross-team-specific one. For each partner team, what does this proposal ask of them? What code do they have to write? What permissions do they have to grant? What do they get in return? When written well, this section is the answer to the most common cross-team review question, which is "what is this doing to us."
+
+### The sections that cause damage
+
+**Future work.** Almost every HLD has a "future work" section that lists things the team thought about but is not committing to. This section is usually a trap. It either becomes a backlog of unkept promises or it gets quoted by stakeholders as if it were a roadmap. If you must include it, frame it explicitly as "things we deliberately deferred and the reason."
+
+**Implementation details that change weekly.** The HLD is not the place for "we will use library X with config Y." Those details will be wrong by the time the doc is read in six months. Keep the HLD at the architectural altitude: which component is responsible for which capability, what the major data flows are, what the contracts between components look like. If you need to capture implementation-level decisions, do it in an architectural decision record that lives close to the code.
+
+**Pseudocode in the body.** It is almost always a tell that the author is not sure how the design works at the architectural level. If you need pseudocode to explain the design, the design is not done.
+
+## The one-diagram rule
+
+Every HLD should have exactly one canonical architecture diagram.
+
+Not zero. Not three. Not six.
+
+The temptation is to have one diagram per audience: a high-level one for executives, a detailed one for engineers, a sequence diagram for the security review, a data flow diagram for the product owner. Resist this. Multiple diagrams of the same system always end up inconsistent. Reviewers cite the diagram that supports their preferred argument. The doc reads as if it is describing four different systems.
+
+One diagram. Annotated. Sized to be readable when printed. It is the canonical view. Other diagrams in the doc exist only to add a specific detail (a sequence, a failure mode, a data shape) that does not fit on the canonical view.
+
+This is harder than it sounds. The discipline of fitting the system into one diagram is itself a design exercise. If you cannot draw it, you cannot explain it.
+
+<FlowDiagram
+  nodes={['Producer team A', 'Launch platform', 'Consumer team B']}
+  caption="The one-diagram rule does not mean simple. It means canonical. The annotations carry the complexity."
+/>
+
+## Writing for the absent reader
+
+The hardest reader to write for is the one who is not in the room.
+
+The HLD will outlive the people who reviewed it. Six months from now, a new engineer will join the team and need to understand the system. A year from now, an auditor will ask why a specific design decision was made. Two years from now, the system will need a significant change and the current team will want to understand the reasoning.
+
+Writing for the absent reader means:
+
+**Explain the constraints, not just the answer.** "We chose Step Functions over a custom orchestrator because the team had no headcount for orchestration infrastructure work and the existing AWS support contract covered Step Functions operationally." That sentence answers more future questions than "we chose Step Functions."
+
+**Name the rejected alternatives.** Not just in the alternatives section. In line, where it matters. "We considered exposing this as a tool callable by the agent. We did not, because the tool would require write access to production data and the eval coverage for write paths is too immature."
+
+**Date your assumptions.** "As of 2026-05, the OpenSearch managed offering does not support the rerank API we need; if that changes, the cost of reranking drops materially." Then when someone reads the doc in 2027, they know which assumptions to re-check.
+
+**Link to artifacts.** Not "see the discussion in Slack." Link to the doc, the ticket, the metric dashboard, the postmortem. Slack threads disappear. Linked artifacts survive.
+
+## The cross-team review mechanics
+
+A cross-team HLD has different review mechanics than a single-team one.
+
+The single-team HLD goes through a few people who all share context. The cross-team HLD goes through a chain of reviewers who each have different priors, different priorities, and different reasons to push back. Coordinating that review is part of writing the doc well.
+
+Three things made the ZeroTouch review work.
+
+**One author, multiple consultations.** I wrote the doc. I had structured conversations with each partner team's tech lead before the doc went to formal review, so the doc reflected their constraints. Their feedback during those conversations shaped the alternatives section. By the time the doc went to formal review, no team was reading a proposal that surprised them.
+
+This is the part most cross-team HLDs skip. The doc lands cold in front of partner teams. They are surprised. The surprise becomes objection. The objection becomes a months-long review cycle that erodes momentum.
+
+**A pre-decided decision rubric.** Before the doc went to review, the partner teams' leads agreed on what the doc had to demonstrate to be approved. Not the architecture (that was up to me). The rubric: each team's API surface must remain stable, the rollout must be revertable, the on-call workload must not increase for any team, the eval coverage must be agreed before launch. Four items.
+
+The review then had a clear question to answer: does this doc meet the rubric? Not "is this the best possible design," which is unanswerable. "Does it meet the rubric," which is.
+
+**Explicit dissent capture.** When a reviewer disagreed with a design decision and could not be convinced, the disagreement was captured in the doc itself. "Team B's tech lead prefers approach X for reason Y; the author chose approach Z because of constraint W. Both parties agree to revisit if metric M does not improve within two quarters."
+
+This is uncomfortable to write. It also resolves the disagreement instead of leaving it as a latent objection. Six months later, when metric M came up in a review, the relevant context was right there in the original doc.
+
+## The doc is software
+
+The deepest mental shift is treating the HLD as software.
+
+Software has versions. The HLD should too. Major changes get a new version with a changelog. The previous version is preserved for historical reference. Comments and review history are preserved.
+
+Software is read by future maintainers. The HLD should be readable by people who were not in the original conversation. That is the absent reader principle from earlier.
+
+Software has known users. The HLD has known users. The same engineering rigor that goes into thinking about API consumers should go into thinking about the doc's readers.
+
+Software has failure modes. The HLD has failure modes too. A doc that gets the structure wrong, that fails the 90-second test, that surprises partner teams in formal review, that does not survive past the launch, is a failed artifact. The team that produced it did not just lose time. They burned cross-team trust that is harder to rebuild than the doc itself.
+
+The good news is that this is all learnable. The HLDs that survive are not the product of inherent talent. They are the product of treating the doc as the thing it actually is: the most leveraged piece of writing the team produces, and the one that the team will live with longest.
+
+If a team has 40 hours to spend, dividing it as 30 hours of writing and 10 hours of coding will almost always produce a better outcome than the reverse. The coding is easier when the design is clear. The design becomes clear by writing it down for readers who will actually read it.
+
+That is the whole craft. Most of the rest is execution.
