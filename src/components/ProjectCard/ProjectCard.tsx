@@ -65,7 +65,7 @@ export function ProjectCard({
 
   return (
     <article className={cardClass}>
-      <Link className={styles.cardLink} to={to} aria-label={`${title} — project notes`}>
+      <Link className={styles.cardLink} to={to} aria-label={`${title}: project notes`}>
         <span className="visually-hidden">{title}</span>
       </Link>
 
