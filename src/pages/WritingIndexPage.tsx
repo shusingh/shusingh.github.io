@@ -38,20 +38,24 @@ export function WritingIndexPage() {
               <Link
                 className={`${styles.filter} ${selectedTag ? '' : styles.activeFilter}`}
                 to="/writing"
+                aria-current={selectedTag ? undefined : 'true'}
               >
                 All
               </Link>
-              {tags.map((tag) => (
-                <Link
-                  key={tag}
-                  className={`${styles.filter} ${
-                    selectedTag === tag ? styles.activeFilter : ''
-                  }`}
-                  to={`/writing?tag=${encodeURIComponent(tag)}`}
-                >
-                  #{tag}
-                </Link>
-              ))}
+              {tags.map((tag) => {
+                const isActive = selectedTag === tag;
+                const href = isActive ? '/writing' : `/writing?tag=${encodeURIComponent(tag)}`;
+                return (
+                  <Link
+                    key={tag}
+                    className={`${styles.filter} ${isActive ? styles.activeFilter : ''}`}
+                    to={href}
+                    aria-current={isActive ? 'true' : undefined}
+                  >
+                    #{tag}
+                  </Link>
+                );
+              })}
             </nav>
           ) : null}
         </div>

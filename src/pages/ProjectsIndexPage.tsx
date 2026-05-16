@@ -93,41 +93,53 @@ export function ProjectsIndexPage() {
             </p>
             <div className={styles.filterBlock}>
               <nav className={styles.filters} aria-label="Filter projects by kind">
-                {[
-                  ['all', 'All'],
-                  ['personal', 'Personal'],
-                  ['contribution', 'Open source'],
-                ].map(([kind, label]) => (
-                  <Link
-                    key={kind}
-                    className={`${styles.filter} ${
-                      selectedKind === kind ? styles.activeFilter : ''
-                    }`}
-                    to={kindPath(kind as KindFilter, selectedTag)}
-                  >
-                    {label}
-                  </Link>
-                ))}
+                {(
+                  [
+                    ['all', 'All'],
+                    ['personal', 'Personal'],
+                    ['contribution', 'Open source'],
+                  ] as const
+                ).map(([kind, label]) => {
+                  const isActive = selectedKind === kind;
+                  // Active non-'all' chips toggle back to 'all'. 'all' chip always goes to 'all'.
+                  const targetKind: KindFilter = isActive && kind !== 'all' ? 'all' : kind;
+                  return (
+                    <Link
+                      key={kind}
+                      className={`${styles.filter} ${isActive ? styles.activeFilter : ''}`}
+                      to={kindPath(targetKind, selectedTag)}
+                      aria-current={isActive ? 'true' : undefined}
+                    >
+                      {label}
+                    </Link>
+                  );
+                })}
               </nav>
               {tags.length > 0 ? (
                 <nav className={styles.filters} aria-label="Filter projects by tag">
                   <Link
                     className={`${styles.filter} ${selectedTag ? '' : styles.activeFilter}`}
                     to={kindPath(selectedKind, null)}
+                    aria-current={selectedTag ? undefined : 'true'}
                   >
                     All tags
                   </Link>
-                  {tags.map((tag) => (
-                    <Link
-                      key={tag}
-                      className={`${styles.filter} ${
-                        selectedTag === tag ? styles.activeFilter : ''
-                      }`}
-                      to={tagPath(tag, selectedKind)}
-                    >
-                      #{tag}
-                    </Link>
-                  ))}
+                  {tags.map((tag) => {
+                    const isActive = selectedTag === tag;
+                    const href = isActive
+                      ? kindPath(selectedKind, null)
+                      : tagPath(tag, selectedKind);
+                    return (
+                      <Link
+                        key={tag}
+                        className={`${styles.filter} ${isActive ? styles.activeFilter : ''}`}
+                        to={href}
+                        aria-current={isActive ? 'true' : undefined}
+                      >
+                        #{tag}
+                      </Link>
+                    );
+                  })}
                 </nav>
               ) : null}
             </div>
