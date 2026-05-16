@@ -2,17 +2,19 @@ import { Link } from 'react-router-dom';
 
 import { Hero } from '@/components/Hero/Hero';
 import { NowCard } from '@/components/NowCard/NowCard';
+import { ProjectCard } from '@/components/ProjectCard/ProjectCard';
 import { SEO } from '@/components/SEO/SEO';
 import { Section } from '@/components/Section/Section';
 import { WorkCard } from '@/components/WorkCard/WorkCard';
 import { WritingItem } from '@/components/WritingItem/WritingItem';
-import { formatWritingDate, workEntries, writingEntries } from '@/content/load';
+import { formatWritingDate, projectEntries, workEntries, writingEntries } from '@/content/load';
 
 import styles from './HomePage.module.css';
 
 export function HomePage() {
   const featuredWork = workEntries.filter((entry) => entry.frontmatter.featured).slice(0, 3);
   const [primaryWork, ...secondaryWork] = featuredWork;
+  const featuredProjects = projectEntries.filter((entry) => entry.frontmatter.featured).slice(0, 3);
   const latestWriting = writingEntries.slice(0, 3);
 
   return (
@@ -60,7 +62,41 @@ export function HomePage() {
         </div>
       </Section>
 
-      <Section id="writing" num="02" title="Writing" meta="Notes on production systems">
+      <Section
+        id="projects"
+        num="02"
+        title="Open source & projects"
+        meta="Public work outside work"
+      >
+        <div className={styles.projectsGrid}>
+          {featuredProjects.map(({ frontmatter }) => (
+            <ProjectCard
+              key={frontmatter.slug}
+              to={`/projects/${frontmatter.slug}`}
+              title={frontmatter.title}
+              description={frontmatter.description}
+              kind={frontmatter.kind}
+              year={frontmatter.year}
+              tags={frontmatter.tags}
+              link={frontmatter.link}
+              repo={frontmatter.repo}
+              liveUrl={frontmatter.liveUrl}
+              upstream={frontmatter.upstream}
+              prUrl={frontmatter.prUrl}
+              prNumber={frontmatter.prNumber}
+              status={frontmatter.status}
+              stat={frontmatter.stat}
+            />
+          ))}
+        </div>
+        <div className={styles.sectionFooter}>
+          <Link to="/projects">
+            View all projects <span aria-hidden="true">→</span>
+          </Link>
+        </div>
+      </Section>
+
+      <Section id="writing" num="03" title="Writing" meta="Notes on production systems">
         <div className={styles.writingGrid}>
           {latestWriting.map(({ frontmatter }) => (
             <WritingItem
@@ -80,7 +116,7 @@ export function HomePage() {
         </div>
       </Section>
 
-      <Section id="now" num="03" title="Now" meta="What I'm focused on">
+      <Section id="now" num="04" title="Now" meta="What I'm focused on">
         <NowCard
           headingPrefix="What I'm"
           headingAccent="working on"

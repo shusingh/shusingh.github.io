@@ -1,0 +1,34 @@
+---
+title: "Strands multi-agent experiments"
+slug: "strands-multi-agent"
+description: "A Python workbench for testing planner, critic, and refinement patterns with the Strands Agents SDK."
+kind: "personal"
+link: "https://github.com/shusingh/strands-multi-agent"
+repo: "https://github.com/shusingh/strands-multi-agent"
+tags: ["Python", "Strands Agents", "Multi-agent Systems"]
+year: 2026
+status: "wip"
+featured: false
+order: 5
+diagram:
+  nodes: ["planner", "executor", "critic", "state"]
+  caption: "The emphasis is explicit state between agents, not a long chat transcript pretending to be memory."
+---
+
+## Why I built it
+
+The fastest way to get better at agent architecture is to isolate the patterns. This repo is a place to test small multi-agent loops without the noise of a full product surface.
+
+The focus is on state handoff, role separation, and evaluation. I am less interested in whether an agent can produce a neat answer once. I care about whether the loop is inspectable, repeatable, and resilient when an intermediate step is wrong.
+
+## What it explores
+
+- Planner agents that produce structured work plans instead of prose.
+- Executor agents that operate on a constrained task surface.
+- Critic agents that return structured findings.
+- Shared state that can be inspected between each step.
+- Feedback loops that can be bounded and tested.
+
+## Next improvements
+
+The next useful layer is an evaluation harness. Agent loops are easy to admire subjectively, but hard to improve without repeatable test cases and failure labels.

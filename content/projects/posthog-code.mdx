@@ -1,0 +1,34 @@
+---
+title: "PostHog/code: fix terminal special character rendering"
+slug: "posthog-code"
+description: "Fixed special-character rendering in the embedded terminal: decoded PTY output as UTF-8 before rendering and switched the terminal font stack to the app's code font instead of browser defaults."
+kind: "contribution"
+link: "https://github.com/PostHog/code/pull/2152"
+upstream: "PostHog/code"
+prUrl: "https://github.com/PostHog/code/pull/2152"
+prNumber: 2152
+tags: ["TypeScript", "Terminal", "Open Source"]
+year: 2026
+status: "open"
+featured: false
+order: 9
+---
+
+## What the PR fixes
+
+PostHog's self-driving development platform has an embedded terminal. Special characters (UTF-8 multibyte sequences, common in modern shells and prompts) were rendering incorrectly. The terminal also fell back to the browser's default monospace font instead of the application's own code font, which made the rendering look subtly off compared to the rest of the editor surface.
+
+The fix is in two parts:
+
+1. **Decode PTY output as UTF-8 strings before rendering.** The shell service was passing raw byte buffers through to the renderer, which produced mojibake for any multibyte character. Decoding at the service boundary (`apps/code/src/main/services/shell/service.ts`) means the renderer always receives valid strings.
+2. **Update the terminal font stack** to use the app's existing code font instead of the browser default in `TerminalManager.ts`. Consistent with how the rest of the editor renders code.
+
+Closes issue #1789.
+
+## Why it matters
+
+Terminal rendering is the kind of thing that breaks confidence in a development tool faster than almost anything else. If the prompt is garbled, you assume something is broken. The fix is small, but the user-visible improvement is significant.
+
+## Status
+
+Open as of submission. Includes updated unit tests for the shell service.

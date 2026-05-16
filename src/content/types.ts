@@ -36,6 +36,30 @@ export interface WorkFrontmatter {
   draft?: boolean;
 }
 
+export type ProjectKind = 'personal' | 'contribution';
+export type ProjectStatus = 'active' | 'merged' | 'open' | 'closed' | 'released' | 'wip';
+
+export interface ProjectFrontmatter {
+  title: string;
+  slug: string;
+  description: string;
+  kind: ProjectKind;
+  link: string;
+  repo?: string;
+  liveUrl?: string;
+  upstream?: string;
+  prUrl?: string;
+  prNumber?: number;
+  tags: string[];
+  year: number;
+  status?: ProjectStatus;
+  stat?: WorkStat;
+  diagram?: WorkDiagramSpec;
+  featured?: boolean;
+  order?: number;
+  draft?: boolean;
+}
+
 export interface WritingEntry {
   frontmatter: WritingFrontmatter;
   Component: ComponentType;
@@ -43,6 +67,11 @@ export interface WritingEntry {
 
 export interface WorkEntry {
   frontmatter: WorkFrontmatter;
+  Component: ComponentType;
+}
+
+export interface ProjectEntry {
+  frontmatter: ProjectFrontmatter;
   Component: ComponentType;
 }
 
@@ -148,6 +177,102 @@ export function parseWorkFrontmatter(value: unknown, source: string): WorkFrontm
     description,
     tech,
     date,
+    stat,
+    diagram,
+    featured,
+    order,
+    draft,
+  };
+}
+
+function parseKind(value: unknown, source: string): ProjectKind {
+  if (value === 'personal' || value === 'contribution') return value;
+  throw new Error(`[${source}] frontmatter.kind must be 'personal' or 'contribution'`);
+}
+
+function parseStatus(value: unknown, source: string): ProjectStatus | undefined {
+  if (value === undefined) return undefined;
+  if (
+    value === 'active' ||
+    value === 'merged' ||
+    value === 'open' ||
+    value === 'closed' ||
+    value === 'released' ||
+    value === 'wip'
+  ) {
+    return value;
+  }
+  throw new Error(
+    `[${source}] frontmatter.status must be one of 'active' | 'merged' | 'open' | 'closed' | 'released' | 'wip'`
+  );
+}
+
+export function parseProjectFrontmatter(value: unknown, source: string): ProjectFrontmatter {
+  if (!isObject(value)) {
+    throw new Error(`[${source}] frontmatter must be an object`);
+  }
+  const title = requireString(value.title, source, 'title');
+  const slug = requireString(value.slug, source, 'slug');
+  const description = requireString(value.description, source, 'description');
+  const link = requireString(value.link, source, 'link');
+  const kind = parseKind(value.kind, source);
+  const repo = value.repo;
+  if (repo !== undefined && typeof repo !== 'string') {
+    throw new Error(`[${source}] frontmatter.repo must be a string`);
+  }
+  const liveUrl = value.liveUrl;
+  if (liveUrl !== undefined && typeof liveUrl !== 'string') {
+    throw new Error(`[${source}] frontmatter.liveUrl must be a string`);
+  }
+  const upstream = value.upstream;
+  if (upstream !== undefined && typeof upstream !== 'string') {
+    throw new Error(`[${source}] frontmatter.upstream must be a string`);
+  }
+  const prUrl = value.prUrl;
+  if (prUrl !== undefined && typeof prUrl !== 'string') {
+    throw new Error(`[${source}] frontmatter.prUrl must be a string`);
+  }
+  const prNumber = value.prNumber;
+  if (prNumber !== undefined && typeof prNumber !== 'number') {
+    throw new Error(`[${source}] frontmatter.prNumber must be a number`);
+  }
+  const tags = value.tags === undefined ? [] : value.tags;
+  if (!isStringArray(tags)) {
+    throw new Error(`[${source}] frontmatter.tags must be a string array`);
+  }
+  const year = value.year;
+  if (typeof year !== 'number' || !Number.isFinite(year)) {
+    throw new Error(`[${source}] frontmatter.year must be a number`);
+  }
+  const status = parseStatus(value.status, source);
+  const stat = parseStat(value.stat, source);
+  const diagram = parseDiagram(value.diagram, source);
+  const featured = value.featured;
+  if (featured !== undefined && typeof featured !== 'boolean') {
+    throw new Error(`[${source}] frontmatter.featured must be a boolean`);
+  }
+  const order = value.order;
+  if (order !== undefined && typeof order !== 'number') {
+    throw new Error(`[${source}] frontmatter.order must be a number`);
+  }
+  const draft = value.draft;
+  if (draft !== undefined && typeof draft !== 'boolean') {
+    throw new Error(`[${source}] frontmatter.draft must be a boolean`);
+  }
+  return {
+    title,
+    slug,
+    description,
+    kind,
+    link,
+    repo,
+    liveUrl,
+    upstream,
+    prUrl,
+    prNumber,
+    tags,
+    year,
+    status,
     stat,
     diagram,
     featured,

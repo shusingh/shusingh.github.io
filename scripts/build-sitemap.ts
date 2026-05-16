@@ -2,7 +2,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { SITE_ORIGIN } from '../src/lib/site';
-import { distDir, loadWorkFrontmatter, loadWritingFrontmatter } from './lib/content';
+import {
+  distDir,
+  loadProjectFrontmatter,
+  loadWorkFrontmatter,
+  loadWritingFrontmatter,
+} from './lib/content';
 
 interface SitemapEntry {
   loc: string;
@@ -26,12 +31,14 @@ function entryXml(entry: SitemapEntry): string {
 export function buildSitemap(): void {
   const writing = loadWritingFrontmatter();
   const work = loadWorkFrontmatter();
+  const projects = loadProjectFrontmatter();
 
   const today = new Date().toISOString().split('T')[0];
 
   const staticPages: SitemapEntry[] = [
     { loc: `${SITE_ORIGIN}/`, lastmod: today, changefreq: 'weekly', priority: 1.0 },
     { loc: `${SITE_ORIGIN}/work`, lastmod: today, changefreq: 'monthly', priority: 0.8 },
+    { loc: `${SITE_ORIGIN}/projects`, lastmod: today, changefreq: 'monthly', priority: 0.7 },
     { loc: `${SITE_ORIGIN}/writing`, lastmod: today, changefreq: 'weekly', priority: 0.8 },
     { loc: `${SITE_ORIGIN}/about`, lastmod: today, changefreq: 'yearly', priority: 0.5 },
     { loc: `${SITE_ORIGIN}/now`, lastmod: today, changefreq: 'monthly', priority: 0.6 },
@@ -51,7 +58,14 @@ export function buildSitemap(): void {
     priority: 0.6,
   }));
 
-  const entries = [...staticPages, ...workPages, ...writingPages];
+  const projectPages: SitemapEntry[] = projects.map((fm) => ({
+    loc: `${SITE_ORIGIN}/projects/${fm.slug}`,
+    lastmod: today,
+    changefreq: 'monthly',
+    priority: 0.5,
+  }));
+
+  const entries = [...staticPages, ...workPages, ...projectPages, ...writingPages];
 
   const xml = [
     '<?xml version="1.0" encoding="UTF-8"?>',

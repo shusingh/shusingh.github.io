@@ -14,6 +14,12 @@
   gap: 4px;
 }
 
+.projectsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
 .sectionFooter {
   margin-top: 40px;
   display: flex;
@@ -41,6 +47,10 @@
 
 @media (max-width: 900px) {
   .workRow {
+    grid-template-columns: 1fr;
+  }
+
+  .projectsGrid {
     grid-template-columns: 1fr;
   }
 }

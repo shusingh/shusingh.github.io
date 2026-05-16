@@ -5,7 +5,12 @@ import { Resvg } from '@resvg/resvg-js';
 import React from 'react';
 import satori from 'satori';
 
-import { distDir, loadWorkFrontmatter, loadWritingFrontmatter } from './lib/content';
+import {
+  distDir,
+  loadProjectFrontmatter,
+  loadWorkFrontmatter,
+  loadWritingFrontmatter,
+} from './lib/content';
 import { loadFonts, type LoadedFont } from './lib/fonts';
 
 const WIDTH = 1200;
@@ -58,15 +63,7 @@ function frame(eyebrow: string, title: string, footer: string) {
           color: TOKENS.textSecondary,
         }}
       >
-        <div
-          style={{
-            width: 14,
-            height: 14,
-            borderRadius: 999,
-            backgroundColor: TOKENS.accent,
-          }}
-        />
-          <span style={{ color: TOKENS.textPrimary, fontWeight: 500 }}>shubham.dev</span>
+        <span style={{ color: TOKENS.textPrimary, fontWeight: 500 }}>Shubham Singh</span>
       </div>
 
       <div
@@ -159,10 +156,7 @@ function defaultFrame() {
           color: TOKENS.textSecondary,
         }}
       >
-        <div
-          style={{ width: 16, height: 16, borderRadius: 999, backgroundColor: TOKENS.accent }}
-        />
-        <span style={{ color: TOKENS.textPrimary, fontWeight: 500 }}>shubham.dev</span>
+        <span style={{ color: TOKENS.textPrimary, fontWeight: 500 }}>Shubham Singh</span>
       </div>
       <div
         style={{
@@ -249,5 +243,18 @@ export async function buildOg(): Promise<void> {
     fs.writeFileSync(path.join(ogDir, `work-${fm.slug}.png`), png);
   }
 
-  console.log(`[og] wrote ${1 + writing.length + work.length} images`);
+  const projects = loadProjectFrontmatter();
+  for (const fm of projects) {
+    const png = await renderToPng(
+      frame(
+        fm.kind === 'contribution' ? 'Open source' : 'Project',
+        fm.title,
+        fm.status ? `${fm.status} · ${fm.year}` : `${fm.year}`
+      ),
+      fonts
+    );
+    fs.writeFileSync(path.join(ogDir, `project-${fm.slug}.png`), png);
+  }
+
+  console.log(`[og] wrote ${1 + writing.length + work.length + projects.length} images`);
 }
