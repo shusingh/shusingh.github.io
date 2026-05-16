@@ -67,9 +67,10 @@ export function ProjectsIndexPage() {
     return kindMatches && tagMatches;
   });
   const featuredEntries = filteredEntries.filter(({ frontmatter }) => frontmatter.featured);
-  const restEntries = filteredEntries.filter(({ frontmatter }) => !frontmatter.featured);
-  const restPersonal = restEntries.filter(({ frontmatter }) => frontmatter.kind === 'personal');
-  const restContributions = restEntries.filter(
+  const personalEntries = filteredEntries.filter(
+    ({ frontmatter }) => frontmatter.kind === 'personal'
+  );
+  const contributionEntries = filteredEntries.filter(
     ({ frontmatter }) => frontmatter.kind === 'contribution'
   );
 
@@ -151,32 +152,32 @@ export function ProjectsIndexPage() {
                 </section>
               ) : null}
 
-              {restPersonal.length > 0 ? (
+              {personalEntries.length > 0 ? (
                 <section className={styles.subSection} aria-labelledby="projects-title">
                   <div className={styles.subSectionHeader}>
                     <h2 id="projects-title">Projects</h2>
                     <span>
-                      {restPersonal.length} public{' '}
-                      {restPersonal.length === 1 ? 'repo' : 'repos'}
+                      {personalEntries.length} public{' '}
+                      {personalEntries.length === 1 ? 'repo' : 'repos'}
                     </span>
                   </div>
                   <div className={styles.compactGrid}>
-                    {restPersonal.map((entry) => renderCard(entry, true))}
+                    {personalEntries.map((entry) => renderCard(entry, true))}
                   </div>
                 </section>
               ) : null}
 
-              {restContributions.length > 0 ? (
+              {contributionEntries.length > 0 ? (
                 <section className={styles.subSection} aria-labelledby="open-source-title">
                   <div className={styles.subSectionHeader}>
                     <h2 id="open-source-title">Open source</h2>
                     <span>
-                      {restContributions.length}{' '}
-                      {restContributions.length === 1 ? 'open PR' : 'open PRs'}
+                      {contributionEntries.length}{' '}
+                      {contributionEntries.length === 1 ? 'open PR' : 'open PRs'}
                     </span>
                   </div>
                   <div className={styles.compactGrid}>
-                    {restContributions.map((entry) => renderCard(entry, true))}
+                    {contributionEntries.map((entry) => renderCard(entry, true))}
                   </div>
                 </section>
               ) : null}
