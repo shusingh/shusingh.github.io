@@ -1,0 +1,37 @@
+---
+title: "Giskard: JSON validity check"
+slug: "giskard-oss"
+description: "Added a JsonValid check to Giskard's check suite: validates whether values are valid JSON strings or JSON-compatible objects, with optional JSON Schema validation."
+kind: "contribution"
+link: "https://github.com/Giskard-AI/giskard-oss/pull/2460"
+upstream: "Giskard-AI/giskard-oss"
+prUrl: "https://github.com/Giskard-AI/giskard-oss/pull/2460"
+prNumber: 2460
+tags: ["Python", "Validation", "Open Source"]
+year: 2026
+status: "open"
+featured: false
+order: 10
+---
+
+## What the PR adds
+
+Giskard's check suite gives ML/AI teams a way to declaratively validate model outputs and pipeline data. The library had checks for common shapes (numerics, strings, schemas), but JSON output validation was a gap. With LLM outputs increasingly expected to be parseable JSON (tool calls, structured responses, agent state), this was worth closing.
+
+This PR adds a `JsonValid` check that:
+
+- Accepts either a raw JSON string or an already-parsed JSON-compatible object
+- Parses and validates JSON syntactically
+- Optionally validates the parsed value against a provided **JSON Schema** (via `jsonschema>=4.23.0`)
+- Distinguishes **schema configuration errors** (malformed schema definition) from **validation failures** (data does not match a valid schema), so operators get actionable error messages
+- Ships with test coverage for both the syntactic-only and schema-validated paths
+
+## Why it matters
+
+LLM-driven systems lean heavily on structured output. The line between "the model returned bad JSON" and "the model returned JSON that does not match the contract" is meaningful, and conflating them makes debugging slow. Having a first-class JSON check inside Giskard means teams can wire this into pipelines without rolling their own validator.
+
+The PR closes issue #2362 and incorporates code-review feedback around error message clarity and dependency handling.
+
+## Status
+
+Open as of submission. Includes new tests and a scoped dependency addition (`jsonschema` constrained to `>=4.23.0,<5`).
