@@ -16,8 +16,8 @@ const entries: NowEntry[] = [
     label: 'Building',
     value: (
       <p>
-        A multi-agent refinement system for compliance policy generation at Amazon: planner /
-        drafter / critic / refiner on Bedrock AgentCore with stateful human edits.
+        Production AI surfaces for compliance work at Amazon: citation-grounded Q&amp;A,
+        permission-aware retrieval, and operator workflows for control launch and review.
       </p>
     ),
   },

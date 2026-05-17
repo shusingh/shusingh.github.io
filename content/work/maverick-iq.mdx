@@ -132,7 +132,7 @@ A few honest things.
 
 ## What I would do differently
 
-**Build the eval set before building the agent.** Same lesson as the policy generation system. The first version of MaverickIQ shipped with subjective spot-checks for quality. A structured eval set with known-good Q&A pairs would have caught a class of regressions earlier and given the team a more defensible way to talk about quality changes with stakeholders.
+**Build the eval set before building the agent.** The first version of MaverickIQ shipped with subjective spot-checks for quality. A structured eval set with known-good Q&A pairs would have caught a class of regressions earlier and given the team a more defensible way to talk about quality changes with stakeholders.
 
 **Invest in query planning and re-ranking earlier.** The router and retrieval tools work, but quality depends heavily on mapping the user's natural-language question to the right filters and source plane. A learned re-ranker for documentation relevance and a stronger query planner for control-index filters would meaningfully improve recall@5. Recall is the actual bottleneck.
 
