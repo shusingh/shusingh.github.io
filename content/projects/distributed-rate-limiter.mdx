@@ -9,25 +9,61 @@ tags: ["Go", "Redis", "Distributed Systems"]
 year: 2026
 status: "released"
 featured: false
-order: 4
+order: 5
 diagram:
   nodes: ["request", "Lua script", "Redis ZSET", "allow or throttle"]
   caption: "Atomic Redis operations keep each decision consistent even when multiple app instances are handling traffic."
 ---
 
-## Why I built it
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-Rate limiting is one of those small infrastructure problems that exposes a lot of distributed-systems thinking. You need fairness, atomicity, cleanup, and predictable failure behavior. You also need the implementation to stay simple enough that an on-call engineer can reason about it quickly.
+## System intent
 
-This project implements a sliding-window limiter backed by Redis sorted sets. Each request is evaluated against a time window, stale entries are trimmed, and the allow-or-throttle decision happens atomically.
+This project implements a distributed sliding-window rate limiter for services that run on multiple app instances. The system needs to make the same decision no matter which instance receives a request, so local process memory is not enough.
 
-## Design notes
+The design goal is simple: given a subject key, a limit, and a time window, return an allow-or-throttle decision that is atomic, predictable, and cheap to operate.
 
-- Redis sorted sets store request timestamps per key.
-- A Lua script keeps trim, count, insert, and TTL update inside one atomic operation.
-- The algorithm avoids local process memory so multiple service instances share the same limit state.
-- The API shape is intentionally boring: give it a key, a limit, and a window. Get back a decision.
+<FlowDiagram
+  nodes={['request key', 'trim old entries', 'count window', 'insert timestamp', 'return decision']}
+  caption="The limiter performs the full decision path inside Redis so concurrent callers cannot race each other."
+/>
 
-## What it practices
+## Requirements
 
-The repo is small, but the design maps directly to real backend work: shared state, concurrent callers, deterministic decisions, and operational clarity.
+- Decisions must be shared across app instances.
+- The trim, count, insert, and TTL update must be atomic.
+- Old request records should expire without a separate cleanup worker.
+- The caller should receive a simple decision and enough metadata to set headers.
+- The algorithm should stay understandable for an on-call engineer.
+
+## High-level design
+
+<LayerDiagram
+  groups={[
+    { title: 'Caller', items: ['endpoint key', 'tenant or user ID', 'limit config'] },
+    { title: 'Limiter', items: ['Lua script', 'sliding window', 'decision metadata'] },
+    { title: 'Redis', items: ['sorted set', 'timestamp scores', 'window TTL'] },
+  ]}
+  caption="The Go layer owns API ergonomics. Redis owns shared state. Lua owns atomicity."
+/>
+
+Each rate-limit bucket is represented as a Redis sorted set. Request timestamps are both the score and the member value. On each request, the Lua script removes expired entries, counts the remaining entries, inserts the current timestamp if capacity exists, updates TTL, and returns the decision.
+
+## Design decisions
+
+**Use a sliding window instead of fixed windows.** Fixed windows allow bursts at boundaries. Sliding windows provide smoother behavior and are closer to what users expect from rate limits.
+
+**Use Lua for atomicity.** Multiple app instances can hit the same key concurrently. Doing trim, count, and insert as separate Redis calls creates race conditions. Lua keeps the whole decision in one operation.
+
+**Keep the public API boring.** Most rate-limit complexity should stay behind a small interface. Application code should not need to know the Redis data structure.
+
+## Failure modes
+
+If Redis is unavailable, the service has to choose fail-open or fail-closed per endpoint. A read-heavy endpoint might fail open with degraded headers. A write-heavy or expensive endpoint should probably fail closed. The project keeps that policy outside the core algorithm so callers can make the right product choice.
+
+## What I would improve
+
+The next production step would be a small middleware package with standard `X-RateLimit-*` headers, metrics for blocked requests, and a fallback strategy that can be configured per route.

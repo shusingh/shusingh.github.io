@@ -14,22 +14,52 @@ featured: true
 order: 3
 ---
 
-## What the PR adds
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-MarkItDown's whole job is turning messy enterprise documents into clean Markdown so downstream RAG systems and agents have something usable to work with. Emails were a gap: the library could handle PDFs, Office docs, screenshots, and HTML, but `.eml` files were unsupported.
+## Change intent
 
-This PR adds an EML converter that:
+MarkItDown converts messy enterprise documents into Markdown for search, RAG, and agent workflows. Email was a meaningful gap. Teams often have important source material trapped in `.eml` files, and ignoring that format cuts retrieval systems off from a large part of the real corpus.
 
-- Parses RFC 822 / MIME structure from the email envelope
-- Extracts headers (From, To, Subject, Date) into a structured preamble
-- Walks the multipart body, preferring `text/plain` and falling back to `text/html`
-- Surfaces attachment metadata (filename, content type, size) in the converted output
-- Ships with test fixtures covering single-part, multipart, and HTML-only messages
+This PR adds an EML converter that extracts message headers, body content, and attachment metadata into Markdown.
 
-## Why it matters
+<FlowDiagram
+  nodes={['.eml file', 'MIME parser', 'body selection', 'attachment metadata', 'Markdown']}
+  caption="The converter turns an email envelope into Markdown while preserving enough structure for downstream retrieval."
+/>
 
-Email is one of the most common "real production data" formats. If your retrieval system cannot ingest it, you cut yourself off from a large chunk of the corpus most teams already have. The fix is not conceptually hard, but the implementation has to handle every weird shape an old email client can produce.
+## Requirements
+
+- Parse RFC 822 / MIME email files.
+- Preserve useful headers such as From, To, Subject, and Date.
+- Prefer `text/plain` body content when available.
+- Fall back to HTML content when plain text is absent.
+- Surface attachment metadata without pretending attachments were fully converted.
+- Add fixtures for single-part, multipart, and HTML-only messages.
+
+## High-level design
+
+<LayerDiagram
+  groups={[
+    { title: 'Input', items: ['RFC 822 envelope', 'MIME parts', 'attachments'] },
+    { title: 'Converter', items: ['header extraction', 'body selection', 'metadata rendering'] },
+    { title: 'Output', items: ['Markdown preamble', 'body text', 'attachment list'] },
+  ]}
+  caption="The converter follows the existing MarkItDown pattern: isolate format-specific parsing and return clean Markdown."
+/>
+
+The implementation treats the email as a structured document rather than a blob of text. Headers become a readable preamble. Body selection follows a deterministic preference order. Attachment metadata is included so downstream systems know what was present even if they do not ingest the attachment content yet.
+
+## Design decisions
+
+**Do not hide multipart complexity.** Email clients produce many shapes. The converter needs predictable behavior for single-part, multipart, and HTML-only messages.
+
+**Preserve metadata for retrieval.** Sender, recipient, subject, and date can matter as much as the body text when an email becomes part of a knowledge corpus.
+
+**Report attachments as metadata.** A converter should not silently discard attachments. Listing them gives downstream ingestion systems a hook for later processing.
 
 ## Status
 
-Open as of submission. The PR includes new test coverage and follows the existing converter patterns in the codebase, so the integration surface should stay small.
+Open as of submission. The PR includes converter fixtures and follows the existing library extension pattern so the integration surface stays small.

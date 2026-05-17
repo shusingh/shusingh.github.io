@@ -9,22 +9,54 @@ tags: ["Rust", "Actix Web", "REST APIs"]
 year: 2026
 status: "released"
 featured: false
-order: 7
+order: 8
 ---
 
-## Why I built it
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-I use Java and Python heavily at work, and Go often on side projects. Rust is useful for stretching a different part of the backend brain: ownership, explicit error handling, and compile-time pressure toward cleaner boundaries.
+## System intent
 
-This is intentionally a small API. The value is in practicing clean endpoint design and typed data flow without hiding behind framework magic.
+This is a deliberately small REST API for blog-style resources. The project exists to practice Rust backend ergonomics: ownership-aware request handling, typed data models, explicit errors, and a clean route/service boundary.
 
-## What it covers
+The scope is intentionally constrained. A small API makes it easier to focus on the design pressure Rust applies to backend code.
 
-- REST endpoints for blog-post style resources.
-- Actix Web routing and request handling.
-- Rust data models for request and response shapes.
-- A compact service layout that is easy to extend.
+<LayerDiagram
+  groups={[
+    { title: 'HTTP layer', items: ['Actix routes', 'request extraction', 'response mapping'] },
+    { title: 'Domain layer', items: ['post model', 'validation rules', 'error types'] },
+    { title: 'Storage boundary', items: ['repository interface', 'future persistence', 'test doubles'] },
+  ]}
+  caption="The useful design exercise is separating HTTP concerns from the post domain model."
+/>
 
-## What I would add next
+## Requirements
 
-The next useful additions would be persistence, structured logging, and integration tests around the API contract.
+- Expose predictable REST endpoints for post resources.
+- Keep request and response types explicit.
+- Return useful errors without panics.
+- Make storage replaceable without rewriting route handlers.
+- Keep the code small enough that the service shape is easy to inspect.
+
+## High-level design
+
+<FlowDiagram
+  nodes={['HTTP request', 'route handler', 'validate payload', 'domain operation', 'HTTP response']}
+  caption="The route handler should translate between HTTP and domain types, not own the business logic."
+/>
+
+The API layer handles routing and extraction. Domain types describe posts and validation. Error types map cleanly into HTTP responses. Persistence is intentionally simple in the first version, but the boundary is shaped so a database can be added later.
+
+## Design decisions
+
+**Keep errors explicit.** Rust makes it cheap to model expected failure paths. That is useful for APIs because client-facing failures should be deliberate.
+
+**Avoid framework magic.** Actix provides the web layer, but the core resource model stays plain and easy to test.
+
+**Design for future persistence.** Even when the first version is small, the API should not bake storage details into every handler.
+
+## What I would improve
+
+The next step would be Postgres persistence, migrations, structured logging, and integration tests that lock down the API contract.
