@@ -8,27 +8,58 @@ repo: "https://github.com/shusingh/rag-platform"
 tags: ["Go", "OpenSearch", "Postgres", "Redis", "RAG"]
 year: 2026
 status: "wip"
-featured: true
-order: 1
+featured: false
+order: 4
 diagram:
   nodes: ["API", "retrieval", "ranking", "citations"]
-  caption: "A side project for practicing the parts of RAG that usually decide whether the system is useful: retrieval boundaries, metadata, caching, and traceability."
+  caption: "A Go-based retrieval workbench focused on service boundaries, metadata, caching, and citation assembly."
 ---
 
-## Why I built it
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-Most RAG examples stop at "embed a document and ask a question." The interesting work starts after that: indexing strategy, metadata filters, citation assembly, cache invalidation, query traces, and the path from a user question to a source-backed answer.
+## System intent
 
-This repo is my workbench for those production concerns. The goal is not to build a polished SaaS product. The goal is to keep sharpening the systems instincts behind retrieval-heavy AI products.
+This project is the smaller Go-based sibling of AgentOps RAG. Its purpose is to practice retrieval infrastructure without the full agent runtime: service boundaries, query handling, OpenSearch integration, metadata persistence, cache paths, and citation assembly.
 
-## What it explores
+It is useful as an HLD exercise because it keeps the scope tight. The system does not try to be a complete AI product. It focuses on the retrieval platform underneath one.
 
-- Go service boundaries around ingestion, retrieval, and answer assembly.
-- OpenSearch for hybrid retrieval and metadata-aware search.
-- Postgres for durable records and query trace state.
-- Redis for cache paths where repeated questions should not pay the full retrieval cost every time.
-- Citation-first response shape, where the system treats evidence as part of the output instead of a footnote.
+<LayerDiagram
+  groups={[
+    { title: 'Serving', items: ['Go API', 'typed handlers', 'request validation'] },
+    { title: 'Retrieval', items: ['OpenSearch', 'metadata filters', 'ranking boundary'] },
+    { title: 'State', items: ['Postgres records', 'Redis cache', 'citation traces'] },
+  ]}
+  caption="The architecture separates serving, retrieval, and state so the retrieval path can evolve without leaking search details into API clients."
+/>
 
-## Next improvements
+## Requirements
 
-The pieces I would keep pushing are query evaluation, reranking, and observability. A retrieval platform is only as good as the evidence it retrieves, and the only honest way to improve that is to make failures visible.
+- Keep the external API typed and boring.
+- Preserve enough metadata to explain why a source was returned.
+- Support exact and semantic retrieval paths later.
+- Cache repeated query paths without hiding freshness rules.
+- Return citations as part of the response contract, not a UI afterthought.
+
+## High-level design
+
+<FlowDiagram
+  nodes={['query', 'normalize', 'retrieve', 'rank', 'assemble citations', 'respond']}
+  caption="The response shape is built around evidence first. Answer generation can sit downstream, but retrieval remains its own service boundary."
+/>
+
+The Go API owns request validation and response shape. OpenSearch owns search and filtering. Postgres stores durable document and query records. Redis is reserved for hot-path cache decisions where repeated queries should not pay full retrieval cost.
+
+## Design decisions
+
+**Citation assembly is a backend concern.** The frontend should not guess which source supports which claim. The API should return citation metadata in a shape that can be rendered directly.
+
+**Metadata is first-class.** Search quality depends on more than embeddings. Document type, tenant, source, version, created time, and indexing state all need a place in the data model.
+
+**Caching needs invalidation rules.** RAG cache entries are dangerous when the corpus changes. This repo treats cache keys as coupled to index version and query normalization.
+
+## Tradeoffs
+
+This project intentionally does less than AgentOps RAG. It is not trying to show auth, DLQ replay, evals, and traces end to end. It is a focused retrieval-platform workbench. The main improvement would be adding an eval set for retrieval quality, because recall failures are the ceiling for any downstream agent.

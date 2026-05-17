@@ -18,48 +18,82 @@ diagram:
   caption: "The project treats RAG as an operational system, not a chatbot demo: auth, ingestion, retrieval, critique, refusal, and observability are first-class paths."
 ---
 
-## Why I built it
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-Most RAG demos prove that retrieval can work once. AgentOps RAG asks a more useful question: what does the system look like when retrieval fails, ingestion breaks, tenants must be isolated, answers need citations, and expensive endpoints need operational controls?
+## System intent
 
-The goal was to build a portfolio-grade AI infrastructure project that shows the production surface area around agentic retrieval. It is intentionally not a chatbot-first demo. The useful part is the discipline around the agent.
+AgentOps RAG is a production-style retrieval platform for agentic applications. The point is not to prove that a model can answer questions from documents. The point is to show the infrastructure an engineering team needs before trusting retrieval in a multi-tenant product: tenant boundaries, async ingestion, replayable failures, grounded answers, evals, traces, rate limits, and benchmarks.
 
-## What it includes
+The repo is intentionally explicit. It avoids hiding the runtime behind a large agent framework so the important system boundaries stay visible.
 
-- **Tenant isolation** with JWT-derived tenant IDs at API and retrieval boundaries.
-- **Async ingestion** through Redis Streams, with worker processing and DLQ replay.
-- **Hybrid retrieval** using BM25 and vector search in OpenSearch.
-- **Explicit agent runtime** with planner, retriever, critic, and finalizer stages.
-- **Citation-grounded answers** with evidence-based refusals when support is missing.
-- **Eval harness** with JSONL cases and generated reports.
-- **OpenTelemetry traces** across auth, ingestion, retrieval, model calls, critic checks, and finalization.
-- **Redis Lua rate limiting** for tenant and endpoint-level control.
-- **Benchmark reports** for throughput, latency, failures, refusals, and rate-limit blocks.
+<LayerDiagram
+  groups={[
+    { title: 'API boundary', items: ['FastAPI', 'JWT tenant claims', 'endpoint rate limits'] },
+    { title: 'Data plane', items: ['Redis Streams', 'Postgres metadata', 'OpenSearch BM25 + vector'] },
+    { title: 'Agent plane', items: ['planner', 'retriever tool', 'coverage critic', 'finalizer'] },
+  ]}
+  caption="The project separates request handling, ingestion/storage, and agent execution so each layer has a clear owner and failure model."
+/>
 
-## Architecture
+## Requirements
 
-The runtime is explicit Python orchestration rather than a framework-hidden graph. That makes the infrastructure decisions visible:
+The system is designed around five non-negotiable requirements:
 
-1. The planner decides whether to retrieve, refuse, or ask for clarification.
-2. The retriever runs tenant-filtered hybrid search.
-3. The critic checks citation coverage and answer support.
-4. The finalizer returns either a grounded answer or a refusal.
+- A tenant must never read another tenant's documents or replay another tenant's failed jobs.
+- Ingestion failures must be inspectable and replayable without losing the original request context.
+- Answers must be citation-grounded, or the system should refuse instead of inventing support.
+- Operators need traces and eval reports, not just server logs.
+- Expensive endpoints need rate limits with explicit degraded behavior when Redis is unavailable.
 
-The ingestion path is similarly explicit. Uploads become queued jobs, workers chunk and index content, metadata lands in Postgres, and failures go to a DLQ with tenant ID, document ID, stage, and retry count.
+These requirements shape the architecture more than the model choice does.
 
-## Why it matters
+## High-level design
 
-This project is valuable because it demonstrates the parts of AI systems that senior engineering teams actually care about:
+<FlowDiagram
+  nodes={[
+    'upload document',
+    'enqueue ingestion job',
+    'chunk + index',
+    'ask question',
+    'retrieve evidence',
+    'critic validates',
+    'answer or refuse',
+  ]}
+  caption="Documents move through an async ingestion path. Questions move through a bounded agent path with citation checks before finalization."
+/>
 
-- Can the system fail visibly instead of returning unsupported answers?
-- Can a tenant ever retrieve another tenant's documents?
-- Can an operator replay failed ingestion jobs without rerunning everything?
-- Can evals catch regressions before they hit users?
-- Can traces explain why an answer was refused or why retrieval missed?
-- Can rate limits degrade differently for read-heavy and write-heavy paths?
+The write path starts at `POST /documents`. The API validates the JWT, derives tenant ID from claims, stores metadata in Postgres, and enqueues an ingestion job in Redis Streams. The worker chunks the document, indexes chunks into OpenSearch, updates document state, and writes failed jobs to a DLQ with tenant ID, document ID, stage, and retry count.
 
-Those are the questions that separate a useful AI platform from a demo that looks good on a laptop.
+The read path starts at `POST /ask`. The endpoint applies tenant-scoped rate limits, runs the planner, executes tenant-filtered retrieval, sends retrieved evidence to the critic, and finalizes either a grounded answer or a refusal. Every answer includes a trace ID.
 
-## What I would do next
+## Design decisions
 
-The natural next step is to harden it like a real deployment: managed Postgres, Redis, and OpenSearch; Alembic migrations; OTLP trace export; retrieval drift monitoring; offline eval gates in CI; worker autoscaling; and stronger audit logs around tenant onboarding and replay actions.
+**Tenant ID comes from JWT claims, not request bodies.** This prevents a client from asking for another tenant by changing payload fields. The same rule applies to document listing, retrieval, and DLQ replay.
+
+**Retrieval is hybrid by default.** BM25 handles exact names, IDs, and policy terms. Vector search handles semantic similarity. The runtime fuses the evidence instead of trusting one retrieval mode for every question.
+
+**Refusal is a product behavior.** If the critic cannot verify citation coverage, the finalizer returns a refusal. That is preferable to a confident answer with weak support.
+
+**DLQ replay is scoped.** Failed ingestion jobs keep tenant and document metadata, so an operator can replay the right work without rerunning the whole corpus.
+
+## Operational behavior
+
+<LoopDiagram
+  steps={['ingest', 'index', 'ask', 'evaluate', 'benchmark']}
+  decision="Regression?"
+  yes="inspect trace, DLQ, and eval report"
+  no="keep baseline as release signal"
+  caption="The repo treats evaluation and observability as part of the build, not as a later dashboard project."
+/>
+
+The eval harness reports answer containment, citation precision, citation recall, refusal accuracy, unsupported claim rate, and latency. Benchmarks report throughput, p50, p95, failure rate, refusal count, and rate-limit blocks. Traces cover HTTP requests, auth validation, ingestion enqueue, worker jobs, chunking, indexing, retrieval, score fusion, model calls, critic decisions, and finalization.
+
+## Tradeoffs
+
+The design favors clarity over framework leverage. A framework could reduce boilerplate, but it would also hide the agent boundary. For a portfolio project, explicit orchestration is a feature because it shows how the runtime behaves under failure.
+
+The next production hardening steps are managed Postgres, Redis, and OpenSearch; Alembic migrations; OTLP trace export; CI eval gates; worker autoscaling; retrieval drift monitoring; and audit logs around tenant onboarding and replay actions.

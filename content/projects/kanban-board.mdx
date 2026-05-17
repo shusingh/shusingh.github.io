@@ -10,22 +10,54 @@ tags: ["React", "TypeScript", "Vite"]
 year: 2024
 status: "released"
 featured: false
-order: 6
+order: 7
 ---
 
-## What it is
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-A small but deliberate Kanban board: columns, draggable cards, a persistent state model, and a component architecture that stays clean as the feature set grows.
+## System intent
 
-The point was not to build a Trello competitor. The point was to practice the parts of frontend that get lazy when you only ever build forms: drag-and-drop ergonomics, optimistic state updates, and component boundaries that survive when a feature requires three components to talk to each other.
+This is a compact Kanban application focused on frontend architecture rather than feature count. The goal is to model board state cleanly enough that drag-and-drop behavior, persistence, and responsive rendering do not turn into tangled component state.
 
-## What it covers
+It is not trying to compete with Trello. It is a focused UI systems project: state transitions, drag ergonomics, component boundaries, and local persistence.
 
-- Drag-and-drop column reordering and card movement
-- Local persistence so the board state survives a refresh
-- Typed state model with explicit transitions, no `any`
-- Responsive layout that works on tablet sizes without separate code paths
+<LayerDiagram
+  groups={[
+    { title: 'UI layer', items: ['board layout', 'columns', 'cards'] },
+    { title: 'State layer', items: ['typed board model', 'move actions', 'local persistence'] },
+    { title: 'Interaction layer', items: ['drag start', 'drop target', 'reorder result'] },
+  ]}
+  caption="The useful part is keeping visual components separate from board-state transitions."
+/>
 
-## Status
+## Requirements
 
-Released and deployed on Render. The live demo is the canonical view.
+- Cards should move between columns without corrupting order.
+- Board state should survive refresh.
+- Components should stay small enough to extend.
+- The layout should work at laptop and tablet widths.
+- State transitions should be explicit and typed.
+
+## High-level design
+
+<FlowDiagram
+  nodes={['drag card', 'calculate target', 'apply move action', 'persist board', 'render updated columns']}
+  caption="Drag-and-drop is modeled as a state transition first and a visual interaction second."
+/>
+
+The board model owns columns and cards. UI components render from that model and dispatch typed transitions. Persistence is local, which keeps the project simple while still forcing a real serialization boundary.
+
+## Design decisions
+
+**Centralize board updates.** Dragging a card affects at least two columns. Keeping that transition in one place avoids duplicate reorder logic.
+
+**Persist the model, not the DOM.** The stored state is the board object. The UI can change without breaking persistence as long as the model remains stable.
+
+**Keep drag state temporary.** The app should only persist completed moves, not transient hover state.
+
+## What I would improve
+
+The next version would add keyboard drag interactions, undo, and a richer persistence backend. The most important accessibility improvement would be a non-pointer workflow for moving cards between columns.

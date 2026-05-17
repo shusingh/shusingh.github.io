@@ -9,26 +9,66 @@ tags: ["Python", "Strands Agents", "Multi-agent Systems"]
 year: 2026
 status: "wip"
 featured: false
-order: 5
+order: 6
 diagram:
   nodes: ["planner", "executor", "critic", "state"]
   caption: "The emphasis is explicit state between agents, not a long chat transcript pretending to be memory."
 ---
 
-## Why I built it
+import {
+  FlowDiagram,
+  LoopDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-The fastest way to get better at agent architecture is to isolate the patterns. This repo is a place to test small multi-agent loops without the noise of a full product surface.
+## System intent
 
-The focus is on state handoff, role separation, and evaluation. I am less interested in whether an agent can produce a neat answer once. I care about whether the loop is inspectable, repeatable, and resilient when an intermediate step is wrong.
+This repo is a focused workbench for multi-agent patterns: planning, execution, critique, and refinement. The goal is not to build a large product surface. The goal is to isolate agent coordination patterns and make the state transitions inspectable.
 
-## What it explores
+The core opinion is that agent systems should behave like software systems. Roles should be narrow, state should be explicit, and feedback loops should be bounded.
 
-- Planner agents that produce structured work plans instead of prose.
-- Executor agents that operate on a constrained task surface.
-- Critic agents that return structured findings.
-- Shared state that can be inspected between each step.
-- Feedback loops that can be bounded and tested.
+<FlowDiagram
+  nodes={['task', 'planner', 'executor', 'critic', 'refiner', 'updated state']}
+  caption="Each stage reads and writes explicit state. The agents do not depend on a growing chat transcript as the source of truth."
+/>
 
-## Next improvements
+## Requirements
 
-The next useful layer is an evaluation harness. Agent loops are easy to admire subjectively, but hard to improve without repeatable test cases and failure labels.
+- Each agent role should have a narrow contract.
+- Intermediate outputs should be inspectable before the next stage runs.
+- Critic findings should be structured, not prose buried in a response.
+- Human feedback should update canonical state instead of appending to chat history.
+- The loop should be easy to test with repeatable cases.
+
+## High-level design
+
+<LayerDiagram
+  groups={[
+    { title: 'State', items: ['task definition', 'plan JSON', 'revision history'] },
+    { title: 'Agents', items: ['planner', 'executor', 'critic', 'refiner'] },
+    { title: 'Controls', items: ['schemas', 'eval cases', 'bounded retries'] },
+  ]}
+  caption="The project treats schemas and state as the design surface. Agents are components operating against those contracts."
+/>
+
+The planner creates a structured plan. The executor performs the next bounded action. The critic evaluates the result against a rubric. The refiner applies feedback to the current state and hands it back into the loop.
+
+<LoopDiagram
+  steps={['plan', 'execute', 'critic check', 'refine']}
+  decision="Good enough?"
+  yes="finalize state"
+  no="apply targeted revision"
+  caption="The loop is intentionally bounded so failure is visible and testable."
+/>
+
+## Design decisions
+
+**State is the memory layer.** Chat history is useful for UX, but it is a weak source of truth. This repo pushes durable task state into explicit objects that can be inspected and diffed.
+
+**Critic output is structured.** A critic that returns a paragraph is hard to act on. A critic that returns findings with section, severity, reason, and suggested fix can drive a real workflow.
+
+**Small agents beat broad agents.** A planner does not need to execute. An executor does not need to judge. Keeping roles narrow makes each prompt easier to test.
+
+## What I would improve
+
+The next step is an eval harness that runs the same tasks across prompt and model changes. Agent loops feel impressive when they work once; they become engineering only when regressions are measurable.

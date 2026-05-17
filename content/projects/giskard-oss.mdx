@@ -14,24 +14,51 @@ featured: false
 order: 10
 ---
 
-## What the PR adds
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-Giskard's check suite gives ML/AI teams a way to declaratively validate model outputs and pipeline data. The library had checks for common shapes (numerics, strings, schemas), but JSON output validation was a gap. With LLM outputs increasingly expected to be parseable JSON (tool calls, structured responses, agent state), this was worth closing.
+## Change intent
 
-This PR adds a `JsonValid` check that:
+Giskard helps teams test ML and LLM systems through reusable checks. Structured JSON output is now a common contract for agents, tool calls, and model pipelines, but the check suite did not have a first-class JSON validity check.
 
-- Accepts either a raw JSON string or an already-parsed JSON-compatible object
-- Parses and validates JSON syntactically
-- Optionally validates the parsed value against a provided **JSON Schema** (via `jsonschema>=4.23.0`)
-- Distinguishes **schema configuration errors** (malformed schema definition) from **validation failures** (data does not match a valid schema), so operators get actionable error messages
-- Ships with test coverage for both the syntactic-only and schema-validated paths
+This PR adds `JsonValid`, a check that validates both raw JSON strings and already-parsed JSON-compatible values. It also supports optional JSON Schema validation.
 
-## Why it matters
+<FlowDiagram
+  nodes={['input value', 'parse JSON', 'optional schema check', 'structured result']}
+  caption="The check separates syntax failures from schema failures so users get actionable feedback."
+/>
 
-LLM-driven systems lean heavily on structured output. The line between "the model returned bad JSON" and "the model returned JSON that does not match the contract" is meaningful, and conflating them makes debugging slow. Having a first-class JSON check inside Giskard means teams can wire this into pipelines without rolling their own validator.
+## Requirements
 
-The PR closes issue #2362 and incorporates code-review feedback around error message clarity and dependency handling.
+- Accept raw JSON strings and JSON-compatible Python objects.
+- Distinguish invalid JSON from schema validation failure.
+- Treat malformed schemas as configuration errors, not data failures.
+- Add test coverage for syntax-only and schema-backed validation.
+- Keep the API consistent with the existing Giskard check patterns.
+
+## High-level design
+
+<LayerDiagram
+  groups={[
+    { title: 'Input surface', items: ['string JSON', 'dict/list objects', 'primitive values'] },
+    { title: 'Validation', items: ['json parsing', 'JSON Schema', 'configuration errors'] },
+    { title: 'Output', items: ['pass/fail result', 'clear reason', 'test coverage'] },
+  ]}
+  caption="The PR is small, but the contract matters because LLM pipelines need to know which boundary failed."
+/>
+
+The implementation validates syntax first. If a schema is provided, it validates the parsed value against that schema. Invalid user data produces a validation failure. Invalid schema configuration produces a configuration error so teams do not mistake a broken check for a broken model output.
+
+## Design decisions
+
+**Support parsed objects.** Many pipelines parse JSON before checks run. Requiring teams to serialize back to strings would make the check awkward to compose.
+
+**Use JSON Schema for shape validation.** Syntax validity only answers "is this JSON?" Schema validation answers "does this match the contract?"
+
+**Keep error classes meaningful.** Debugging LLM output requires knowing whether the model failed, the schema failed, or the pipeline wiring failed.
 
 ## Status
 
-Open as of submission. Includes new tests and a scoped dependency addition (`jsonschema` constrained to `>=4.23.0,<5`).
+Open as of submission. The PR closes issue `#2362`, adds test coverage, and scopes the `jsonschema` dependency to the validation feature.

@@ -16,22 +16,64 @@ diagram:
   caption: "Typed frontend, Go service layer, and an inference backend that stays cleanly behind the API."
 ---
 
-## Why I built it
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-I wanted one end-to-end project that exercised the whole stack the way a real product would: a typed frontend, a real backend in a different language, and an inference layer that the backend talks to directly instead of leaking model details into the UI.
+## System intent
 
-A trip planner was a good shape for it. The UX is small enough to actually finish, but the data flow exercises the parts that matter: structured prompts, response shaping, error paths, and rate limiting on a free Render tier.
+AI Trip Planner is a full-stack application for generating travel itineraries from user preferences. It is intentionally small enough to ship, but it exercises the same boundaries a larger AI product needs: typed UI state, backend-owned model calls, response normalization, latency handling, and deployment.
 
-## The stack
+The important design choice is that the frontend does not call the model provider directly. The Go API owns prompt construction, inference calls, response shaping, and failure handling.
 
-- **Frontend.** Vite + React + TypeScript. Single-page app, typed API client, no UI framework noise.
-- **Backend.** Go. The API does the LLM call, normalizes the response into a typed itinerary shape, and returns clean JSON.
-- **Inference.** Hugging Face Inference API for itinerary generation. Wrapped behind the Go service so the frontend never sees model-specific details.
+<LayerDiagram
+  groups={[
+    { title: 'Frontend', items: ['React', 'typed form state', 'itinerary rendering'] },
+    { title: 'Backend', items: ['Go API', 'prompt assembly', 'response normalization'] },
+    { title: 'Inference', items: ['Hugging Face API', 'model timeout', 'fallback messaging'] },
+  ]}
+  caption="Model-specific behavior stays behind the API boundary so the UI can render a stable itinerary contract."
+/>
 
-## What it taught me
+## Requirements
 
-The interesting parts were on the seams. How to keep the model's freeform output from polluting the frontend's type system. Where to push retry and rate limiting (backend, not browser). How to keep the UI honest about latency when generation takes 5+ seconds on a cold model.
+- The UI should collect trip constraints without exposing prompt details.
+- The backend should return clean JSON instead of model-shaped text.
+- Slow generation should not make the UI feel broken.
+- Provider failures should produce useful user-facing states.
+- The app should be deployable end to end on simple hosting.
 
-## Status
+## High-level design
 
-Released and deployed on Render. The live demo runs on a free tier, so the first request after idle is slow while the service spins up.
+<FlowDiagram
+  nodes={['trip form', 'typed request', 'Go prompt builder', 'model call', 'normalize itinerary', 'render plan']}
+  caption="The backend translates user constraints into a model request and translates model output back into a UI-friendly itinerary."
+/>
+
+The frontend collects destination, dates, interests, budget, and pacing. The Go service builds a structured prompt, calls the inference API, parses the result into an itinerary shape, and returns the response to the UI. The UI only handles product states: loading, success, empty result, and error.
+
+## Design decisions
+
+**Keep inference server-side.** This protects provider details, avoids leaking API keys, and keeps prompt and parsing logic out of the browser.
+
+**Normalize before rendering.** The model can produce messy text. The UI should receive sections, days, activities, and notes in a predictable shape.
+
+**Design for cold starts.** The live demo runs on free hosting, so the first request after idle can be slow. The UI needs a real loading state rather than pretending generation is instant.
+
+## Failure modes
+
+<LoopDiagram
+  steps={['submit trip', 'call backend', 'wait for generation', 'parse itinerary']}
+  decision="Usable response?"
+  yes="render itinerary"
+  no="show recoverable error"
+  caption="The user experience depends on making slow or failed generation legible instead of leaving the screen in an ambiguous state."
+/>
+
+The major failure cases are provider timeout, malformed model output, and free-tier cold start. The app handles these as product states rather than raw exceptions.
+
+## What I would improve
+
+The next version would add saved trips, streaming itinerary generation, editable day cards, and an eval set for response quality. The highest-leverage improvement would be making model output validation stricter before the UI renders it.

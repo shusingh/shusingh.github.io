@@ -14,21 +14,51 @@ featured: false
 order: 9
 ---
 
-## What the PR fixes
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
 
-PostHog's self-driving development platform has an embedded terminal. Special characters (UTF-8 multibyte sequences, common in modern shells and prompts) were rendering incorrectly. The terminal also fell back to the browser's default monospace font instead of the application's own code font, which made the rendering look subtly off compared to the rest of the editor surface.
+## Change intent
 
-The fix is in two parts:
+The embedded terminal in PostHog/code was rendering special characters incorrectly. That usually points to an encoding boundary problem: bytes from a PTY are not the same thing as display-ready strings.
 
-1. **Decode PTY output as UTF-8 strings before rendering.** The shell service was passing raw byte buffers through to the renderer, which produced mojibake for any multibyte character. Decoding at the service boundary (`apps/code/src/main/services/shell/service.ts`) means the renderer always receives valid strings.
-2. **Update the terminal font stack** to use the app's existing code font instead of the browser default in `TerminalManager.ts`. Consistent with how the rest of the editor renders code.
+The PR fixes the rendering path by decoding PTY output as UTF-8 before it reaches the terminal renderer, and by aligning the terminal font stack with the app's code font.
 
-Closes issue #1789.
+<FlowDiagram
+  nodes={['PTY bytes', 'UTF-8 decode', 'terminal renderer', 'code font', 'readable output']}
+  caption="The fix moves decoding to the service boundary so the renderer receives valid text."
+/>
 
-## Why it matters
+## Requirements
 
-Terminal rendering is the kind of thing that breaks confidence in a development tool faster than almost anything else. If the prompt is garbled, you assume something is broken. The fix is small, but the user-visible improvement is significant.
+- Preserve existing terminal behavior for ASCII output.
+- Decode multibyte UTF-8 sequences correctly.
+- Keep the renderer from handling raw byte buffers.
+- Use the app's code font stack for visual consistency.
+- Add tests around the shell service behavior.
+
+## High-level design
+
+<LayerDiagram
+  groups={[
+    { title: 'Shell service', items: ['PTY stream', 'byte buffer', 'UTF-8 decode'] },
+    { title: 'Renderer', items: ['string input', 'terminal surface', 'font stack'] },
+    { title: 'User impact', items: ['clean prompts', 'readable symbols', 'editor consistency'] },
+  ]}
+  caption="The service boundary owns byte decoding. The UI owns rendering."
+/>
+
+The code change is small, but the boundary is important. Terminal rendering should not depend on downstream components guessing how to decode raw process output. Once the service returns valid strings, the renderer can stay focused on display.
+
+## Design decisions
+
+**Decode once at the boundary.** This avoids duplicated decoding logic and keeps malformed output easier to test.
+
+**Do not treat fonts as cosmetic only.** Terminal readability depends on glyph support and spacing. Using the app's code font makes the terminal feel like part of the editor.
+
+**Cover the service with tests.** Encoding bugs regress easily because ASCII happy paths keep passing.
 
 ## Status
 
-Open as of submission. Includes updated unit tests for the shell service.
+Open as of submission. The PR closes issue `#1789` and includes updated shell service tests.
