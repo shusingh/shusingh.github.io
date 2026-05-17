@@ -5,23 +5,36 @@
   --border: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.14);
   --text-primary: #ededed;
-  --text-secondary: #a1a1a6;
-  --text-tertiary: #6b6b72;
+  --text-secondary: #b7b7bd;
+  --text-tertiary: #85858d;
   --accent: #9bc4b2;
   --accent-strong: #b3d4c4;
   --accent-dim: #5e8276;
   --accent-bg: rgba(155, 196, 178, 0.08);
+  --selection-bg: rgba(155, 196, 178, 0.72);
+  --selection-text: #07110d;
   --scrollbar-track: rgba(255, 255, 255, 0.035);
   --scrollbar-thumb: rgba(155, 196, 178, 0.32);
   --scrollbar-thumb-hover: rgba(155, 196, 178, 0.52);
   --nav-bg: rgba(14, 14, 16, 0.7);
   --grain-opacity: 0.04;
   --grain-blend: overlay;
-  --orb-color: rgba(155, 196, 178, 0.08);
+  --pixel-dot: rgba(155, 196, 178, 0.11);
+  --pixel-dot-active: rgba(155, 196, 178, 0.26);
+  --pixel-dot-spacing: 22px;
+  --cursor-x: 50vw;
+  --cursor-y: 22vh;
+  --cursor-spotlight-opacity: 0;
+  --cursor-follower-x: 50vw;
+  --cursor-follower-y: 22vh;
+  --cursor-follower-size: 18px;
+  --cursor-follower-opacity: 0;
+  --interactive-cursor: auto;
   --font-display: 'Fraunces', Georgia, serif;
   --font-body: 'Geist Variable', -apple-system, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --max-width: 1180px;
+  --nav-height: 73px;
   color-scheme: dark;
 }
 
@@ -38,13 +51,16 @@
   --accent-strong: #1f5547;
   --accent-dim: #7ba593;
   --accent-bg: rgba(45, 111, 91, 0.07);
+  --selection-bg: rgba(45, 111, 91, 0.82);
+  --selection-text: #ffffff;
   --scrollbar-track: rgba(0, 0, 0, 0.04);
   --scrollbar-thumb: rgba(45, 111, 91, 0.28);
   --scrollbar-thumb-hover: rgba(45, 111, 91, 0.46);
   --nav-bg: rgba(250, 249, 245, 0.8);
   --grain-opacity: 0.025;
   --grain-blend: multiply;
-  --orb-color: rgba(45, 111, 91, 0.05);
+  --pixel-dot: rgba(45, 111, 91, 0.1);
+  --pixel-dot-active: rgba(45, 111, 91, 0.24);
   color-scheme: light;
 }
 
@@ -114,12 +130,12 @@ body::before {
 
 body::after {
   content: '';
-  position: absolute;
-  top: -200px;
-  right: -200px;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, var(--orb-color) 0%, transparent 60%);
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle at center, var(--pixel-dot) 1px, transparent 1.5px);
+  background-size: var(--pixel-dot-spacing) var(--pixel-dot-spacing);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.72) 42%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.72) 42%, transparent 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -140,6 +156,15 @@ a {
   color: inherit;
 }
 
+a,
+button,
+input,
+textarea,
+select,
+[role='button'] {
+  cursor: var(--interactive-cursor);
+}
+
 button:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--accent);
@@ -147,8 +172,8 @@ a:focus-visible {
 }
 
 ::selection {
-  background: var(--accent-bg);
-  color: var(--text-primary);
+  background: var(--selection-bg);
+  color: var(--selection-text);
 }
 
 .visually-hidden {
@@ -169,6 +194,58 @@ a:focus-visible {
   position: relative;
 }
 
+#root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background-image: radial-gradient(
+    circle at center,
+    var(--pixel-dot-active) 1px,
+    transparent 1.5px
+  );
+  background-size: var(--pixel-dot-spacing) var(--pixel-dot-spacing);
+  opacity: var(--cursor-spotlight-opacity);
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  -webkit-mask-image: radial-gradient(
+    circle 170px at var(--cursor-x) var(--cursor-y),
+    black 0%,
+    rgba(0, 0, 0, 0.78) 34%,
+    transparent 72%
+  );
+  mask-image: radial-gradient(
+    circle 170px at var(--cursor-x) var(--cursor-y),
+    black 0%,
+    rgba(0, 0, 0, 0.78) 34%,
+    transparent 72%
+  );
+}
+
+#root::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  width: var(--cursor-follower-size);
+  height: var(--cursor-follower-size);
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  opacity: var(--cursor-follower-opacity);
+  pointer-events: none;
+  transform: translate3d(
+    calc(var(--cursor-follower-x) - 50%),
+    calc(var(--cursor-follower-y) - 50%),
+    0
+  );
+  transition:
+    width 0.18s ease,
+    height 0.18s ease,
+    opacity 0.2s ease,
+    border-color 0.2s ease;
+}
+
 .container {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -178,6 +255,10 @@ a:focus-visible {
 }
 
 @media (max-width: 900px) {
+  :root {
+    --nav-height: 69px;
+  }
+
   .container {
     padding-inline: 24px;
   }
