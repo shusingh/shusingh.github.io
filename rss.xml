@@ -7,8 +7,19 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>ksingh.shubh@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Sun, 17 May 2026 15:22:56 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 17 May 2026 15:55:34 GMT</lastBuildDate>
     <pubDate>Sun, 17 May 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Designing interfaces for agentic systems</title>
+      <link>https://shusingh.github.io/writing/designing-interfaces-for-agentic-systems</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/designing-interfaces-for-agentic-systems</guid>
+      <pubDate>Sun, 17 May 2026 00:00:00 GMT</pubDate>
+      <description>Agentic products need interfaces for supervision, correction, evidence, and safe control. A practical guide to designing UI surfaces for systems that plan, call tools, revise artifacts, and sometimes need to stop.</description>
+      <category>ui</category>
+      <category>agents</category>
+      <category>product-engineering</category>
+      <category>ux</category>
+    </item>
     <item>
       <title>Writing an HLD that survives cross-team review</title>
       <link>https://shusingh.github.io/writing/hld-cross-team-review</link>

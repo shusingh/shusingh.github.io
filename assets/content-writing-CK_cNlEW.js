@@ -1,4 +1,4 @@
-import{j as e}from"./react-vendor-DRnTuPlI.js";import{F as i,L as r,H as o,S as f,a}from"./content-projects-PRkjPYs5.js";import{u as s}from"./mdx-vendor-q2tj1Xgi.js";const x={title:"Agentic systems, explained from first principles",date:"2026-05-15",slug:"agentic-systems-basics",excerpt:"A plain-English map of agents, tools, MCP servers, streaming responses, agent frameworks, runtime infrastructure, memory, state, and the engineering choices that make agentic systems production-ready.",readTime:"13 min read",tags:["agents","architecture","production"]};function h(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",pre:"pre",strong:"strong",table:"table",tbody:"tbody",td:"td",th:"th",thead:"thead",tr:"tr",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:'Most explanations of agentic systems start in the wrong place. They start with frameworks, model names, or diagrams full of boxes labeled "planner" and "executor."'}),`
+import{j as e}from"./react-vendor-DRnTuPlI.js";import{F as i,L as r,H as o,S as j,a,C as h,I as w,T as y}from"./content-projects-CDOPHMa0.js";import{u as s}from"./mdx-vendor-q2tj1Xgi.js";const b={title:"Agentic systems, explained from first principles",date:"2026-05-15",slug:"agentic-systems-basics",excerpt:"A plain-English map of agents, tools, MCP servers, streaming responses, agent frameworks, runtime infrastructure, memory, state, and the engineering choices that make agentic systems production-ready.",readTime:"13 min read",tags:["agents","architecture","production"]};function l(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",pre:"pre",strong:"strong",table:"table",tbody:"tbody",td:"td",th:"th",thead:"thead",tr:"tr",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:'Most explanations of agentic systems start in the wrong place. They start with frameworks, model names, or diagrams full of boxes labeled "planner" and "executor."'}),`
 `,e.jsx(t.p,{children:"The simpler starting point is this:"}),`
 `,e.jsx(t.p,{children:e.jsx(t.strong,{children:"An agentic system is a software system where an LLM is allowed to choose the next step inside a controlled loop."})}),`
 `,e.jsx(t.p,{children:"That is the whole idea. The rest is engineering."}),`
@@ -75,7 +75,7 @@ import{j as e}from"./react-vendor-DRnTuPlI.js";import{F as i,L as r,H as o,S as 
 `,e.jsx(t.p,{children:"Streaming means the system sends partial output while the agent is still working."}),`
 `,e.jsx(t.p,{children:"For simple chat, streaming looks like text appearing word by word. In agentic systems, streaming is more useful than that. It can show the shape of the work as it happens."}),`
 `,e.jsx(t.p,{children:"A good streamed agent response might include:"}),`
-`,e.jsx(f,{leftTitle:"Client UI",rightTitle:"Agent runtime",events:[{side:"left",label:"submit question"},{side:"right",label:"status.reading"},{side:"right",label:"tool.started(search)"},{side:"right",label:"tool.completed(12 hits)"},{side:"right",label:"text.delta"},{side:"right",label:"citation.added"},{side:"right",label:"done"}]}),`
+`,e.jsx(j,{leftTitle:"Client UI",rightTitle:"Agent runtime",events:[{side:"left",label:"submit question"},{side:"right",label:"status.reading"},{side:"right",label:"tool.started(search)"},{side:"right",label:"tool.completed(12 hits)"},{side:"right",label:"text.delta"},{side:"right",label:"citation.added"},{side:"right",label:"done"}]}),`
 `,e.jsx(t.p,{children:"Streaming is not only a UX improvement. It is also an observability surface."}),`
 `,e.jsx(t.p,{children:"Users trust a system more when they can see progress. Engineers debug a system faster when intermediate events are visible. Product teams can design better experiences when tool calls, retrieval steps, and completion events are explicit."}),`
 `,e.jsx(t.p,{children:"The engineering rule: stream events, not just tokens."}),`
@@ -239,7 +239,187 @@ import{j as e}from"./react-vendor-DRnTuPlI.js";import{F as i,L as r,H as o,S as 
 `,e.jsx(t.li,{children:e.jsx(t.a,{href:"https://modelcontextprotocol.io/docs/learn/server-concepts",children:"Model Context Protocol: server concepts"})}),`
 `,e.jsx(t.li,{children:e.jsx(t.a,{href:"https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/agents-tools-runtime.html",children:"Amazon Bedrock AgentCore Runtime"})}),`
 `,e.jsx(t.li,{children:e.jsx(t.a,{href:"https://strandsagents.com/docs/user-guide/concepts/streaming/",children:"Strands Agents SDK: streaming events"})}),`
-`]})]})}function j(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(h,{...n})}):h(n)}const N=Object.freeze(Object.defineProperty({__proto__:null,default:j,frontmatter:x},Symbol.toStringTag,{value:"Module"})),w={title:"Error isolation for batch pipelines: when fail-fast is wrong",date:"2026-05-16",slug:"error-isolation-batch-pipelines",excerpt:"Standard data-engineering advice says validate strictly, fail loudly, and replay. That advice is wrong for any pipeline where one bad record cannot be allowed to block the run. Here is the pattern that replaces it.",readTime:"9 min read",tags:["distributed-systems","data-pipelines","production"]};function l(n){const t={a:"a",code:"code",h2:"h2",li:"li",p:"p",pre:"pre",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"The standard advice for batch pipelines is fail-fast."}),`
+`]})]})}function v(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(l,{...n})}):l(n)}const B=Object.freeze(Object.defineProperty({__proto__:null,default:v,frontmatter:b},Symbol.toStringTag,{value:"Module"})),T={title:"Designing interfaces for agentic systems",date:"2026-05-17",slug:"designing-interfaces-for-agentic-systems",excerpt:"Agentic products need interfaces for supervision, correction, evidence, and safe control. A practical guide to designing UI surfaces for systems that plan, call tools, revise artifacts, and sometimes need to stop.",readTime:"12 min read",tags:["ui","agents","product-engineering","ux"]};function c(n){const t={a:"a",code:"code",h2:"h2",li:"li",ol:"ol",p:"p",pre:"pre",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"Most agent interfaces start as chat boxes."}),`
+`,e.jsx(t.p,{children:"That is understandable. Chat is the fastest way to prove the model can understand a user, ask a follow-up question, and produce a useful answer. It is also a familiar shape: input at the bottom, answer in the middle, history above."}),`
+`,e.jsx(t.p,{children:"But chat is a weak default for production agentic systems."}),`
+`,e.jsx(t.p,{children:"An agent is not only answering. It may be searching, planning, calling tools, editing an artifact, waiting on a human decision, retrying a failed step, or refusing because it does not have enough evidence. A single transcript hides most of that work."}),`
+`,e.jsx(t.p,{children:"The UI job changes. The interface is not a wrapper around the model. It is the control surface for uncertain automation."}),`
+`,e.jsx(h,{left:{eyebrow:"Weak default",title:"Chat skin",items:["One transcript carries every decision","Intermediate work is hidden","Feedback is free text","Trust depends on model confidence"]},right:{eyebrow:"Production shape",title:"Supervision surface",items:["Status, artifact, evidence, and controls are separated","Tool calls and waiting states are visible","Feedback targets a specific object","Trust comes from inspectable sources and history"]},caption:"Agent UI should make supervision easier than scrolling through a transcript."}),`
+`,e.jsx(t.p,{children:"The best agent UI does not feel like magic. It feels calm, inspectable, and correctable."}),`
+`,e.jsx(t.h2,{id:"the-interface-has-four-jobs",children:e.jsx(t.a,{href:"#the-interface-has-four-jobs",children:"The interface has four jobs"})}),`
+`,e.jsx(t.p,{children:"An agentic interface needs to answer four questions at all times:"}),`
+`,e.jsxs(t.ol,{children:[`
+`,e.jsx(t.li,{children:"What is the system doing?"}),`
+`,e.jsx(t.li,{children:"What has it produced?"}),`
+`,e.jsx(t.li,{children:"Why should I trust it?"}),`
+`,e.jsx(t.li,{children:"How do I correct it?"}),`
+`]}),`
+`,e.jsx(t.p,{children:"Those questions map to four UI surfaces."}),`
+`,e.jsx(a,{groups:[{title:"Status",items:["Current step","Tool calls","Retries","Waiting states"]},{title:"Artifact",items:["Draft","Answer","Plan","Recommendation"]},{title:"Evidence",items:["Citations","Tool outputs","Diffs","Confidence signals"]}],caption:"A production agent UI separates what is happening, what changed, and why it is believable."}),`
+`,e.jsx(t.p,{children:"The fourth surface is control: approve, reject, edit, retry, rollback, ask for more evidence, escalate to a human, or stop the run."}),`
+`,e.jsx(t.p,{children:'If those controls are buried inside chat, the user has to translate intent into prose. That creates ambiguity. A button that says "revise this section" is more precise than a message that says "can you make this better?"'}),`
+`,e.jsx(t.h2,{id:"supervision-beats-conversation",children:e.jsx(t.a,{href:"#supervision-beats-conversation",children:"Supervision beats conversation"})}),`
+`,e.jsx(t.p,{children:"The core design shift is this:"}),`
+`,e.jsx(t.p,{children:e.jsx(t.strong,{children:"The user is not having a conversation with the agent. The user is supervising work."})}),`
+`,e.jsx(t.p,{children:"That does not mean the UI should be cold or mechanical. It means the interface should expose the shape of the work."}),`
+`,e.jsx(t.p,{children:"For a policy generation agent, the user needs to see the plan, the draft, the critic findings, and the source material. For a support agent, the user needs to see what account data was read and what action is about to be taken. For a coding agent, the user needs a diff, test output, and a rollback path."}),`
+`,e.jsx(t.p,{children:"A useful product surface might look like this:"}),`
+`,e.jsx(w,{title:"Policy draft review",statusItems:["Plan approved","Drafting section 3","Citation check running","Waiting on reviewer"],workspaceTitle:"Artifact",workspaceItems:["Section 3.2: retention exceptions tightened for marketplace launch scope.","Section 3.4: pending reviewer decision on jurisdiction-specific wording.","Critic finding: source coverage missing for deletion request edge case."],evidenceItems:["DSA mapping table v12","Retention policy memo 2026-04","Reviewer note from legal"],actions:["Approve section","Request revision","Add evidence","Rollback"],caption:"The transcript is not the product surface. The artifact, evidence, status, and controls are."}),`
+`,e.jsx(t.p,{children:"Notice what is missing: there is no giant chat log asking the user to infer system state."}),`
+`,e.jsx(t.p,{children:"The UI gives each object a place. Status lives in the rail. The artifact is central. Evidence is beside the claim it supports. Controls are attached to the thing they change."}),`
+`,e.jsx(t.p,{children:"That structure is more important than visual polish. It lets users act without reverse-engineering what the agent thinks happened."}),`
+`,e.jsx(t.h2,{id:"streaming-should-explain-progress",children:e.jsx(t.a,{href:"#streaming-should-explain-progress",children:"Streaming should explain progress"})}),`
+`,e.jsx(t.p,{children:"Most products treat streaming as a typing effect."}),`
+`,e.jsx(t.p,{children:"That is the least interesting version of streaming."}),`
+`,e.jsx(t.p,{children:"For agentic systems, streaming should reveal progress and state transitions. The user should see when the agent is searching, when a tool starts, when the tool returns, when a source is attached, when the system hits a retry, and when the agent is waiting for input."}),`
+`,e.jsx(y,{steps:[{title:"Task accepted",body:"The system confirms the user goal and shows the starting state."},{title:"Context loaded",body:"Permissions, prior artifact state, and relevant documents are loaded before model work begins."},{title:"Tool running",body:"The UI names the tool, shows the reason for calling it, and distinguishes reading from mutation."},{title:"Evidence attached",body:"Sources are visible before the final prose asks for trust."},{title:"Decision needed",body:"The system stops when human judgment is required instead of pretending certainty."}],caption:"Stream events, not just tokens. The UI should show what the system is doing, not only what it is saying."}),`
+`,e.jsx(t.p,{children:"Token streaming is pleasant. Event streaming is useful."}),`
+`,e.jsx(t.p,{children:"The difference is product leverage. Token streaming makes the system feel fast. Event streaming makes the system feel understandable."}),`
+`,e.jsx(t.p,{children:"Good event streams can power:"}),`
+`,e.jsxs(t.ul,{children:[`
+`,e.jsx(t.li,{children:"Progress indicators"}),`
+`,e.jsx(t.li,{children:"Tool-call inspection"}),`
+`,e.jsx(t.li,{children:"Debug traces"}),`
+`,e.jsx(t.li,{children:"Audit logs"}),`
+`,e.jsx(t.li,{children:"Latency breakdowns"}),`
+`,e.jsx(t.li,{children:"Cancel and resume behavior"}),`
+`]}),`
+`,e.jsx(t.p,{children:"The same event model can serve both the user interface and the engineering team. That is a good sign. The product surface and the operational surface are describing the same system."}),`
+`,e.jsx(t.h2,{id:"trust-is-a-layout-problem",children:e.jsx(t.a,{href:"#trust-is-a-layout-problem",children:"Trust is a layout problem"})}),`
+`,e.jsx(t.p,{children:"Trust is often discussed as a model problem: better model, better prompt, better guardrails."}),`
+`,e.jsx(t.p,{children:"In practice, trust is also a layout problem."}),`
+`,e.jsx(t.p,{children:"Where do citations appear? Can the user preview the source without losing context? Is the evidence attached to the claim or dumped at the bottom? Can the user tell whether a claim came from retrieval, a tool call, or model inference?"}),`
+`,e.jsx(t.p,{children:"A weak answer UI looks like this:"}),`
+`,e.jsx(t.pre,{children:e.jsx(t.code,{className:"language-text",children:`Here is the answer.
+
+Sources:
+1. policy-doc-17
+2. regulation-note-4
+3. internal-memo-9
+`})}),`
+`,e.jsx(t.p,{children:"That is technically cited, but operationally weak. The user still has to map each sentence back to a source."}),`
+`,e.jsx(t.p,{children:"A stronger interface attaches evidence to claims:"}),`
+`,e.jsx(t.pre,{children:e.jsx(t.code,{className:"language-text",children:`Claim: Control 4.2 applies to seller onboarding in DE.
+Evidence: applicability matrix row 214, marketplace scope table v7
+Status: verified against current index
+Action: accept, ask for more evidence, flag as disputed
+`})}),`
+`,e.jsx(t.p,{children:"The citation is not a footnote. It is part of the object."}),`
+`,e.jsx(t.p,{children:"That is especially important in regulated or high-stakes systems. The user should not have to trust the agent's tone. They should be able to inspect the support behind the claim."}),`
+`,e.jsx(t.h2,{id:"feedback-should-target-objects",children:e.jsx(t.a,{href:"#feedback-should-target-objects",children:"Feedback should target objects"})}),`
+`,e.jsx(t.p,{children:"Free-text feedback is flexible, but it is imprecise."}),`
+`,e.jsx(t.p,{children:'"Make this stricter" might mean:'}),`
+`,e.jsxs(t.ul,{children:[`
+`,e.jsx(t.li,{children:"Change the tone"}),`
+`,e.jsx(t.li,{children:"Narrow the scope"}),`
+`,e.jsx(t.li,{children:"Add a citation"}),`
+`,e.jsx(t.li,{children:"Remove an exception"}),`
+`,e.jsx(t.li,{children:"Escalate to legal"}),`
+`,e.jsx(t.li,{children:"Rewrite one section"}),`
+`,e.jsx(t.li,{children:"Reject the whole draft"}),`
+`]}),`
+`,e.jsx(t.p,{children:"When the UI has no structure, the model has to guess."}),`
+`,e.jsx(t.p,{children:"Structured feedback reduces that ambiguity. Instead of one big chat box, give the user controls attached to the artifact:"}),`
+`,e.jsx(h,{left:{eyebrow:"Ambiguous",title:"Text feedback only",items:["User says make this stricter","Model guesses target and intent","Revision is hard to audit","Rollback depends on transcript history"]},right:{eyebrow:"Operational",title:"Object-level feedback",items:["User selects section 3.2","Intent is revise exception language","Reason is stored with reviewer identity","Diff and rollback are available"]}}),`
+`,e.jsx(t.p,{children:"This is not about removing natural language. It is about giving natural language a target."}),`
+`,e.jsx(t.p,{children:"A better feedback record looks like:"}),`
+`,e.jsx(t.pre,{children:e.jsx(t.code,{className:"language-text",children:`target: section 3.2
+operation: revise
+intent: tighten retention exception
+reason: current language allows unsupported marketplace case
+actor: reviewer id
+source_version: draft v5
+`})}),`
+`,e.jsx(t.p,{children:"The user may still type a note. The product should store that note as part of a structured operation."}),`
+`,e.jsx(t.p,{children:"That distinction matters later, when someone asks why the artifact changed."}),`
+`,e.jsx(t.h2,{id:"design-for-interruptibility",children:e.jsx(t.a,{href:"#design-for-interruptibility",children:"Design for interruptibility"})}),`
+`,e.jsx(t.p,{children:"Agentic systems run longer than ordinary UI actions."}),`
+`,e.jsx(t.p,{children:"They search, call tools, validate outputs, retry failures, and sometimes wait for human approval. A user who starts a task may need to pause it, inspect a partial result, cancel it, resume later, or hand it to another reviewer."}),`
+`,e.jsx(t.p,{children:"That means the UI needs a task model, not just a loading spinner."}),`
+`,e.jsx(t.p,{children:"A task model includes:"}),`
+`,e.jsxs(t.ul,{children:[`
+`,e.jsx(t.li,{children:"Current step"}),`
+`,e.jsx(t.li,{children:"Started time"}),`
+`,e.jsx(t.li,{children:"Owner"}),`
+`,e.jsx(t.li,{children:"Inputs"}),`
+`,e.jsx(t.li,{children:"Outputs so far"}),`
+`,e.jsx(t.li,{children:"Cancellation state"}),`
+`,e.jsx(t.li,{children:"Resume state"}),`
+`,e.jsx(t.li,{children:"Error state"}),`
+`,e.jsx(t.li,{children:"Next required action"}),`
+`]}),`
+`,e.jsx(t.p,{children:"The worst possible agent UI is a spinner that lasts 45 seconds and then either prints a wall of text or fails."}),`
+`,e.jsx(t.p,{children:"The better UI gives users confidence that the system is alive, bounded, and interruptible."}),`
+`,e.jsx(t.h2,{id:"use-progressive-control",children:e.jsx(t.a,{href:"#use-progressive-control",children:"Use progressive control"})}),`
+`,e.jsx(t.p,{children:"Different users want different levels of control."}),`
+`,e.jsx(t.p,{children:"An executive reading a summary may only need the final answer plus citations. A compliance reviewer needs claim-level evidence and revision history. An engineer operating the system needs tool traces, model versions, and failure reasons."}),`
+`,e.jsx(t.p,{children:"The mistake is showing everyone the most detailed view by default."}),`
+`,e.jsx(t.p,{children:"Progressive control works better:"}),`
+`,e.jsx(a,{groups:[{title:"Default",items:["Final artifact","Primary status","Top citations"]},{title:"Inspect",items:["Claim evidence","Tool calls","Diffs"]},{title:"Operate",items:["Traces","Prompt version","Index version"]}],caption:"The interface should reveal depth when the user needs it, not drown every user in internals."}),`
+`,e.jsx(t.p,{children:"This is how you keep the product usable without hiding the system."}),`
+`,e.jsx(t.p,{children:"The default view should be calm. The inspection view should be precise. The operations view should be complete."}),`
+`,e.jsx(t.h2,{id:"make-refusal-useful",children:e.jsx(t.a,{href:"#make-refusal-useful",children:"Make refusal useful"})}),`
+`,e.jsx(t.p,{children:"Refusal is part of the interface."}),`
+`,e.jsx(t.p,{children:'If an agent says "I cannot answer that," the UI should explain what is missing and what the user can do next.'}),`
+`,e.jsx(t.p,{children:"Bad refusal:"}),`
+`,e.jsx(t.pre,{children:e.jsx(t.code,{className:"language-text",children:`I do not have enough information to answer.
+`})}),`
+`,e.jsx(t.p,{children:"Better refusal:"}),`
+`,e.jsx(t.pre,{children:e.jsx(t.code,{className:"language-text",children:`I could not find current evidence for this claim.
+
+Searched:
+- control taxonomy v18
+- policy memos through 2026-05
+- marketplace applicability tables
+
+Next actions:
+- broaden search scope
+- attach a source
+- ask compliance reviewer
+`})}),`
+`,e.jsx(t.p,{children:"That turns a dead end into a workflow."}),`
+`,e.jsx(t.p,{children:"For high-stakes systems, this is critical. A trustworthy agent is not one that always answers. A trustworthy agent knows when the evidence is insufficient and makes the next step clear."}),`
+`,e.jsx(t.h2,{id:"the-ui-should-encode-the-safety-model",children:e.jsx(t.a,{href:"#the-ui-should-encode-the-safety-model",children:"The UI should encode the safety model"})}),`
+`,e.jsx(t.p,{children:"If a tool mutates state, the UI should treat it differently from a read-only tool."}),`
+`,e.jsx(t.p,{children:"Reading a document can stream quietly. Updating a ticket, submitting a report, changing a policy draft, or sending an email needs stronger affordances:"}),`
+`,e.jsxs(t.ul,{children:[`
+`,e.jsx(t.li,{children:"Preview before mutation"}),`
+`,e.jsx(t.li,{children:"Explicit confirmation"}),`
+`,e.jsx(t.li,{children:"Visible target"}),`
+`,e.jsx(t.li,{children:"Permission boundary"}),`
+`,e.jsx(t.li,{children:"Idempotency or duplicate warning"}),`
+`,e.jsx(t.li,{children:"Post-action receipt"}),`
+`,e.jsx(t.li,{children:"Undo or compensating action where possible"}),`
+`]}),`
+`,e.jsx(t.p,{children:"The interface should make dangerous actions feel different."}),`
+`,e.jsx(t.p,{children:"This is not only about user protection. It is about system honesty. The UI should teach the user what kind of action is happening."}),`
+`,e.jsx(t.p,{children:"If every agent action looks like a chat message, the product hides risk. If the UI distinguishes read, draft, validate, submit, and rollback, the product exposes control."}),`
+`,e.jsx(t.h2,{id:"a-practical-checklist",children:e.jsx(t.a,{href:"#a-practical-checklist",children:"A practical checklist"})}),`
+`,e.jsx(t.p,{children:"When I review an agentic UI, I ask:"}),`
+`,e.jsxs(t.ul,{children:[`
+`,e.jsx(t.li,{children:"Can the user tell what the agent is doing right now?"}),`
+`,e.jsx(t.li,{children:"Can the user distinguish model output from retrieved evidence?"}),`
+`,e.jsx(t.li,{children:"Are tool calls visible at the right level of detail?"}),`
+`,e.jsx(t.li,{children:"Is mutation handled differently from reading?"}),`
+`,e.jsx(t.li,{children:"Can the user stop, retry, resume, or rollback?"}),`
+`,e.jsx(t.li,{children:"Is feedback attached to an object, not just appended to chat?"}),`
+`,e.jsx(t.li,{children:"Can a reviewer reconstruct why something changed?"}),`
+`,e.jsx(t.li,{children:"Does the UI show refusal as a useful state?"}),`
+`,e.jsx(t.li,{children:"Are citations close to the claims they support?"}),`
+`,e.jsx(t.li,{children:"Does the default view stay calm while deeper inspection remains available?"}),`
+`]}),`
+`,e.jsx(t.p,{children:"If the answer is no, the interface is probably still demo-shaped."}),`
+`,e.jsx(t.h2,{id:"the-main-idea",children:e.jsx(t.a,{href:"#the-main-idea",children:"The main idea"})}),`
+`,e.jsx(t.p,{children:"Agentic UI is not about making the model look smart."}),`
+`,e.jsx(t.p,{children:"It is about helping the user supervise work that is partly automated, partly uncertain, and sometimes consequential."}),`
+`,e.jsx(t.p,{children:"The best interfaces for agents make three things visible:"}),`
+`,e.jsxs(t.ul,{children:[`
+`,e.jsxs(t.li,{children:[e.jsx(t.strong,{children:"Progress:"})," what the system is doing"]}),`
+`,e.jsxs(t.li,{children:[e.jsx(t.strong,{children:"Grounding:"})," why the output is believable"]}),`
+`,e.jsxs(t.li,{children:[e.jsx(t.strong,{children:"Control:"})," how the user can correct or stop it"]}),`
+`]}),`
+`,e.jsx(t.p,{children:"That is the difference between a chat demo and a product surface."}),`
+`,e.jsx(t.p,{children:"The chat box is a useful input. It should not be the whole interface."})]})}function k(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(c,{...n})}):c(n)}const U=Object.freeze(Object.defineProperty({__proto__:null,default:k,frontmatter:T},Symbol.toStringTag,{value:"Module"})),I={title:"Error isolation for batch pipelines: when fail-fast is wrong",date:"2026-05-16",slug:"error-isolation-batch-pipelines",excerpt:"Standard data-engineering advice says validate strictly, fail loudly, and replay. That advice is wrong for any pipeline where one bad record cannot be allowed to block the run. Here is the pattern that replaces it.",readTime:"9 min read",tags:["distributed-systems","data-pipelines","production"]};function d(n){const t={a:"a",code:"code",h2:"h2",li:"li",p:"p",pre:"pre",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"The standard advice for batch pipelines is fail-fast."}),`
 `,e.jsx(t.p,{children:"Validate strictly. If a record does not match the schema, throw. The principle is that bad data should not silently corrupt downstream systems, and the cheapest place to catch the problem is at the boundary. Fix the source, replay the batch, move on."}),`
 `,e.jsx(t.p,{children:"This advice is correct for analytics pipelines, internal dashboards, and most data engineering work. It is wrong for any pipeline where one malformed record cannot be allowed to halt the entire run."}),`
 `,e.jsx(t.p,{children:"That second category is bigger than people expect. Regulated reporting, compliance systems, payment processing, customer-facing event ingestion, fraud detection, audit logging: in all of these, a single bad record stopping the batch is a worse outcome than processing the rest while quarantining the bad one. Fail-fast in those domains is not engineering rigor. It is engineering negligence."}),`
@@ -328,7 +508,7 @@ class DependentAttributesValidation:
 `,e.jsx(t.p,{children:"Isolate-fast says: things will go wrong, often, in ways we cannot fully predict, and the system has to keep working anyway. That is the production story."}),`
 `,e.jsx(t.p,{children:"The shift from one to the other is mostly mechanical. It is an error store, a set of structured failure reasons, a replay path, and an operator surface. None of these are hard to build. The hard part is admitting they are necessary before the first incident proves they are."}),`
 `,e.jsx(t.p,{children:'The teams that admit it early ship pipelines that age well. The teams that wait write a four-page runbook and call it "operational maturity."'}),`
-`,e.jsx(t.p,{children:"For systems that have to demonstrate they processed every record, classified every failure, and preserved the audit trail of both, fail-fast is not engineering rigor. It is engineering nostalgia for a simpler world that the production version does not inhabit."})]})}function y(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(l,{...n})}):l(n)}const R=Object.freeze(Object.defineProperty({__proto__:null,default:y,frontmatter:w},Symbol.toStringTag,{value:"Module"})),b={title:"From chained Lambdas to Step Functions",date:"2026-03-09",slug:"from-chained-lambdas-to-step-functions",excerpt:"A migration retrospective: why brittle orchestration patterns fail at scale, how Map states unlocked per-marketplace parallelism, and what we would do differently.",readTime:"12 min read",tags:["aws","step-functions","migrations"]};function d(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",p:"p",pre:"pre",strong:"strong",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"Most AWS orchestration starts as chained Lambdas."}),`
+`,e.jsx(t.p,{children:"For systems that have to demonstrate they processed every record, classified every failure, and preserved the audit trail of both, fail-fast is not engineering rigor. It is engineering nostalgia for a simpler world that the production version does not inhabit."})]})}function A(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(d,{...n})}):d(n)}const z=Object.freeze(Object.defineProperty({__proto__:null,default:A,frontmatter:I},Symbol.toStringTag,{value:"Module"})),S={title:"From chained Lambdas to Step Functions",date:"2026-03-09",slug:"from-chained-lambdas-to-step-functions",excerpt:"A migration retrospective: why brittle orchestration patterns fail at scale, how Map states unlocked per-marketplace parallelism, and what we would do differently.",readTime:"12 min read",tags:["aws","step-functions","migrations"]};function u(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",p:"p",pre:"pre",strong:"strong",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"Most AWS orchestration starts as chained Lambdas."}),`
 `,e.jsx(t.p,{children:"The first version of the pipeline has one Lambda that does the work. The second version has two Lambdas, glued together by an SNS topic. The third version has four Lambdas, glued together by two SNS topics, an SQS queue, and a DynamoDB table that nobody is quite sure who owns. It works. It is in production. It would be embarrassing to migrate it because the team has bigger problems."}),`
 `,e.jsx(t.p,{children:'Then the fan-out grows. The pipeline that used to process hundreds of items now processes tens of thousands. The retries that nobody noticed start to show up as cost. The "transient" errors start to show up as data quality issues. The on-call playbook for "rerun the third Lambda for marketplace X between 9pm and midnight" gets longer.'}),`
 `,e.jsx(t.p,{children:"That is when you migrate to Step Functions."}),`
@@ -425,7 +605,7 @@ class DependentAttributesValidation:
 `,e.jsx(t.p,{children:"The migration was about moving orchestration from implicit (logs, retries-by-configuration, ad-hoc DynamoDB tables) to explicit (state machine definitions, declarative retry policies, execution history as a first-class object)."}),`
 `,e.jsx(t.p,{children:"Implicit orchestration is fast to write and slow to operate. Explicit orchestration is slower to write and fast to operate. For a pipeline that is going to run for years and be touched by people who did not build it, that tradeoff is the right one."}),`
 `,e.jsx(t.p,{children:'The same lesson applies to most "we will migrate to a real orchestrator someday" decisions. The right time to migrate is when the implicit orchestration has gotten complex enough that nobody on the team can confidently say what happens when a specific stage fails on a specific record. Once that point arrives, the migration pays for itself in the first major incident the new system handles cleanly.'}),`
-`,e.jsx(t.p,{children:"In our case, it paid for itself in the first month."})]})}function v(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(d,{...n})}):d(n)}const O=Object.freeze(Object.defineProperty({__proto__:null,default:v,frontmatter:b},Symbol.toStringTag,{value:"Module"})),T={title:"Writing an HLD that survives cross-team review",date:"2026-05-17",slug:"hld-cross-team-review",excerpt:"Most high-level design documents are skimmed, signed, and forgotten. The ones that survive are written for specific readers, not a generic reviewer. Here is what changes when you take that seriously.",readTime:"10 min read",tags:["hld","design-docs","cross-team"]};function c(n){const t={a:"a",h2:"h2",h3:"h3",li:"li",p:"p",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"The most undervalued artifact in engineering is the high-level design document."}),`
+`,e.jsx(t.p,{children:"In our case, it paid for itself in the first month."})]})}function M(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(u,{...n})}):u(n)}const V=Object.freeze(Object.defineProperty({__proto__:null,default:M,frontmatter:S},Symbol.toStringTag,{value:"Module"})),W={title:"Writing an HLD that survives cross-team review",date:"2026-05-17",slug:"hld-cross-team-review",excerpt:"Most high-level design documents are skimmed, signed, and forgotten. The ones that survive are written for specific readers, not a generic reviewer. Here is what changes when you take that seriously.",readTime:"10 min read",tags:["hld","design-docs","cross-team"]};function p(n){const t={a:"a",h2:"h2",h3:"h3",li:"li",p:"p",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"The most undervalued artifact in engineering is the high-level design document."}),`
 `,e.jsx(t.p,{children:'People treat it as a gate to clear. Write the doc, get the sign-offs, start coding. Six months later, when someone asks why the system makes a specific decision, nobody can find the doc, and the answer is "I think we discussed that in a meeting?"'}),`
 `,e.jsx(t.p,{children:"The few HLDs that survive are different. They get cited in code reviews. They get linked from runbooks. They get pulled up in incident retrospectives. New engineers read them and start contributing within a week instead of three months. They are referenced in interviews, in budgeting conversations, and in regulatory audits."}),`
 `,e.jsx(t.p,{children:"That difference is not about formatting or template choice. It is about who you are writing for."}),`
@@ -501,7 +681,7 @@ class DependentAttributesValidation:
 `,e.jsx(t.p,{children:"Software has failure modes. The HLD has failure modes too. A doc that gets the structure wrong, that fails the 90-second test, that surprises partner teams in formal review, that does not survive past the launch, is a failed artifact. The team that produced it did not just lose time. They burned cross-team trust that is harder to rebuild than the doc itself."}),`
 `,e.jsx(t.p,{children:"The good news is that this is all learnable. The HLDs that survive are not the product of inherent talent. They are the product of treating the doc as the thing it actually is: the most leveraged piece of writing the team produces, and the one that the team will live with longest."}),`
 `,e.jsx(t.p,{children:"If a team has 40 hours to spend, dividing it as 30 hours of writing and 10 hours of coding will almost always produce a better outcome than the reverse. The coding is easier when the design is clear. The design becomes clear by writing it down for readers who will actually read it."}),`
-`,e.jsx(t.p,{children:"That is the whole craft. Most of the rest is execution."})]})}function k(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(c,{...n})}):c(n)}const F=Object.freeze(Object.defineProperty({__proto__:null,default:k,frontmatter:T},Symbol.toStringTag,{value:"Module"})),I={title:"Human feedback is not a chat message",date:"2026-05-15",slug:"human-feedback-is-not-a-chat-message",excerpt:"In production agent systems, human feedback should be modeled as a structured state transition, not appended to a conversation transcript.",readTime:"10 min read",tags:["agents","human-in-the-loop","architecture"]};function u(n){const t={a:"a",blockquote:"blockquote",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",pre:"pre",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"The easiest way to add human feedback to an agent is to append it to the chat."}),`
+`,e.jsx(t.p,{children:"That is the whole craft. Most of the rest is execution."})]})}function L(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(p,{...n})}):p(n)}const J=Object.freeze(Object.defineProperty({__proto__:null,default:L,frontmatter:W},Symbol.toStringTag,{value:"Module"})),C={title:"Human feedback is not a chat message",date:"2026-05-15",slug:"human-feedback-is-not-a-chat-message",excerpt:"In production agent systems, human feedback should be modeled as a structured state transition, not appended to a conversation transcript.",readTime:"10 min read",tags:["agents","human-in-the-loop","architecture"]};function m(n){const t={a:"a",blockquote:"blockquote",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",pre:"pre",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"The easiest way to add human feedback to an agent is to append it to the chat."}),`
 `,e.jsx(t.p,{children:'The model produces a draft. The user says, "make section 3 stricter on data retention." The system adds that sentence to the conversation history. The model reads the prior draft plus the new message and writes another version.'}),`
 `,e.jsx(t.p,{children:"For a demo, this feels natural. It is fast, flexible, and impressive."}),`
 `,e.jsx(t.p,{children:"For production systems, it is usually the wrong abstraction."}),`
@@ -670,7 +850,7 @@ class DependentAttributesValidation:
 `,e.jsx(t.p,{children:"The danger is letting that imprecision become the system of record."}),`
 `,e.jsx(t.p,{children:"Production agents need a boundary where natural language becomes structured intent. For human feedback, that boundary is the difference between a helpful demo and a system people can review, audit, and trust."}),`
 `,e.jsx(t.p,{children:"Let the user speak naturally."}),`
-`,e.jsx(t.p,{children:"Make the system commit deliberately."})]})}function S(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(u,{...n})}):u(n)}const E=Object.freeze(Object.defineProperty({__proto__:null,default:S,frontmatter:I},Symbol.toStringTag,{value:"Module"})),A={title:"Hybrid retrieval at scale: BM25 + kNN tradeoffs",date:"2026-04-18",slug:"hybrid-retrieval-bm25-knn-tradeoffs",excerpt:"When to reach for vector search, when keyword retrieval still wins, and the architectural decisions behind a citation-grounded compliance Q&A system.",readTime:"11 min read",tags:["retrieval","search","opensearch"]};function p(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:'The default answer to retrieval has become "embed it and use a vector store."'}),`
+`,e.jsx(t.p,{children:"Make the system commit deliberately."})]})}function q(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(m,{...n})}):m(n)}const X=Object.freeze(Object.defineProperty({__proto__:null,default:q,frontmatter:C},Symbol.toStringTag,{value:"Module"})),D={title:"Hybrid retrieval at scale: BM25 + kNN tradeoffs",date:"2026-04-18",slug:"hybrid-retrieval-bm25-knn-tradeoffs",excerpt:"When to reach for vector search, when keyword retrieval still wins, and the architectural decisions behind a citation-grounded compliance Q&A system.",readTime:"11 min read",tags:["retrieval","search","opensearch"]};function g(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:'The default answer to retrieval has become "embed it and use a vector store."'}),`
 `,e.jsx(t.p,{children:"That default is wrong often enough that it is worth taking seriously. Vectors are not retrieval. They are one tool inside retrieval. Treating them as the whole pipeline trades real recall and real latency for a story that is easy to put on a slide."}),`
 `,e.jsx(t.p,{children:"This post is a working engineer's view of when BM25 still beats vectors, when vectors actually earn the complexity, and how to fuse them in a way that survives production. It draws on building a citation-grounded compliance Q&A system on OpenSearch, where hybrid retrieval was the architectural decision that mattered most."}),`
 `,e.jsx(t.h2,{id:"the-shape-of-the-problem",children:e.jsx(t.a,{href:"#the-shape-of-the-problem",children:"The shape of the problem"})}),`
@@ -749,7 +929,7 @@ class DependentAttributesValidation:
 `,e.jsx(t.p,{children:"A production retrieval system is the engineering choices about how each layer fails and how those failures are made visible."}),`
 `,e.jsx(t.p,{children:"The vector-first default treats retrieval as if it is one decision: which index. That framing is what produces systems that work well in demos and degrade quietly in production."}),`
 `,e.jsx(t.p,{children:"The hybrid-first default treats retrieval as a stack with explicit failure modes, where the layers are chosen to compensate for each other's weaknesses, and where the failure cases are observable rather than hidden inside a similarity score."}),`
-`,e.jsx(t.p,{children:"That second framing is the production one. It is also the more boring one. Both of those things are true at once."})]})}function M(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(p,{...n})}):p(n)}const H=Object.freeze(Object.defineProperty({__proto__:null,default:M,frontmatter:A},Symbol.toStringTag,{value:"Module"})),L={title:"The schema problem in LLM outputs",date:"2026-05-16",slug:"schema-problem-llm-outputs",excerpt:"Structured output from LLMs is treated as a solved problem. It is not. The JSON looks right, but the contract underneath is fragile in ways that only show up under volume. Here is what actually has to be true at the boundary.",readTime:"10 min read",tags:["llm","validation","api-design"]};function m(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"The pitch for structured output from LLMs is clean: tell the model the schema, get JSON back, parse it, use it. The provider APIs make this look easy. OpenAI's response format, Anthropic's tool use, the various OSS shims around them. The demos work. The first 1,000 calls in production work."}),`
+`,e.jsx(t.p,{children:"That second framing is the production one. It is also the more boring one. Both of those things are true at once."})]})}function P(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(g,{...n})}):g(n)}const $=Object.freeze(Object.defineProperty({__proto__:null,default:P,frontmatter:D},Symbol.toStringTag,{value:"Module"})),_={title:"The schema problem in LLM outputs",date:"2026-05-16",slug:"schema-problem-llm-outputs",excerpt:"Structured output from LLMs is treated as a solved problem. It is not. The JSON looks right, but the contract underneath is fragile in ways that only show up under volume. Here is what actually has to be true at the boundary.",readTime:"10 min read",tags:["llm","validation","api-design"]};function f(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"The pitch for structured output from LLMs is clean: tell the model the schema, get JSON back, parse it, use it. The provider APIs make this look easy. OpenAI's response format, Anthropic's tool use, the various OSS shims around them. The demos work. The first 1,000 calls in production work."}),`
 `,e.jsx(t.p,{children:"The trouble starts later."}),`
 `,e.jsx(t.p,{children:"A field that is supposed to be a string comes back as a string-shaped JSON value. An enum that has five allowed values returns a sixth one that the model invented. An array of objects has one object missing a required field. The JSON parses successfully but the contract is wrong in a way that only shows up downstream."}),`
 `,e.jsx(t.p,{children:"This is the schema problem. It is not solved. It is one of the layers where production AI systems leak."}),`
@@ -833,7 +1013,7 @@ class DependentAttributesValidation:
 `,e.jsxs(t.p,{children:[e.jsx(t.strong,{children:"Pick the validator that matches the language at the seam."})," Pydantic for Python, Zod for TS, JSON Schema for cross-language contracts."]}),`
 `,e.jsxs(t.p,{children:[e.jsx(t.strong,{children:"Consider the normalize-then-validate split."})," It is more work upfront and pays off when the model's behavior drifts."]}),`
 `,e.jsx(t.p,{children:"The schema problem is not solved. It is managed. The teams that take it seriously build systems that age well as the underlying models change. The teams that treat it as a checkbox build systems that work in the first quarter and break in the second."}),`
-`,e.jsx(t.p,{children:"The good news is the engineering is not exotic. It is the same kind of boundary-design work that has always made the difference between code that works on a happy path and code that works in production. The fact that an LLM sits on one side of the boundary does not change the principles. It just makes the boundary more important."})]})}function W(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(m,{...n})}):m(n)}const B=Object.freeze(Object.defineProperty({__proto__:null,default:W,frontmatter:L},Symbol.toStringTag,{value:"Module"})),q={title:"What production agents need that demos do not",date:"2026-05-15",slug:"what-production-agents-need",excerpt:"The gap between an impressive agent demo and a trustworthy production system is not model intelligence. It is state, tools, evals, permissions, observability, retries, and human feedback design.",readTime:"11 min read",tags:["agents","production","architecture"]};function g(n){const t={a:"a",code:"code",h2:"h2",li:"li",p:"p",pre:"pre",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"Agent demos are easy to enjoy."}),`
+`,e.jsx(t.p,{children:"The good news is the engineering is not exotic. It is the same kind of boundary-design work that has always made the difference between code that works on a happy path and code that works in production. The fact that an LLM sits on one side of the boundary does not change the principles. It just makes the boundary more important."})]})}function N(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(f,{...n})}):f(n)}const Y=Object.freeze(Object.defineProperty({__proto__:null,default:N,frontmatter:_},Symbol.toStringTag,{value:"Module"})),R={title:"What production agents need that demos do not",date:"2026-05-15",slug:"what-production-agents-need",excerpt:"The gap between an impressive agent demo and a trustworthy production system is not model intelligence. It is state, tools, evals, permissions, observability, retries, and human feedback design.",readTime:"11 min read",tags:["agents","production","architecture"]};function x(n){const t={a:"a",code:"code",h2:"h2",li:"li",p:"p",pre:"pre",strong:"strong",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"Agent demos are easy to enjoy."}),`
 `,e.jsx(t.p,{children:"The model reads a request, calls a tool, streams a confident answer, and the room nods. For five minutes, it feels like software has become fluid. The agent can search, plan, write, explain, maybe even update something on your behalf."}),`
 `,e.jsx(t.p,{children:"Then someone asks the production questions:"}),`
 `,e.jsxs(t.ul,{children:[`
@@ -1015,4 +1195,4 @@ created_at: timestamp
 `,e.jsx(t.p,{children:"The agent demo asks: can the model do the task once?"}),`
 `,e.jsx(t.p,{children:"The production system asks: can the team trust it repeatedly, operate it safely, explain its behavior, and improve it without breaking users?"}),`
 `,e.jsx(t.p,{children:"That second question is the real work."}),`
-`,e.jsx(t.p,{children:"The future of agents will not be won by the systems with the fanciest demos. It will be won by the systems that make intelligent behavior boring enough to operate."})]})}function C(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(g,{...n})}):g(n)}const z=Object.freeze(Object.defineProperty({__proto__:null,default:C,frontmatter:q},Symbol.toStringTag,{value:"Module"}));export{N as _,R as a,O as b,F as c,E as d,H as e,B as f,z as g};
+`,e.jsx(t.p,{children:"The future of agents will not be won by the systems with the fanciest demos. It will be won by the systems that make intelligent behavior boring enough to operate."})]})}function O(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(x,{...n})}):x(n)}const G=Object.freeze(Object.defineProperty({__proto__:null,default:O,frontmatter:R},Symbol.toStringTag,{value:"Module"}));export{B as _,U as a,z as b,V as c,J as d,X as e,$ as f,Y as g,G as h};
