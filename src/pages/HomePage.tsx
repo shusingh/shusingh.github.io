@@ -124,7 +124,8 @@ export function HomePage() {
           entries={[
             {
               label: 'Building',
-              value: 'Multi-agent refinement system for compliance policy generation at Amazon.',
+              value:
+                'Citation-grounded compliance Q&A and operator surfaces for control launch workflows at Amazon.',
             },
             {
               label: 'Learning',

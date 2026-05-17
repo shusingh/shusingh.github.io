@@ -24,11 +24,11 @@ export function AboutPage() {
 
           <div className={styles.body}>
             <p>
-              I spend most of my time on multi-agent systems at Amazon: planner / drafter / critic /
-              refiner architectures with stateful human-in-the-loop refinement, built on Bedrock,
-              OpenSearch, and Step Functions. Before that I shipped large-scale compliance
-              orchestration: the EU DSA pipeline, a compliance testing automation platform, and ZeroTouch, the
-              control launch platform I led across three partner teams.
+              I spend most of my time on production AI and compliance infrastructure at Amazon:
+              citation-grounded Q&amp;A, hybrid retrieval over compliance knowledge, and operator
+              surfaces for control launch workflows. Before that I shipped large-scale compliance
+              orchestration: the EU DSA pipeline, a compliance testing automation platform, and
+              ZeroTouch, the control launch platform I led across three partner teams.
             </p>
             <p>
               What I actually care about is the production path. Most agentic-system talk online is
@@ -61,7 +61,7 @@ export function AboutPage() {
 
             <dt className={styles.factLabel}>Working on</dt>
             <dd className={styles.factValue}>
-              Multi-agent systems for compliance policy generation
+              Production AI systems for compliance search, review, and launch workflows
             </dd>
 
             <dt className={styles.factLabel}>Stack</dt>
