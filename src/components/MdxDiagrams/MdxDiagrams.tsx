@@ -187,3 +187,137 @@ export function LayerDiagram({ groups, caption }: LayerDiagramProps) {
     </DiagramFigure>
   );
 }
+
+export interface ComparisonColumn {
+  title: string;
+  eyebrow?: string;
+  items: string[];
+}
+
+export interface ComparisonDiagramProps {
+  left: ComparisonColumn;
+  right: ComparisonColumn;
+  caption?: string;
+}
+
+export function ComparisonDiagram({ left, right, caption }: ComparisonDiagramProps) {
+  return (
+    <DiagramFigure caption={caption}>
+      <div className={styles.comparison}>
+        {[left, right].map((column, index) => (
+          <section
+            className={styles.comparisonColumn}
+            data-emphasis={index === 1 ? 'strong' : 'muted'}
+            key={column.title}
+            aria-label={column.title}
+          >
+            {column.eyebrow ? (
+              <p className={styles.comparisonEyebrow}>{column.eyebrow}</p>
+            ) : null}
+            <h4 className={styles.comparisonTitle}>{column.title}</h4>
+            <ul className={styles.comparisonItems}>
+              {column.items.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </DiagramFigure>
+  );
+}
+
+export interface TimelineStep {
+  title: string;
+  body: string;
+}
+
+export interface TimelineDiagramProps {
+  steps: TimelineStep[];
+  caption?: string;
+}
+
+export function TimelineDiagram({ steps, caption }: TimelineDiagramProps) {
+  return (
+    <DiagramFigure caption={caption}>
+      <ol className={styles.timeline}>
+        {steps.map((step, index) => (
+          <li className={styles.timelineStep} key={step.title}>
+            <span className={styles.timelineMarker}>{index + 1}</span>
+            <div>
+              <h4 className={styles.timelineTitle}>{step.title}</h4>
+              <p className={styles.timelineBody}>{step.body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </DiagramFigure>
+  );
+}
+
+export interface InterfaceSurfaceDiagramProps {
+  title: string;
+  statusItems: string[];
+  workspaceTitle: string;
+  workspaceItems: string[];
+  evidenceItems: string[];
+  actions: string[];
+  caption?: string;
+}
+
+export function InterfaceSurfaceDiagram({
+  title,
+  statusItems,
+  workspaceTitle,
+  workspaceItems,
+  evidenceItems,
+  actions,
+  caption,
+}: InterfaceSurfaceDiagramProps) {
+  return (
+    <DiagramFigure caption={caption}>
+      <div className={styles.surfaceShell}>
+        <div className={styles.surfaceTopbar}>
+          <span className={styles.surfaceDot} />
+          <span className={styles.surfaceDot} />
+          <span className={styles.surfaceDot} />
+          <strong>{title}</strong>
+        </div>
+        <div className={styles.surfaceGrid}>
+          <aside className={styles.surfaceRail} aria-label="Agent status">
+            <p className={styles.surfaceLabel}>Status</p>
+            {statusItems.map((item, index) => (
+              <div className={styles.surfaceStatus} key={item}>
+                <span className={styles.surfaceStatusIndex}>{index + 1}</span>
+                <span>{item}</span>
+              </div>
+            ))}
+          </aside>
+          <section className={styles.surfaceWorkspace} aria-label={workspaceTitle}>
+            <p className={styles.surfaceLabel}>{workspaceTitle}</p>
+            {workspaceItems.map((item) => (
+              <div className={styles.surfaceLine} key={item}>
+                {item}
+              </div>
+            ))}
+            <div className={styles.surfaceActions}>
+              {actions.map((action) => (
+                <span className={styles.surfaceAction} key={action}>
+                  {action}
+                </span>
+              ))}
+            </div>
+          </section>
+          <aside className={styles.surfaceEvidence} aria-label="Evidence">
+            <p className={styles.surfaceLabel}>Evidence</p>
+            {evidenceItems.map((item) => (
+              <div className={styles.surfaceCitation} key={item}>
+                {item}
+              </div>
+            ))}
+          </aside>
+        </div>
+      </div>
+    </DiagramFigure>
+  );
+}

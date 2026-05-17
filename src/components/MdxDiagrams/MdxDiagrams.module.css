@@ -249,6 +249,224 @@
   font-size: 12px;
 }
 
+.comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.comparisonColumn {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+}
+
+.comparisonColumn[data-emphasis='strong'] {
+  border-color: var(--accent-dim);
+  background: var(--accent-bg);
+}
+
+.comparisonEyebrow {
+  margin: 0 0 8px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.comparisonTitle {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 20px;
+}
+
+.comparisonItems {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.comparisonItems li {
+  margin: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elevated-2);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.timeline {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timelineStep {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+}
+
+.timelineMarker {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.timelineTitle {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.timelineBody {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.surfaceShell {
+  min-width: 680px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+
+.surfaceTopbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.surfaceDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--border-strong);
+}
+
+.surfaceDot:first-child {
+  background: var(--accent);
+}
+
+.surfaceGrid {
+  display: grid;
+  grid-template-columns: 0.8fr 1.35fr 0.95fr;
+  min-height: 300px;
+}
+
+.surfaceRail,
+.surfaceWorkspace,
+.surfaceEvidence {
+  padding: 16px;
+}
+
+.surfaceRail,
+.surfaceWorkspace {
+  border-right: 1px solid var(--border);
+}
+
+.surfaceLabel {
+  margin: 0 0 12px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.surfaceStatus {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.surfaceStatusIndex {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 999px;
+  color: var(--accent);
+}
+
+.surfaceLine {
+  margin-bottom: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-elevated-2);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.surfaceActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.surfaceAction {
+  padding: 7px 10px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 999px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.surfaceCitation {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-bg);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 @media (max-width: 700px) {
   .figure {
     padding: 16px;
@@ -266,7 +484,22 @@
   .loopGrid,
   .hub,
   .sequence,
-  .layers {
+  .layers,
+  .comparison {
     grid-template-columns: 1fr;
+  }
+
+  .surfaceShell {
+    min-width: 0;
+  }
+
+  .surfaceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .surfaceRail,
+  .surfaceWorkspace {
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
   }
 }

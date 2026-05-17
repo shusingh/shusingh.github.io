@@ -1,0 +1,416 @@
+---
+title: Designing interfaces for agentic systems
+date: 2026-05-17
+slug: designing-interfaces-for-agentic-systems
+excerpt: Agentic products need interfaces for supervision, correction, evidence, and safe control. A practical guide to designing UI surfaces for systems that plan, call tools, revise artifacts, and sometimes need to stop.
+readTime: 12 min read
+tags:
+  - ui
+  - agents
+  - product-engineering
+  - ux
+---
+
+import {
+  ComparisonDiagram,
+  InterfaceSurfaceDiagram,
+  LayerDiagram,
+  TimelineDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Most agent interfaces start as chat boxes.
+
+That is understandable. Chat is the fastest way to prove the model can understand a user, ask a follow-up question, and produce a useful answer. It is also a familiar shape: input at the bottom, answer in the middle, history above.
+
+But chat is a weak default for production agentic systems.
+
+An agent is not only answering. It may be searching, planning, calling tools, editing an artifact, waiting on a human decision, retrying a failed step, or refusing because it does not have enough evidence. A single transcript hides most of that work.
+
+The UI job changes. The interface is not a wrapper around the model. It is the control surface for uncertain automation.
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'Weak default',
+    title: 'Chat skin',
+    items: [
+      'One transcript carries every decision',
+      'Intermediate work is hidden',
+      'Feedback is free text',
+      'Trust depends on model confidence',
+    ],
+  }}
+  right={{
+    eyebrow: 'Production shape',
+    title: 'Supervision surface',
+    items: [
+      'Status, artifact, evidence, and controls are separated',
+      'Tool calls and waiting states are visible',
+      'Feedback targets a specific object',
+      'Trust comes from inspectable sources and history',
+    ],
+  }}
+  caption="Agent UI should make supervision easier than scrolling through a transcript."
+/>
+
+The best agent UI does not feel like magic. It feels calm, inspectable, and correctable.
+
+## The interface has four jobs
+
+An agentic interface needs to answer four questions at all times:
+
+1. What is the system doing?
+2. What has it produced?
+3. Why should I trust it?
+4. How do I correct it?
+
+Those questions map to four UI surfaces.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Status',
+      items: ['Current step', 'Tool calls', 'Retries', 'Waiting states'],
+    },
+    {
+      title: 'Artifact',
+      items: ['Draft', 'Answer', 'Plan', 'Recommendation'],
+    },
+    {
+      title: 'Evidence',
+      items: ['Citations', 'Tool outputs', 'Diffs', 'Confidence signals'],
+    },
+  ]}
+  caption="A production agent UI separates what is happening, what changed, and why it is believable."
+/>
+
+The fourth surface is control: approve, reject, edit, retry, rollback, ask for more evidence, escalate to a human, or stop the run.
+
+If those controls are buried inside chat, the user has to translate intent into prose. That creates ambiguity. A button that says "revise this section" is more precise than a message that says "can you make this better?"
+
+## Supervision beats conversation
+
+The core design shift is this:
+
+**The user is not having a conversation with the agent. The user is supervising work.**
+
+That does not mean the UI should be cold or mechanical. It means the interface should expose the shape of the work.
+
+For a policy generation agent, the user needs to see the plan, the draft, the critic findings, and the source material. For a support agent, the user needs to see what account data was read and what action is about to be taken. For a coding agent, the user needs a diff, test output, and a rollback path.
+
+A useful product surface might look like this:
+
+<InterfaceSurfaceDiagram
+  title="Policy draft review"
+  statusItems={[
+    'Plan approved',
+    'Drafting section 3',
+    'Citation check running',
+    'Waiting on reviewer',
+  ]}
+  workspaceTitle="Artifact"
+  workspaceItems={[
+    'Section 3.2: retention exceptions tightened for marketplace launch scope.',
+    'Section 3.4: pending reviewer decision on jurisdiction-specific wording.',
+    'Critic finding: source coverage missing for deletion request edge case.',
+  ]}
+  evidenceItems={[
+    'DSA mapping table v12',
+    'Retention policy memo 2026-04',
+    'Reviewer note from legal',
+  ]}
+  actions={[
+    'Approve section',
+    'Request revision',
+    'Add evidence',
+    'Rollback',
+  ]}
+  caption="The transcript is not the product surface. The artifact, evidence, status, and controls are."
+/>
+
+Notice what is missing: there is no giant chat log asking the user to infer system state.
+
+The UI gives each object a place. Status lives in the rail. The artifact is central. Evidence is beside the claim it supports. Controls are attached to the thing they change.
+
+That structure is more important than visual polish. It lets users act without reverse-engineering what the agent thinks happened.
+
+## Streaming should explain progress
+
+Most products treat streaming as a typing effect.
+
+That is the least interesting version of streaming.
+
+For agentic systems, streaming should reveal progress and state transitions. The user should see when the agent is searching, when a tool starts, when the tool returns, when a source is attached, when the system hits a retry, and when the agent is waiting for input.
+
+<TimelineDiagram
+  steps={[
+    {
+      title: 'Task accepted',
+      body: 'The system confirms the user goal and shows the starting state.',
+    },
+    {
+      title: 'Context loaded',
+      body: 'Permissions, prior artifact state, and relevant documents are loaded before model work begins.',
+    },
+    {
+      title: 'Tool running',
+      body: 'The UI names the tool, shows the reason for calling it, and distinguishes reading from mutation.',
+    },
+    {
+      title: 'Evidence attached',
+      body: 'Sources are visible before the final prose asks for trust.',
+    },
+    {
+      title: 'Decision needed',
+      body: 'The system stops when human judgment is required instead of pretending certainty.',
+    },
+  ]}
+  caption="Stream events, not just tokens. The UI should show what the system is doing, not only what it is saying."
+/>
+
+Token streaming is pleasant. Event streaming is useful.
+
+The difference is product leverage. Token streaming makes the system feel fast. Event streaming makes the system feel understandable.
+
+Good event streams can power:
+
+- Progress indicators
+- Tool-call inspection
+- Debug traces
+- Audit logs
+- Latency breakdowns
+- Cancel and resume behavior
+
+The same event model can serve both the user interface and the engineering team. That is a good sign. The product surface and the operational surface are describing the same system.
+
+## Trust is a layout problem
+
+Trust is often discussed as a model problem: better model, better prompt, better guardrails.
+
+In practice, trust is also a layout problem.
+
+Where do citations appear? Can the user preview the source without losing context? Is the evidence attached to the claim or dumped at the bottom? Can the user tell whether a claim came from retrieval, a tool call, or model inference?
+
+A weak answer UI looks like this:
+
+```text
+Here is the answer.
+
+Sources:
+1. policy-doc-17
+2. regulation-note-4
+3. internal-memo-9
+```
+
+That is technically cited, but operationally weak. The user still has to map each sentence back to a source.
+
+A stronger interface attaches evidence to claims:
+
+```text
+Claim: Control 4.2 applies to seller onboarding in DE.
+Evidence: applicability matrix row 214, marketplace scope table v7
+Status: verified against current index
+Action: accept, ask for more evidence, flag as disputed
+```
+
+The citation is not a footnote. It is part of the object.
+
+That is especially important in regulated or high-stakes systems. The user should not have to trust the agent's tone. They should be able to inspect the support behind the claim.
+
+## Feedback should target objects
+
+Free-text feedback is flexible, but it is imprecise.
+
+"Make this stricter" might mean:
+
+- Change the tone
+- Narrow the scope
+- Add a citation
+- Remove an exception
+- Escalate to legal
+- Rewrite one section
+- Reject the whole draft
+
+When the UI has no structure, the model has to guess.
+
+Structured feedback reduces that ambiguity. Instead of one big chat box, give the user controls attached to the artifact:
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'Ambiguous',
+    title: 'Text feedback only',
+    items: [
+      'User says make this stricter',
+      'Model guesses target and intent',
+      'Revision is hard to audit',
+      'Rollback depends on transcript history',
+    ],
+  }}
+  right={{
+    eyebrow: 'Operational',
+    title: 'Object-level feedback',
+    items: [
+      'User selects section 3.2',
+      'Intent is revise exception language',
+      'Reason is stored with reviewer identity',
+      'Diff and rollback are available',
+    ],
+  }}
+/>
+
+This is not about removing natural language. It is about giving natural language a target.
+
+A better feedback record looks like:
+
+```text
+target: section 3.2
+operation: revise
+intent: tighten retention exception
+reason: current language allows unsupported marketplace case
+actor: reviewer id
+source_version: draft v5
+```
+
+The user may still type a note. The product should store that note as part of a structured operation.
+
+That distinction matters later, when someone asks why the artifact changed.
+
+## Design for interruptibility
+
+Agentic systems run longer than ordinary UI actions.
+
+They search, call tools, validate outputs, retry failures, and sometimes wait for human approval. A user who starts a task may need to pause it, inspect a partial result, cancel it, resume later, or hand it to another reviewer.
+
+That means the UI needs a task model, not just a loading spinner.
+
+A task model includes:
+
+- Current step
+- Started time
+- Owner
+- Inputs
+- Outputs so far
+- Cancellation state
+- Resume state
+- Error state
+- Next required action
+
+The worst possible agent UI is a spinner that lasts 45 seconds and then either prints a wall of text or fails.
+
+The better UI gives users confidence that the system is alive, bounded, and interruptible.
+
+## Use progressive control
+
+Different users want different levels of control.
+
+An executive reading a summary may only need the final answer plus citations. A compliance reviewer needs claim-level evidence and revision history. An engineer operating the system needs tool traces, model versions, and failure reasons.
+
+The mistake is showing everyone the most detailed view by default.
+
+Progressive control works better:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Default',
+      items: ['Final artifact', 'Primary status', 'Top citations'],
+    },
+    {
+      title: 'Inspect',
+      items: ['Claim evidence', 'Tool calls', 'Diffs'],
+    },
+    {
+      title: 'Operate',
+      items: ['Traces', 'Prompt version', 'Index version'],
+    },
+  ]}
+  caption="The interface should reveal depth when the user needs it, not drown every user in internals."
+/>
+
+This is how you keep the product usable without hiding the system.
+
+The default view should be calm. The inspection view should be precise. The operations view should be complete.
+
+## Make refusal useful
+
+Refusal is part of the interface.
+
+If an agent says "I cannot answer that," the UI should explain what is missing and what the user can do next.
+
+Bad refusal:
+
+```text
+I do not have enough information to answer.
+```
+
+Better refusal:
+
+```text
+I could not find current evidence for this claim.
+
+Searched:
+- control taxonomy v18
+- policy memos through 2026-05
+- marketplace applicability tables
+
+Next actions:
+- broaden search scope
+- attach a source
+- ask compliance reviewer
+```
+
+That turns a dead end into a workflow.
+
+For high-stakes systems, this is critical. A trustworthy agent is not one that always answers. A trustworthy agent knows when the evidence is insufficient and makes the next step clear.
+
+## The UI should encode the safety model
+
+If a tool mutates state, the UI should treat it differently from a read-only tool.
+
+Reading a document can stream quietly. Updating a ticket, submitting a report, changing a policy draft, or sending an email needs stronger affordances:
+
+- Preview before mutation
+- Explicit confirmation
+- Visible target
+- Permission boundary
+- Idempotency or duplicate warning
+- Post-action receipt
+- Undo or compensating action where possible
+
+The interface should make dangerous actions feel different.
+
+This is not only about user protection. It is about system honesty. The UI should teach the user what kind of action is happening.
+
+If every agent action looks like a chat message, the product hides risk. If the UI distinguishes read, draft, validate, submit, and rollback, the product exposes control.
+
+## A practical checklist
+
+When I review an agentic UI, I ask:
+
+- Can the user tell what the agent is doing right now?
+- Can the user distinguish model output from retrieved evidence?
+- Are tool calls visible at the right level of detail?
+- Is mutation handled differently from reading?
+- Can the user stop, retry, resume, or rollback?
+- Is feedback attached to an object, not just appended to chat?
+- Can a reviewer reconstruct why something changed?
+- Does the UI show refusal as a useful state?
+- Are citations close to the claims they support?
+- Does the default view stay calm while deeper inspection remains available?
+
+If the answer is no, the interface is probably still demo-shaped.
+
+## The main idea
+
+Agentic UI is not about making the model look smart.
+
+It is about helping the user supervise work that is partly automated, partly uncertain, and sometimes consequential.
+
+The best interfaces for agents make three things visible:
+
+- **Progress:** what the system is doing
+- **Grounding:** why the output is believable
+- **Control:** how the user can correct or stop it
+
+That is the difference between a chat demo and a product surface.
+
+The chat box is a useful input. It should not be the whole interface.
