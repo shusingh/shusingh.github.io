@@ -185,7 +185,7 @@ export function ProjectsIndexPage() {
                     <h2 id="open-source-title">Open source</h2>
                     <span>
                       {contributionEntries.length}{' '}
-                      {contributionEntries.length === 1 ? 'open PR' : 'open PRs'}
+                      {contributionEntries.length === 1 ? 'contribution' : 'contributions'}
                     </span>
                   </div>
                   <div className={styles.compactGrid}>
