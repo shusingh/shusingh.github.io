@@ -54,7 +54,7 @@ export function LoadingIntro() {
   return (
     <div className={styles.overlay} aria-hidden="true">
       <div className={styles.inner}>
-        <span className={styles.logo}>Shubham Singh</span>
+        <span className={styles.logo}>Production AI systems</span>
         <span className={styles.name}>
           Shubham <span className={styles.accent}>Singh</span>
         </span>
