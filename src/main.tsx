@@ -16,12 +16,15 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { ErrorFallback } from './components/ErrorFallback/ErrorFallback';
 import './index.css';
+import { initClarity } from './lib/clarity';
 
 const root = document.getElementById('root');
 
 if (!root) {
   throw new Error('Root element #root was not found.');
 }
+
+initClarity();
 
 createRoot(root).render(
   <StrictMode>

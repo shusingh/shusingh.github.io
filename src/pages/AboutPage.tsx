@@ -50,7 +50,7 @@ export function AboutPage() {
             </p>
             <p>
               If you're building serious AI infrastructure and looking for engineers who care about
-              the production path, <a href="mailto:ksingh.shubh@gmail.com">get in touch</a>.
+              the production path, <a href="mailto:shubh.singh.dev@gmail.com">get in touch</a>.
             </p>
           </div>
 

@@ -55,7 +55,7 @@ export function buildRss(): void {
     <atom:link href="${SITE_ORIGIN}/rss.xml" rel="self" type="application/rss+xml" />
     <description>${escapeXml(SITE_DESCRIPTION)}</description>
     <language>en-us</language>
-    <managingEditor>ksingh.shubh@gmail.com (${escapeXml(SITE_AUTHOR)})</managingEditor>
+    <managingEditor>shubh.singh.dev@gmail.com (${escapeXml(SITE_AUTHOR)})</managingEditor>
     <lastBuildDate>${lastBuildDate}</lastBuildDate>
     <pubDate>${latestPubDate}</pubDate>
 ${items}
