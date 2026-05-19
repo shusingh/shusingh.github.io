@@ -1,0 +1,66 @@
+---
+title: "Microsoft Agent Framework: nullable tool arguments"
+slug: "agent-framework"
+description: "Fixed tool invocation argument handling so explicitly provided null values survive validation for required nullable parameters, across direct FunctionTool invocation and automatic function calling."
+kind: "contribution"
+link: "https://github.com/microsoft/agent-framework/pull/5944"
+upstream: "microsoft/agent-framework"
+prUrl: "https://github.com/microsoft/agent-framework/pull/5944"
+prNumber: 5944
+tags: ["Python", "Agents", "Tool Calling", "Open Source"]
+year: 2026
+status: "open"
+featured: false
+order: 7
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+## Change intent
+
+Agent frameworks rely on schemas to distinguish missing arguments from explicitly provided values. That distinction matters when a tool parameter is both required and nullable.
+
+Before this PR, validated tool arguments could lose explicit `null` values during serialization. The tool call started with a meaningful value, but the invocation boundary treated it like absence. That is a subtle correctness bug: the model or caller did provide the argument, and the tool contract allowed `null`.
+
+This PR preserves explicit `null` values during tool invocation for both direct `FunctionTool.invoke()` calls and automatic function calling.
+
+<FlowDiagram
+  nodes={['tool schema', 'validated args', 'explicit null', 'invoke tool']}
+  caption="The fix keeps nullable values intact across the validation-to-invocation boundary."
+/>
+
+## Requirements
+
+- Preserve explicit `null` for required nullable parameters.
+- Keep missing arguments distinct from present-but-null arguments.
+- Apply the same behavior to direct tool invocation and automatic function calling.
+- Avoid broad changes to tool schema semantics.
+- Add regression coverage for both invocation paths.
+
+## High-level design
+
+<LayerDiagram
+  groups={[
+    { title: 'Input contract', items: ['required parameter', 'nullable value', 'schema validation'] },
+    { title: 'Invocation path', items: ['argument dump', 'FunctionTool.invoke', 'auto calling'] },
+    { title: 'Regression tests', items: ['direct invoke', 'automatic tool call', 'nullable required arg'] },
+  ]}
+  caption="The important boundary is not parsing. It is preserving caller intent after validation."
+/>
+
+The implementation keeps the fix close to the argument dump path. Validated arguments are serialized without dropping explicitly provided nullable fields. Tests cover the direct tool invocation path and the automatic function-calling path so both surfaces preserve the same contract.
+
+## Design decisions
+
+**Treat `null` as a value, not absence.** In tool-calling systems, `null` can be a deliberate argument. Dropping it changes the meaning of the call.
+
+**Patch the shared invocation boundary.** Fixing only direct invocation or only automatic calling would leave two subtly different contracts in the framework.
+
+**Add regression tests at user-visible paths.** The bug is not interesting as an internal serialization detail. It matters because users can define required nullable tool parameters and expect invocation to respect them.
+
+## Status
+
+Open as of May 19, 2026. The PR fixes issue `#5934` and adds regression coverage for required nullable tool parameters across direct invocation and automatic function calling.
