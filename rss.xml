@@ -7,8 +7,19 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Tue, 19 May 2026 14:39:35 GMT</lastBuildDate>
-    <pubDate>Sun, 17 May 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Tue, 19 May 2026 14:48:43 GMT</lastBuildDate>
+    <pubDate>Tue, 19 May 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Choosing analytics for a personal portfolio</title>
+      <link>https://shusingh.github.io/writing/choosing-analytics-for-a-personal-portfolio</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/choosing-analytics-for-a-personal-portfolio</guid>
+      <pubDate>Tue, 19 May 2026 00:00:00 GMT</pubDate>
+      <description>A small engineering decision note on picking analytics for a portfolio site: what to measure, what not to overbuild, and why Microsoft Clarity is a practical fit when the goal is understanding visitor behavior.</description>
+      <category>analytics</category>
+      <category>frontend</category>
+      <category>product-engineering</category>
+      <category>privacy</category>
+    </item>
     <item>
       <title>Designing interfaces for agentic systems</title>
       <link>https://shusingh.github.io/writing/designing-interfaces-for-agentic-systems</link>
