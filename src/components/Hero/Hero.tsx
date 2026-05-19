@@ -42,7 +42,7 @@ export function Hero() {
               </a>
               <a
                 className={`${styles.btn} ${styles.btnSecondary}`}
-                href="mailto:ksingh.shubh@gmail.com"
+                href="mailto:shubh.singh.dev@gmail.com"
               >
                 Get in touch
               </a>

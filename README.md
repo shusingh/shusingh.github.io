@@ -22,3 +22,8 @@ npm run deploy
 ```
 
 `npm run deploy` publishes `dist` to the `gh-pages` branch.
+
+## Analytics
+
+Set `VITE_CLARITY_PROJECT_ID` to enable Microsoft Clarity in production builds.
+Leave it empty for local development.
