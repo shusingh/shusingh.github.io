@@ -1,13 +1,13 @@
 ---
-title: "Dify: clean up unnecessary None defaults"
+title: "Dify: Redis-backed Socket.IO collaboration"
 slug: "dify"
-description: "Replaced unnecessary None defaults with empty-string defaults in OAuth and Swagger code paths where absence was already being checked by truthiness, removing a class of subtle type ambiguity."
+description: "Added Redis-backed Socket.IO manager selection for collaboration mode, allowing realtime events to coordinate across workers while preserving the in-memory manager for single-process deployments."
 kind: "contribution"
-link: "https://github.com/langgenius/dify/pull/36254"
+link: "https://github.com/langgenius/dify/pull/36359"
 upstream: "langgenius/dify"
-prUrl: "https://github.com/langgenius/dify/pull/36254"
-prNumber: 36254
-tags: ["Python", "OAuth", "Open Source"]
+prUrl: "https://github.com/langgenius/dify/pull/36359"
+prNumber: 36359
+tags: ["Python", "Redis", "Realtime", "Open Source"]
 year: 2026
 status: "open"
 featured: false
@@ -21,44 +21,44 @@ import {
 
 ## Change intent
 
-This PR cleans up places where Dify used `Optional[str] = None` even though the consuming code only checked truthiness. In those paths, `None` was not carrying meaningful state. It was just widening the type surface.
+Dify supports realtime collaboration over Socket.IO. In a single-process deployment, Socket.IO's default in-memory manager is enough. Once the application runs across multiple workers or instances, that assumption breaks: events emitted in one process are not automatically visible to clients connected through another process.
 
-The change moves those defaults to empty strings in OAuth and Swagger-related code paths, then updates tests to match the actual contract.
+This PR adds Redis-backed Socket.IO manager selection when collaboration mode is enabled. When collaboration is disabled, the app keeps the simpler in-memory manager.
 
 <FlowDiagram
-  nodes={['optional string default', 'truthy check', 'ambiguous contract', 'empty string default']}
-  caption="The PR narrows the type contract so absence is represented the same way the code already consumes it."
+  nodes={['collaboration config', 'manager selection', 'Redis manager', 'Socket.IO server']}
+  caption="The runtime chooses the coordination layer based on deployment mode instead of hardcoding one topology."
 />
 
 ## Requirements
 
-- Preserve existing runtime behavior.
-- Avoid changing OAuth semantics.
-- Keep Swagger generation output stable except for the cleaner default contract.
-- Update unit and integration tests around the touched paths.
-- Make future refactors less likely to treat `None` as a meaningful state.
+- Preserve the existing in-memory Socket.IO manager for non-collaboration deployments.
+- Use a Redis-backed manager when collaboration mode is enabled.
+- Keep manager selection close to Socket.IO server construction.
+- Avoid changing the public Socket.IO event surface.
+- Add unit coverage for both manager selection and server construction.
 
 ## High-level design
 
 <LayerDiagram
   groups={[
-    { title: 'Touched areas', items: ['OAuth helpers', 'console auth', 'Swagger generation'] },
-    { title: 'Contract cleanup', items: ['empty string default', 'truthiness preserved', 'narrower type'] },
-    { title: 'Validation', items: ['unit tests', 'integration coverage', 'generated spec checks'] },
+    { title: 'Config', items: ['collaboration mode', 'Redis URL', 'runtime topology'] },
+    { title: 'Socket layer', items: ['manager selection', 'server construction', 'event routing'] },
+    { title: 'Coverage', items: ['in-memory path', 'Redis path', 'server init tests'] },
   ]}
-  caption="Small cleanup PRs still need a design lens: identify the contract, change the representation, and prove behavior did not drift."
+  caption="The contribution is small, but it changes an important production boundary: local realtime state versus shared realtime coordination."
 />
 
-The implementation audits each `Optional[str] = None` usage before changing it. The important question is whether `None` means something distinct from an empty string. If not, the type should not imply a state the code does not actually handle.
+The implementation keeps the Socket.IO setup explicit. The extension checks whether collaboration mode is enabled, constructs the appropriate manager, and passes it into the Socket.IO server. Tests cover the default single-process path and the Redis-backed collaboration path.
 
 ## Design decisions
 
-**Preserve truthiness behavior.** The goal is contract cleanup, not logic change.
+**Do not make Redis mandatory.** Single-process deployments should not pay operational complexity for a manager they do not need.
 
-**Keep auth paths conservative.** OAuth code is not a place for clever refactors. The PR stays narrow and test-backed.
+**Keep topology behind configuration.** Runtime mode should decide whether realtime events need cross-worker coordination. Callers should not need to know the manager implementation.
 
-**Update tests with the code.** Type cleanup is easy to under-test because the runtime behavior appears unchanged. The tests document the intended contract.
+**Test server construction, not only helper logic.** The meaningful contract is that the Socket.IO server receives the correct manager. Testing only a helper function would miss integration drift.
 
 ## Status
 
-Open as of submission. The PR is intentionally small, scoped, and reviewable.
+Open as of May 18, 2026. The PR fixes issue `#36266` and adds unit coverage for manager selection and Socket.IO server construction.
