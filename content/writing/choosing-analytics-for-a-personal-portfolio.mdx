@@ -1,0 +1,268 @@
+---
+title: Choosing analytics for a personal portfolio
+date: 2026-05-19
+slug: choosing-analytics-for-a-personal-portfolio
+excerpt: "A small engineering decision note on picking analytics for a portfolio site: what to measure, what not to overbuild, and why Microsoft Clarity is a practical fit when the goal is understanding visitor behavior."
+readTime: 8 min read
+tags:
+  - analytics
+  - frontend
+  - product-engineering
+  - privacy
+---
+
+import {
+  ComparisonDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Most personal websites do not need product analytics.
+
+That sounds obvious, but it is easy to forget once you start wiring tools into a site. A portfolio can quickly become a tiny enterprise dashboard in disguise: page views, funnels, feature flags, replay, attribution, custom events, dashboards nobody checks, and a pile of scripts that make the site heavier than the thing they are supposed to measure.
+
+The better question is simpler:
+
+**What decision will this data help me make?**
+
+For a portfolio, the decisions are not complicated. I want to know whether the site is doing its job for the people I care about: senior engineering managers, AI infrastructure teams, and engineers who might want to compare notes.
+
+That means the analytics layer should answer questions like:
+
+- Are visitors reading the case studies or bouncing from the homepage?
+- Do people click the resume link?
+- Which projects or writing pieces get attention?
+- Are important calls to action visible enough?
+- Are visitors getting stuck, rage-clicking, or missing obvious navigation?
+- Is the site fast enough that analytics is not hurting the thing being measured?
+
+That is the whole job.
+
+## The constraints
+
+For this site, the constraints are:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Useful',
+      items: ['Page traffic', 'Referrers', 'Scroll depth', 'Click behavior'],
+    },
+    {
+      title: 'Lightweight',
+      items: ['No backend to operate', 'No paid plan to justify', 'Small script surface'],
+    },
+    {
+      title: 'Respectful',
+      items: ['Avoid collecting sensitive input', 'Mask content where needed', 'Do not turn a portfolio into surveillance'],
+    },
+  ]}
+  caption="A portfolio analytics setup should be useful enough to guide design changes and quiet enough to stay out of the way."
+/>
+
+The important one is the last constraint. A portfolio is not a SaaS product. I do not need to identify users, track them across a funnel, or stitch sessions to a CRM.
+
+I need enough signal to improve the site.
+
+That changes the tool choice.
+
+## The obvious options
+
+There are a few common choices for this kind of site.
+
+### Google Analytics
+
+Google Analytics is the default option because it is everywhere. It gives good traffic reporting, acquisition channels, geography, device data, events, and ecosystem integration.
+
+For this portfolio, it is too much.
+
+The downside is not that Google Analytics is bad. The downside is that it solves a broader problem than I have. It is designed for serious marketing analytics. A portfolio does not need attribution modeling, conversion events, audience reports, or a dashboard that encourages over-reading tiny traffic samples.
+
+When traffic volume is small, precision can become fake confidence. Seeing that one article had 11 visitors and another had 7 does not mean the first idea is better. It may only mean one person clicked twice.
+
+### Plausible, Fathom, and GoatCounter
+
+Privacy-friendly analytics tools are probably the cleanest answer if the main need is traffic reporting.
+
+They tend to be simple, lightweight, and focused:
+
+- Page views
+- Referrers
+- Top pages
+- Device and country-level summaries
+- Minimal or no cookie usage, depending on the tool
+- Dashboards that do not pretend the site is a growth machine
+
+This is attractive. If my only question were "how many people visited each page," I would probably choose one of these.
+
+The missing piece is behavioral debugging. A portfolio is a designed object. The interesting failures are often visual and interaction-based:
+
+- People never scroll far enough to see the projects.
+- The resume button looks secondary when it should be primary.
+- A tag looks clickable but is missed.
+- A case study page has a strong title but weak internal flow.
+- A mobile user taps around the nav because the hit targets are unclear.
+
+Simple traffic analytics can tell me which pages were visited. They usually cannot show me where the interface is failing.
+
+### PostHog
+
+PostHog is powerful. Product analytics, funnels, feature flags, session replay, event capture, experiments, surveys, and more. If I were building a product, this would be a serious option.
+
+For a personal portfolio, it is overpowered.
+
+The issue is not only bundle weight or setup. It is operating posture. PostHog invites the right questions for a product team: activation, retention, funnels, cohorts, feature adoption. Those are not the main questions here.
+
+A portfolio has a simpler feedback loop:
+
+1. See whether people are reading and clicking.
+2. Notice where the design causes friction.
+3. Improve the page.
+4. Re-check behavior.
+
+I do not need a full product analytics stack to do that well.
+
+### Microsoft Clarity
+
+Microsoft Clarity sits in an interesting middle ground.
+
+It gives basic traffic visibility, but its real value is behavioral:
+
+- Session recordings
+- Heatmaps
+- Click maps
+- Scroll maps
+- Dead clicks
+- Rage clicks
+- JavaScript error visibility
+- Basic acquisition and page insights
+
+That lines up well with a portfolio because the hard part is not counting visitors. The hard part is understanding how visitors actually move through the page.
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'Traffic analytics',
+    title: 'What happened?',
+    items: [
+      'Which page was visited',
+      'Where the visitor came from',
+      'What device they used',
+      'How many visits the page received',
+    ],
+  }}
+  right={{
+    eyebrow: 'Behavior analytics',
+    title: 'How did it feel?',
+    items: [
+      'Where people clicked',
+      'How far they scrolled',
+      'Which UI elements were ignored',
+      'Where the page created friction',
+    ],
+  }}
+  caption="For a portfolio, behavior often matters more than aggregate traffic."
+/>
+
+The other practical advantage: it is free. That matters for a personal site. The tool should not create a recurring cost unless it clearly changes the quality of the decisions being made.
+
+## The tradeoff
+
+Clarity is not automatically the best analytics tool.
+
+If I wanted the cleanest privacy-first pageview analytics, I would reach for Plausible, Fathom, or GoatCounter. If I were building a product and needed funnels, feature flags, cohorts, and event analysis, I would consider PostHog. If I were running paid acquisition or SEO-heavy growth work, Google Analytics would be easier to justify.
+
+For this site, Clarity is the practical fit because the questions are behavioral:
+
+- Is the homepage hierarchy working?
+- Are visitors noticing the strongest case studies?
+- Does the writing section get inspected or skipped?
+- Does the cursor and background polish help or distract?
+- Are people opening the resume?
+- Are people interacting with tags and navigation the way I expect?
+
+Those questions are easier to answer with recordings and heatmaps than with a pageview table.
+
+The privacy caveat matters. Session replay tools deserve more caution than simple aggregate analytics. Even on a portfolio, the implementation should avoid collecting sensitive input, keep forms minimal, and rely on masking where appropriate. The site should not have private user workflows anyway, which lowers the risk, but it does not remove the responsibility.
+
+This is the decision:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Do not need',
+      items: ['User identity', 'CRM attribution', 'Deep funnels', 'Experiment platform'],
+    },
+    {
+      title: 'Do need',
+      items: ['Scroll behavior', 'Click behavior', 'Friction signals', 'Referrers'],
+    },
+    {
+      title: 'Choice',
+      items: ['Microsoft Clarity', 'Production-only script', 'No custom identity tracking'],
+    },
+  ]}
+/>
+
+## The implementation shape
+
+The implementation should be boring.
+
+For a Vite site, the tracking ID can live in an environment variable:
+
+```text
+VITE_CLARITY_PROJECT_ID=...
+```
+
+The app loads Clarity only in production. Local development should not create noise in analytics, and developers should not have to remember to disable a script while testing.
+
+The script loader should also be idempotent. If React Strict Mode or a route transition causes initialization code to run more than once, the script should not be appended twice.
+
+The setup looks like this conceptually:
+
+```text
+read project id
+if not production, return
+if script already exists, return
+create script element
+append to document head
+```
+
+That is enough. No framework change. No backend. No analytics abstraction layer. No premature custom event taxonomy.
+
+The first useful events are the ones Clarity gives by default. If a future version of the site needs custom events, they should be added only when they answer a specific design question.
+
+## What I will watch
+
+The first dashboard I care about is not a dashboard.
+
+It is a short review loop:
+
+- Watch a few recordings from real visits.
+- Check whether users reach the work, projects, and writing sections.
+- Look for dead clicks on decorative or ambiguous elements.
+- Check scroll depth on long case studies.
+- Check whether resume and email actions are discoverable.
+- Make one design change at a time.
+
+The last point matters. Analytics becomes noise if every observation turns into five simultaneous changes. A small site benefits from slower interpretation.
+
+I want the data to improve judgment, not replace it.
+
+## Why this belongs on a portfolio
+
+This is a small decision, but small decisions reveal engineering taste.
+
+The point is not "Clarity is better." The point is fit.
+
+Good engineering is often choosing the smallest tool that gives you the signal you need without pulling the system into a different operating model. For this site, Clarity gives enough visibility into visitor behavior without turning a portfolio into a product analytics project.
+
+That is the general lesson:
+
+**Measure the behavior that can change your design. Ignore the rest until it earns its place.**
+
+## Further reading
+
+- [Microsoft Clarity setup](https://learn.microsoft.com/en-ca/clarity/setup-and-installation/clarity-setup)
+- [Microsoft Clarity masking](https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-masking)
+- [Plausible Analytics docs](https://plausible.io/docs/)
+- [PostHog product analytics](https://posthog.com/product-analytics)
+- [GoatCounter](https://www.goatcounter.com/)
