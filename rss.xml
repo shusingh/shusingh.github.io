@@ -7,8 +7,19 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Tue, 19 May 2026 14:48:43 GMT</lastBuildDate>
-    <pubDate>Tue, 19 May 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Sat, 23 May 2026 18:28:05 GMT</lastBuildDate>
+    <pubDate>Sat, 23 May 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>The hidden engineering behind citations in RAG systems</title>
+      <link>https://shusingh.github.io/writing/hidden-engineering-behind-rag-citations</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/hidden-engineering-behind-rag-citations</guid>
+      <pubDate>Sat, 23 May 2026 00:00:00 GMT</pubDate>
+      <description>Citations in RAG systems are not a formatting detail. They are an engineering contract between retrieval, generation, rendering, auditability, and user trust.</description>
+      <category>rag</category>
+      <category>retrieval</category>
+      <category>production</category>
+      <category>ai-infrastructure</category>
+    </item>
     <item>
       <title>Choosing analytics for a personal portfolio</title>
       <link>https://shusingh.github.io/writing/choosing-analytics-for-a-personal-portfolio</link>
