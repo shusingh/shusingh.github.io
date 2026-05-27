@@ -7,8 +7,19 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Sat, 23 May 2026 18:28:05 GMT</lastBuildDate>
-    <pubDate>Sat, 23 May 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Wed, 27 May 2026 14:50:59 GMT</lastBuildDate>
+    <pubDate>Wed, 27 May 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Why internal tools feel worse than consumer apps</title>
+      <link>https://shusingh.github.io/writing/why-internal-tools-feel-worse</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/why-internal-tools-feel-worse</guid>
+      <pubDate>Wed, 27 May 2026 00:00:00 GMT</pubDate>
+      <description>Internal tools are often built for delivery, not use. The result is software with real business value, captive users, weak ownership, and a surprising amount of avoidable pain.</description>
+      <category>internal-tools</category>
+      <category>product-engineering</category>
+      <category>ui</category>
+      <category>systems</category>
+    </item>
     <item>
       <title>The hidden engineering behind citations in RAG systems</title>
       <link>https://shusingh.github.io/writing/hidden-engineering-behind-rag-citations</link>
