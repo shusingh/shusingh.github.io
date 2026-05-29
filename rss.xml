@@ -7,8 +7,28 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Wed, 27 May 2026 14:50:59 GMT</lastBuildDate>
-    <pubDate>Wed, 27 May 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Fri, 29 May 2026 20:46:06 GMT</lastBuildDate>
+    <pubDate>Fri, 29 May 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Idempotency: the under-loved primitive</title>
+      <link>https://shusingh.github.io/writing/idempotency-the-underloved-primitive</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/idempotency-the-underloved-primitive</guid>
+      <pubDate>Fri, 29 May 2026 00:00:00 GMT</pubDate>
+      <description>Retries are not an edge case. They are the normal operating condition of any distributed system. Idempotency is the property that makes retries safe, and it is the difference between at-least-once delivery and a customer charged twice.</description>
+      <category>distributed-systems</category>
+      <category>reliability</category>
+      <category>infrastructure</category>
+    </item>
+    <item>
+      <title>TypeScript at the API boundary: contracts that do not lie</title>
+      <link>https://shusingh.github.io/writing/typescript-at-the-api-boundary</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/typescript-at-the-api-boundary</guid>
+      <pubDate>Thu, 28 May 2026 00:00:00 GMT</pubDate>
+      <description>TypeScript types are erased at runtime. At the edges of your system, where data crosses a network or a process boundary, the type is a claim nobody is checking. Here is how to make those claims true instead of hopeful.</description>
+      <category>typescript</category>
+      <category>api-design</category>
+      <category>full-stack</category>
+    </item>
     <item>
       <title>Why internal tools feel worse than consumer apps</title>
       <link>https://shusingh.github.io/writing/why-internal-tools-feel-worse</link>
