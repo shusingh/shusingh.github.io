@@ -1,0 +1,273 @@
+---
+title: 'TypeScript at the API boundary: contracts that do not lie'
+date: 2026-05-28
+slug: typescript-at-the-api-boundary
+excerpt: TypeScript types are erased at runtime. At the edges of your system, where data crosses a network or a process boundary, the type is a claim nobody is checking. Here is how to make those claims true instead of hopeful.
+readTime: 11 min read
+tags:
+  - typescript
+  - api-design
+  - full-stack
+---
+
+import {
+  ComparisonDiagram,
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+There is a moment in almost every TypeScript codebase where the type system stops describing reality and starts describing a wish.
+
+It usually looks like this:
+
+```ts
+const res = await fetch('/api/user/123');
+const user = (await res.json()) as User;
+```
+
+From that line forward, the compiler treats `user` as a fully formed `User`. Autocomplete works. `user.email.toLowerCase()` compiles. Every downstream function that takes a `User` accepts it without complaint. The code is type-safe in the sense the compiler cares about.
+
+It is also a lie. `res.json()` returns `any`. The `as User` is not a check. It is an assertion that silences the compiler. Nothing on that line verified that the response has an `email`, that `email` is a string, or that the server even returned the shape you think it did. The type is a label slapped on a value that arrived from outside your program, and the label was written by you, not by the data.
+
+This is the API boundary problem. TypeScript is a compile-time system. Types are erased before the code runs. At the boundary, where bytes cross from a network, a database driver, an environment variable, or another process into your program, there is no type. There is only the value that actually showed up, and your hope about what it is.
+
+This post is about closing that gap: where the boundaries are, why casts and typed wrappers do not protect you, and what a contract that does not lie actually looks like.
+
+## The two type systems you are actually using
+
+It helps to be precise about what TypeScript checks and what it does not.
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'compile time',
+    title: 'What TypeScript checks',
+    items: [
+      'Code you wrote against types you wrote',
+      'Internal function calls and object shapes',
+      'Erased completely before runtime',
+      'Catches typos, wrong arity, shape drift in your code',
+    ],
+  }}
+  right={{
+    eyebrow: 'run time',
+    title: 'What actually arrives',
+    items: [
+      'JSON from a network you do not control',
+      'Rows from a database that schema-migrated',
+      'Env vars, message payloads, webhook bodies',
+      'Checked by nothing unless you check it',
+    ],
+  }}
+  caption="The compiler validates the left column. The right column is where bugs come from."
+/>
+
+Inside your program, TypeScript is excellent. If you have a `User` and you pass it to a function expecting a `Post`, you find out instantly. That is real value and it is most of what people mean when they say a codebase is type-safe.
+
+But every value your program reasons about originated somewhere. A lot of it originated outside the part of the world TypeScript can see. The compiler has no opinion about whether the JSON body of an HTTP response matches the interface you assigned to it, because by the time that JSON exists, the types are gone.
+
+So you are running two type systems at once. One is enforced by the compiler. The other is enforced by nothing, and it is the one that fails in production.
+
+## Where the boundaries actually are
+
+People hear "API boundary" and think of `fetch`. That is one boundary. It is not close to all of them. Anywhere a value enters your program from a place the compiler cannot statically verify, you have a boundary that lies by default:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Network edges',
+      items: [
+        'HTTP responses from your own backend',
+        'Third-party API responses',
+        'Inbound webhook bodies',
+        'WebSocket and SSE messages',
+      ],
+    },
+    {
+      title: 'Storage edges',
+      items: [
+        'Database rows (schema drifted since the type was written)',
+        'JSON / JSONB columns',
+        'Cache values (Redis returns strings)',
+        'Files and blobs you parse',
+      ],
+    },
+    {
+      title: 'Process and config edges',
+      items: [
+        'process.env (every value is string | undefined)',
+        'CLI arguments',
+        'Message queue / event payloads',
+        'LLM and tool-call outputs',
+      ],
+    },
+  ]}
+  caption="Every item here is typed by you, not by the data, until you validate it."
+/>
+
+The pattern across all of these: a value crosses into your program, and at the crossing you have an opportunity to either check it or assert it. A cast asserts. A schema parse checks. The difference is invisible at compile time and decisive at runtime.
+
+`process.env` is the cleanest example because TypeScript already tells the truth there. `process.env.PORT` is typed `string | undefined`, not `number`. The number you want does not exist yet. Most teams paper over this with `Number(process.env.PORT)` or a cast and move on, which is exactly the boundary lie in miniature: the type now says `number` but nothing guaranteed the env var was set or numeric.
+
+## Why the obvious fixes do not fix it
+
+Before the right answer, it is worth being clear about why the common ones fall short, because they all feel like they solve the problem.
+
+**Casting (`as User`).** A cast is a message to the compiler, not a runtime operation. It generates no code. It cannot inspect the value. `as` is you overriding the compiler's uncertainty with your certainty, and your certainty about external data is the thing that was never justified in the first place.
+
+**A typed fetch wrapper.** Generics make this feel safe:
+
+```ts
+async function getJSON<T>(url: string): Promise<T> {
+  const res = await fetch(url);
+  return res.json() as Promise<T>;
+}
+
+const user = await getJSON<User>('/api/user/123');
+```
+
+This is worse than the inline cast, not better, because it launders the lie behind a reusable abstraction. `T` is whatever the caller wrote. The function does nothing to make the value a `T`. You have built a machine that stamps `User` on arbitrary JSON and hands it to the rest of the app with full confidence.
+
+**Shared types between client and server.** Genuinely useful, and you should do it. But sharing the `interface User` only guarantees both sides agree on what the type is named and shaped in source. It does not guarantee the running server returns that shape. The server can serialize a `Date` to a string, omit a nullable field, or be deployed a version behind the client. The shared type makes drift less likely at authoring time and does nothing at runtime.
+
+The throughline: none of these produce a runtime check. They produce a more confident lie.
+
+## Parse, don't validate, don't cast
+
+The principle that fixes this is "parse, don't validate," and the distinction is sharper than it sounds.
+
+A validator takes an `unknown` and returns a boolean: is this a `User`? You are then trusted to use it as a `User`, and the type system takes your word for it via a type guard. The knowledge that the check happened lives in your discipline, not in the type.
+
+A parser takes an `unknown` and returns a `User` or throws. After it returns, the value is a `User` because it provably has that shape, and the type reflects a fact rather than an assertion. The check and the type are the same operation.
+
+In practice this means a runtime schema library (zod, valibot, arktype, io-ts; I reach for zod most often) at every boundary, with the static type derived from the schema rather than written separately:
+
+```ts
+import { z } from 'zod';
+
+const User = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  displayName: z.string().min(1),
+  createdAt: z.coerce.date(),
+  plan: z.enum(['free', 'pro', 'enterprise']),
+});
+
+type User = z.infer<typeof User>;
+
+async function getUser(id: string): Promise<User> {
+  const res = await fetch(`/api/user/${id}`);
+  if (!res.ok) throw new ApiError(res.status);
+  return User.parse(await res.json());
+}
+```
+
+Three things changed, and each one matters.
+
+First, `User.parse` runs at runtime. If the server returns an object missing `email`, or with `plan: "trial"`, the parse throws at the boundary with a precise path to the bad field. The error happens where the bad data entered, not three layers deep when `user.email.toLowerCase()` blows up on `undefined` and you are staring at a stack trace that points at your rendering code instead of your API.
+
+Second, `type User = z.infer<typeof User>` derives the type from the schema. There is one source of truth. You cannot let the type and the validator drift apart, because the type *is* the validator. Add a field to the schema and the type updates; the compiler then forces you to handle it everywhere.
+
+Third, `z.coerce.date()` does the conversion the boundary always secretly needed. JSON has no date type. The server sent a string. The naive `as User` left `createdAt` typed as `Date` while it was actually a string, a bug that hides until someone calls `.getTime()` on it. The parser turns it into a real `Date` and the type is finally honest.
+
+<FlowDiagram
+  nodes={['raw response (unknown)', 'schema.parse', 'typed value', 'typed core logic']}
+  caption="One parse step converts unknown into a value the rest of the app can trust."
+/>
+
+## Put the boundary in one place, keep the core pure
+
+The architectural move that makes this sustainable is to concentrate parsing at the edges and let everything inside assume validated data.
+
+The shape I aim for:
+
+- **Edge layer.** Every inbound value (route handlers, API clients, queue consumers, config loaders) parses immediately. Nothing past this layer ever sees `any` or `unknown` from the outside world.
+- **Core layer.** Pure functions over already-validated domain types. These never call `JSON.parse`, never touch `process.env`, never re-check shapes. They are allowed to be confident because the edge already earned it.
+- **Outbound edge.** The same discipline in reverse: validate what you send and what you store, so your service is not the one corrupting someone else's boundary.
+
+This is the same instinct as "validate at the perimeter, trust the interior" from network design, applied to types. The payoff is that the messy, defensive, branchy code lives in a thin shell, and the bulk of your logic is written against types that are true. When a parse fails, you know exactly which boundary failed and why.
+
+A config module is the smallest complete example:
+
+```ts
+const Env = z.object({
+  PORT: z.coerce.number().int().positive().default(3000),
+  DATABASE_URL: z.string().url(),
+  STRIPE_KEY: z.string().startsWith('sk_'),
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+});
+
+export const env = Env.parse(process.env);
+```
+
+If a required variable is missing or malformed, the process fails on startup with a readable message naming the variable, instead of failing at 3 a.m. when some code path finally reads `STRIPE_KEY` and sends `undefined` to Stripe. The boundary moved the failure from "deep in runtime, far from the cause" to "immediately, at the cause." That relocation is most of the value.
+
+## Model errors as values, not surprises
+
+Once data is honest, the next lie to remove is the one about failure. A function typed `Promise<User>` claims it returns a `User`. It might also throw five different ways, none of which appear in the signature. The happy path is typed; the failure path is folklore.
+
+For boundary operations that fail in expected, recoverable ways, I prefer to make failure part of the return type using a discriminated union:
+
+```ts
+type Result<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: 'not_found' | 'unauthorized' | 'invalid_response' };
+
+async function getUser(id: string): Promise<Result<User>> {
+  const res = await fetch(`/api/user/${id}`);
+  if (res.status === 404) return { ok: false, error: 'not_found' };
+  if (res.status === 401) return { ok: false, error: 'unauthorized' };
+
+  const parsed = User.safeParse(await res.json());
+  if (!parsed.success) return { ok: false, error: 'invalid_response' };
+
+  return { ok: true, value: parsed.data };
+}
+```
+
+Now the caller cannot reach `.value` without first narrowing on `ok`, and the compiler enforces that every failure mode is considered. The contract describes the whole function, not just the path where everything went right.
+
+This is not the right tool everywhere. Genuinely exceptional conditions (programmer errors, unrecoverable invariants) should still throw; wrapping everything in `Result` turns into noise. The rule I use: if a caller can reasonably do something different depending on the failure, it belongs in the type. If the only sane response is to crash or bubble up, an exception is fine.
+
+## Contracts evolve, so evolve them additively
+
+A contract that does not lie today still lies the day the other side changes. The boundary discipline has to survive versioning.
+
+The practices that hold up:
+
+- **Additive changes only on shared contracts.** New fields are optional or defaulted. You never repurpose a field's meaning or tighten a type without a version bump, because old clients and in-flight messages still carry the old shape.
+- **Parse leniently, produce strictly.** When reading, accept unknown extra fields rather than rejecting them, so a newer producer does not break an older consumer. When writing, emit exactly the documented shape.
+- **Version the schema, not just the endpoint.** If a breaking change is unavoidable, the new schema lives alongside the old one and the boundary routes by version, the same way a well-behaved data pipeline keeps old transformation paths alive while adding new ones.
+
+The mental model is that your schema is a contract with the past and the future, not just with the version of the other service currently deployed.
+
+## Tradeoffs and limitations
+
+A few honest things, because the parse-everything gospel has real costs.
+
+**Validation is not free.** Parsing a large payload on a hot path costs CPU. For most web workloads it is noise next to the network round-trip, but for very large arrays or extremely high-throughput internal services it can matter. The answer is to measure, then relax deliberately at specific hot boundaries, not to skip validation reflexively because it might be slow.
+
+**Trusted internal boundaries can be lighter.** A call between two services you own, in the same deploy, sharing generated types from a single proto or OpenAPI source, has a much lower drift risk than a third-party API or a browser client. It is reasonable to validate hard at untrusted edges and lean on codegen for trusted ones. The mistake is treating an untrusted edge as if it were trusted because it was convenient.
+
+**Codegen versus hand-written schemas is a real fork.** If you control both sides, generating types and validators from one source (OpenAPI, protobuf, a shared zod package) beats hand-writing schemas that can drift from the server. Hand-written schemas shine exactly where you do not control the other side and need to assert what you actually depend on, which is often a subset of what the API sends.
+
+**Schemas duplicate the server's truth.** Your client-side `User` schema is your belief about the server's contract. If the server is the source of truth and you hand-maintain the client schema, you have two definitions that can disagree. This is the argument for shared or generated schemas, and the reason a hand-written boundary schema should encode what you *depend on*, not a guess at the full payload.
+
+**Validation cannot check semantics.** A schema confirms `email` is a string shaped like an email. It cannot confirm the email belongs to this user, or that `balance` reflects reality. The boundary defends shape and basic invariants. Business correctness is a different layer and pretending otherwise gives false comfort.
+
+## What I would do differently
+
+**Establish the boundary discipline on day one.** Retrofitting parsing into a codebase that has thousands of `as` casts and `any` leaks is genuinely painful, because you cannot tell which casts were load-bearing lies and which were harmless. Starting with "every edge parses" costs almost nothing up front and compounds.
+
+**Turn on the compiler flags that expose the lie.** `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, and a lint rule banning `as` outside of narrow, reviewed cases surface most of the places where the type system was being told what to think. They are annoying for a week and clarifying forever.
+
+**Treat `any` from a library as a boundary.** Untyped or loosely typed dependencies leak `any` into otherwise strict code, and `any` is contagious: it disables checking on everything it touches. Wrapping a sketchy library behind a small typed, parsed adapter contains the blast radius.
+
+## What this work taught me
+
+The slogan version: a TypeScript type is a promise about a value, and at the boundary, nobody is keeping the promise but you.
+
+The compiler is a fast, tireless reviewer of the code you wrote against the types you wrote. It is completely blind to whether the data that shows up at runtime matches those types, and the data that shows up at runtime is where production incidents live. Closing that gap is not exotic. It is one parse step at each edge, types derived from schemas instead of asserted next to them, and the discipline to keep the messy validation in a thin shell so the core can be honestly confident.
+
+Do that, and "type-safe" stops being a thing you say about your codebase and starts being a thing that is actually true at the places it was previously only hoped.
+
+If you are wrangling type safety across a client, a backend, and a few third-party APIs that all disagree about reality, [get in touch](mailto:shubh.singh.dev@gmail.com).

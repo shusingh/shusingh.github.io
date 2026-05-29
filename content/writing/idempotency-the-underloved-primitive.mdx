@@ -1,0 +1,190 @@
+---
+title: 'Idempotency: the under-loved primitive'
+date: 2026-05-29
+slug: idempotency-the-underloved-primitive
+excerpt: Retries are not an edge case. They are the normal operating condition of any distributed system. Idempotency is the property that makes retries safe, and it is the difference between at-least-once delivery and a customer charged twice.
+readTime: 12 min read
+tags:
+  - distributed-systems
+  - reliability
+  - infrastructure
+---
+
+import {
+  ComparisonDiagram,
+  FlowDiagram,
+  SequenceDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+A request times out. The client did not get a response. Now it has to decide: did the work happen, or not?
+
+It cannot tell. A timeout means the answer never came back, not that the work never ran. The request may have completed perfectly and the response got lost on the way home. Or it may have died before touching anything. From the client's side, those two cases are identical, and they demand opposite actions. If the work did not happen, you must retry. If it did, retrying might charge the card again, send the email twice, or create a second order.
+
+This is not a rare situation you can engineer around. In any system with a network between two parts, it is the normal weather. Timeouts happen. Connections drop. Load balancers recycle. Queues redeliver. Users double-click. The question is never "will a request be sent more than once," it is "what happens when one is."
+
+Idempotency is the answer. It is one of the highest-leverage and least-discussed properties in distributed systems, and most production incidents that involve duplicate charges, doubled inventory adjustments, or replayed side effects trace back to its absence.
+
+## What idempotency actually means
+
+An operation is idempotent if performing it more than once has the same effect as performing it once. The first call does the work. Every identical call after it produces the same result and changes nothing further.
+
+It is worth separating this from two ideas it gets confused with.
+
+It is not the same as "read-only." A `GET` is trivially idempotent because it changes nothing, but idempotency is interesting precisely for operations that *do* change state. The goal is a write you can safely repeat.
+
+It is not the same as "exactly-once delivery." Exactly-once delivery, in the strict sense, is largely a myth in distributed messaging; you cannot guarantee a message is delivered to and processed by a consumer exactly one time across all failure modes. What you can build is at-least-once delivery plus idempotent processing, which produces exactly-once *effects*. The message may arrive five times. The effect happens once. That combination is the achievable, and correct, target.
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'the trap',
+    title: 'At-least-once alone',
+    items: [
+      'Message or request may arrive many times',
+      'Each arrival re-runs the side effect',
+      'Duplicate charges, doubled inventory, repeated emails',
+      'Correctness depends on nothing ever retrying',
+    ],
+  }}
+  right={{
+    eyebrow: 'the fix',
+    title: 'At-least-once + idempotency',
+    items: [
+      'Message or request may still arrive many times',
+      'Repeat arrivals are recognized and deduplicated',
+      'Effect happens exactly once regardless of delivery count',
+      'Correctness survives retries, replays, and races',
+    ],
+  }}
+  caption="You do not get exactly-once delivery. You get exactly-once effects by making processing idempotent."
+/>
+
+## Two kinds: natural and imposed
+
+Some operations are idempotent by their nature. Others have to be made that way. Knowing which one you are dealing with tells you how much machinery you need.
+
+**Naturally idempotent operations** reach the same end state no matter how many times you apply them. "Set the user's status to active" is idempotent: run it once or ten times, the status is active. "Add 10 dollars to the balance" is not: each run moves the number. The first is an assignment, the second is an increment, and that single distinction is the whole game. Whenever you can model a write as "make the state be X" rather than "change the state by delta," you get idempotency for free.
+
+This is the deep reason `PUT` is idempotent in HTTP and `POST` is not. `PUT` says "make this resource equal to this representation." Repeating it is harmless. `POST` says "create something new" or "perform this action," and repeating it creates or performs again. The protocol encoded the distinction decades ago and most of us learned it as a rule to memorize rather than the load-bearing idea it is.
+
+**Imposed idempotency** is what you build when the operation is not naturally safe to repeat, which is most interesting operations: charge a card, place an order, enqueue a payout, send a notification. You cannot make "charge 50 dollars" naturally idempotent because charging is inherently an action with an external effect. So you wrap it in a mechanism that recognizes a repeat and refuses to do the work twice.
+
+## The idempotency key pattern
+
+The standard mechanism, and the one Stripe popularized for payment APIs, is the client-supplied idempotency key.
+
+The client generates a unique key per logical operation (a UUID is fine) and sends it with the request, usually as a header. The server uses that key as the deduplication identity. The first time it sees a key, it does the work and records the result against the key. Every later request with the same key returns the recorded result without redoing anything.
+
+<SequenceDiagram
+  leftTitle="Client"
+  rightTitle="Server"
+  events={[
+    { side: 'left', label: 'POST /charge  Idempotency-Key: abc-123' },
+    { side: 'right', label: 'key abc-123 unseen -> charge card -> store result' },
+    { side: 'right', label: 'response lost to a timeout' },
+    { side: 'left', label: 'retry: POST /charge  Idempotency-Key: abc-123' },
+    { side: 'right', label: 'key abc-123 seen -> return stored result, do NOT charge again' },
+    { side: 'left', label: 'receives the original result, exactly one charge happened' },
+  ]}
+  caption="The key turns an ambiguous retry into a safe, deduplicated repeat."
+/>
+
+The key properties of a correct implementation:
+
+- **The key identifies the operation, not the request.** A retry of the same logical action carries the same key. Two genuinely different actions carry different keys. This is the client's responsibility, and it is why the client generates the key before the first attempt and reuses it across retries, rather than minting a new one each time.
+- **The result is stored, not just a flag.** Recording only "abc-123 was handled" is not enough. The retry needs the *original response*, because the caller still needs the answer it never received. You store the status code and body (or enough to reconstruct them) keyed by the idempotency key.
+- **Storage and the side effect commit together.** This is the subtle part covered below. If you do the work but crash before recording the key, the retry will redo the work. The key write and the effect have to be atomic, or as close to it as you can get.
+
+## The race condition everyone forgets
+
+The naive implementation has a bug that does not show up in testing and shows up immediately under real concurrency:
+
+```text
+1. look up key abc-123 -> not found
+2. do the work (charge the card)
+3. store the result under abc-123
+```
+
+Now imagine two requests with the same key arrive within milliseconds, which is exactly what an impatient client retrying on a slow connection produces. Both execute step 1, both find nothing, both proceed to step 2, and the card is charged twice. The idempotency mechanism did nothing because the check and the write were not atomic.
+
+The fix is to claim the key before doing the work, using the database to enforce uniqueness rather than your application logic:
+
+<FlowDiagram
+  nodes={[
+    'insert key row (unique constraint)',
+    'conflict? return stored / in-progress',
+    'no conflict -> do work',
+    'update row with result',
+  ]}
+  direction="vertical"
+  caption="Insert-first turns the race into a database uniqueness check, which databases are good at."
+/>
+
+The flow becomes: insert a row for the key with a status of `in_progress`, relying on a unique constraint. If the insert succeeds, you won the race and you do the work, then update the row to `completed` with the stored result. If the insert fails on the constraint, someone else owns this key, and you either return the stored result (if `completed`) or signal that the operation is still in flight (often a `409` so the client backs off and retries).
+
+This shifts the atomicity guarantee onto the database's unique index, which is precisely the thing databases are built to enforce correctly under concurrency. Your application stops trying to be a lock manager.
+
+The `in_progress` state matters more than it looks. It handles the case where two requests race *and* the first is still running. Without it, the second request either redoes the work or returns an empty result. With it, the second request knows the operation is underway and can wait or tell the client to retry shortly.
+
+## Atomicity between the key and the effect
+
+The hardest case is when the side effect lives in a different system than the idempotency record. You charge the card through an external payment provider, and you store the idempotency key in your own database. There is no single transaction spanning both.
+
+If you charge first and record the key second, a crash in between leaves no record, and the retry charges again. If you record the key first and charge second, a crash in between leaves a key that claims success for a charge that never happened, and the retry returns a fake success.
+
+There is no perfect local fix, but there are good ones:
+
+- **Push the key down to the downstream system.** The best option when available: the payment provider itself accepts an idempotency key. Then the dedup happens at the system that owns the effect, and your retries are safe even if your own record is lost. This is why mature payment and messaging APIs expose idempotency keys; they are letting you make their boundary safe.
+- **Record intent, then reconcile.** Write the key in `in_progress`, attempt the effect, then update to `completed`. On recovery, any key stuck in `in_progress` past a timeout gets reconciled by querying the downstream system for the actual outcome rather than blindly retrying. This is the outbox and saga family of patterns.
+- **Make the effect itself carry the key.** If the downstream record can store your idempotency key, you can always query "did the operation with key abc-123 already happen?" and recover the truth instead of guessing.
+
+The general principle: the closer the deduplication identity lives to the system that owns the side effect, the fewer ways the two can disagree.
+
+## Idempotency in pipelines, not just APIs
+
+This is not only a request-response concern. Batch and streaming systems live or die by it, and it is where I have spent a lot of time.
+
+A regulatory data pipeline I led the design for processed tens of millions of records per month, and a non-negotiable property was that rerunning a given reporting window produced the same output as the first run. Reruns happen constantly in batch systems: a node dies, a deploy interrupts a job, an upstream fix requires reprocessing. If a rerun double-counts records or appends duplicate rows, the output is corrupt in a domain where corrupt output is a compliance liability.
+
+The techniques are the same idea wearing work clothes:
+
+- **Idempotent batch boundaries.** A run is keyed by its window. Re-running the same window overwrites or no-ops rather than appending, so the output is a function of the input, not of how many times you ran it.
+- **Deterministic partitioning and deduplication.** Records carry stable identities, so a replay can recognize what it has already emitted.
+- **Replayable error isolation.** Bad records are quarantined and reprocessed separately, and the replay merges without duplicating the records that already succeeded.
+
+The streaming version of this is "process each message idempotently so at-least-once delivery is safe." A consumer that reads a message, updates state, and crashes before acknowledging will see that message again. If processing keyed on the message's identity is idempotent, the redelivery is harmless. If it is not, every consumer restart corrupts state.
+
+## Idempotency for non-deterministic and expensive calls
+
+A newer wrinkle: idempotency around operations that are expensive or non-deterministic, like LLM calls.
+
+The non-determinism makes "same effect" subtle. Calling a model twice with the same prompt can return different text, so naive retries do not just waste money, they can change the answer a user already received. Keying the call by a request identity and caching the first response gives you both idempotency and cost control: the retry returns the original generated answer rather than paying for a second, possibly different one. In a system where the same logical question must yield a stable answer (compliance Q&A, for instance), this is a correctness requirement, not an optimization.
+
+The lesson generalizes: whenever an operation is costly, externally visible, or non-deterministic, an idempotency key plus a stored result turns "retry" from a liability into a safe, cheap no-op.
+
+## Tradeoffs and limitations
+
+**Idempotency keys need a lifetime.** You cannot store every key forever. Stripe expires them after 24 hours; the right window depends on how long retries can realistically arrive. Too short and a legitimate late retry re-executes. Too long and your dedup store grows without bound. This is a real operational decision, not a default you can ignore.
+
+**Request fingerprint mismatches need handling.** What if a client reuses a key but changes the request body? That is a client bug, but your server has to decide: reject the mismatch loudly (the safer choice, since silently serving the old result for a new request hides the bug), or ignore the new body. Detecting it requires storing a fingerprint of the original request alongside the key.
+
+**Not all side effects are dedupable.** Sending an email through a provider that does not support idempotency keys means a redelivery can send twice no matter how careful your own records are. You contain this by pushing the effect behind your own idempotent boundary, but some external effects are genuinely at-least-once and you design the user experience to tolerate the occasional duplicate.
+
+**It adds a write to every mutating path.** Imposed idempotency means an extra insert and an extra lookup on operations that previously did neither. For most systems this is trivial next to the work being protected. For extremely high-throughput paths it is a real cost, and you weigh it against the blast radius of a duplicate.
+
+**It does not make a non-idempotent action become idempotent by decree.** The key recognizes the repeat; the work behind it still has to either be safe to skip or safe to redo. If your "do the work" step has its own internal side effects that fire before the dedup check, the key does not save you. The whole path has to respect the boundary.
+
+## What I would do differently
+
+**Design the operation to be naturally idempotent before reaching for keys.** A surprising number of "we need idempotency keys" problems dissolve when you model the write as a state assignment instead of a delta, or let the client supply the resource ID so a create becomes an upsert. Imposed idempotency is the fallback for when the operation genuinely cannot be made naturally safe, not the first tool.
+
+**Treat the idempotency key as part of the API contract from the start.** Adding it later means clients are already retrying unsafely in production, and you are reconciling damage instead of preventing it. The cost of supporting a key on day one is small; the cost of retrofitting it after the first duplicate-charge incident is not.
+
+**Make the in-flight state explicit.** The implementations that bit me were the ones that modeled only "seen" and "not seen" and forgot "currently running." Concurrent retries are the common case, not the rare one, and the in-progress state is what makes them safe.
+
+## What this work taught me
+
+The mental shift is to stop treating retries as exceptional and start treating them as the default. The network will deliver your request more than once. Your queue will redeliver. Your users will double-click. None of that is a bug to be eliminated; it is the environment your code runs in. Idempotency is how you make that environment survivable.
+
+Once you internalize that, idempotency stops feeling like defensive boilerplate and starts looking like what it is: the primitive that lets at-least-once systems behave as if effects happened exactly once. It is not glamorous, it rarely shows up in an architecture diagram, and it is the difference between a system you can safely retry and one where every timeout is a coin flip with your customer's money.
+
+If you are designing APIs or pipelines where a duplicated operation would be expensive or unsafe and want to compare notes, [get in touch](mailto:shubh.singh.dev@gmail.com).

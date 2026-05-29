@@ -46,7 +46,7 @@ export function AboutPage() {
             </p>
             <p>
               Outside work I'm at the gym at 5 AM, doing street photography on a Fujifilm X100VI, or
-              somewhere in a non-fiction stack. Lately: Adlerian psychology and re-reading Kleppmann.
+              somewhere in a non-fiction stack. Lately: Taoist philosophy and re-reading Kleppmann.
             </p>
             <p>
               If you're building serious AI infrastructure and looking for engineers who care about
