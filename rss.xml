@@ -7,8 +7,20 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Fri, 29 May 2026 20:46:06 GMT</lastBuildDate>
-    <pubDate>Fri, 29 May 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Sat, 30 May 2026 19:41:04 GMT</lastBuildDate>
+    <pubDate>Sat, 30 May 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>How I rendered 50k agent spans at 60fps</title>
+      <link>https://shusingh.github.io/writing/rendering-50k-agent-spans-at-60fps</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/rendering-50k-agent-spans-at-60fps</guid>
+      <pubDate>Sat, 30 May 2026 00:00:00 GMT</pubDate>
+      <description>A trace viewer for LLM agents has to draw tens of thousands of spans and stay smooth while you pan, zoom, and scrub. Here is the rendering pipeline that gets there - structure-of-arrays geometry, a segment-tree cull, level-of-detail, a decoupled render loop, and off-main-thread parsing.</description>
+      <category>frontend</category>
+      <category>performance</category>
+      <category>canvas</category>
+      <category>agents</category>
+      <category>web-workers</category>
+    </item>
     <item>
       <title>Idempotency: the under-loved primitive</title>
       <link>https://shusingh.github.io/writing/idempotency-the-underloved-primitive</link>
