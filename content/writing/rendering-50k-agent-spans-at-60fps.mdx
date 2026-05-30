@@ -1,0 +1,208 @@
+---
+title: How I rendered 50k agent spans at 60fps
+date: 2026-05-30
+slug: rendering-50k-agent-spans-at-60fps
+excerpt: A trace viewer for LLM agents has to draw tens of thousands of spans and stay smooth while you pan, zoom, and scrub. Here is the rendering pipeline that gets there - structure-of-arrays geometry, a segment-tree cull, level-of-detail, a decoupled render loop, and off-main-thread parsing.
+readTime: 11 min read
+tags:
+  - frontend
+  - performance
+  - canvas
+  - agents
+  - web-workers
+---
+
+import {
+  FlowDiagram,
+  ComparisonDiagram,
+  LayerDiagram,
+  HubDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+I built [Agent Replay](https://agent-replay.onrender.com), a time-travel debugger for LLM agent runs: drop in a trace, scrub it like a video, watch tool calls and model steps fire on a waterfall, replay token streams, and diff two runs. ([Live demo](https://agent-replay.onrender.com), [source](https://github.com/shusingh/agent-replay).)
+
+In [an earlier post](/writing/designing-interfaces-for-agentic-systems) I argued that production agent UIs should stream events, not just tokens - that the same event model can power progress indicators, tool-call inspection, debug traces, and latency breakdowns. Agent Replay is what that looks like when you actually build it. And the moment you build it, you hit a wall: a real agent run is tens of thousands of spans, and the browser falls over long before you get there.
+
+This is the story of getting one trace to **50,000 spans at a locked 60fps** - smooth pan, zoom, and scrub - and the handful of techniques that made it possible.
+
+## The wall: DOM dies first
+
+The obvious way to draw a waterfall is a div per span. It works beautifully at 200 spans and collapses somewhere around 10,000. Every node is layout, style, paint, and memory; a few tens of thousands of them and the main thread is gone before the user touches anything.
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'The naive shape',
+    title: 'A div per span',
+    items: [
+      'Layout + style + paint per node',
+      'Memory grows with the whole trace',
+      'Stalls around 10k nodes',
+      'Pan/zoom re-layout the document',
+    ],
+  }}
+  right={{
+    eyebrow: 'What 50k needs',
+    title: 'One canvas, drawn by hand',
+    items: [
+      'No per-span DOM, no layout cost',
+      'Only the visible window is touched',
+      'Geometry in flat typed arrays',
+      'A render loop that never re-renders React',
+    ],
+  }}
+  caption="Past a certain span count, the browser's own layout engine is the bottleneck. The fix is to stop asking it to lay out the trace."
+/>
+
+So the timeline is a single `<canvas>`, and everything below is in service of one frame budget: **16.6ms**. Miss it and the demo reads as a slideshow. The five techniques that keep frames under budget are an ingest pipeline, structure-of-arrays geometry, a culling index, level-of-detail, and a decoupled render loop.
+
+<FlowDiagram
+  nodes={['JSONL trace', 'parse', 'TraceIndex', 'cull to viewport', 'draw frame']}
+  caption="The trace is parsed once into a render-ready index; every frame then reads from that index, never from the original objects."
+/>
+
+## Geometry is structure-of-arrays, not objects
+
+The render loop iterates every visible span, every frame. If each span is an object, that iteration is pointer-chasing across the heap, and the garbage collector wakes up mid-pan. So span geometry does not live in objects. It lives in one flat typed array per field.
+
+```ts
+// Not this: an array of objects (pointer-chasing, GC pressure on the hot path)
+type Span = { startMs: number; endMs: number; depth: number; kind: Kind };
+const spans: Span[];
+
+// This: structure-of-arrays - one typed array per field, indexed by spanIndex
+startMs: Float32Array;
+endMs: Float32Array;
+depth: Uint16Array;
+kind: Uint8Array; // a small integer code per kind
+status: Uint8Array;
+```
+
+The geometry the renderer needs is now a few contiguous numeric buffers. Iterating 50k spans is a tight loop over packed memory with zero allocation. The heavy, rarely-touched data - inputs, outputs, chat messages, attributes - sits in a separate lazy store keyed by the same index, so the hot path never pulls a megabyte of JSON into cache to draw a rectangle.
+
+This one decision is most of the performance. Everything cache-friendly downstream depends on the geometry being flat.
+
+## Only draw what is on screen
+
+At any zoom level the viewport shows a time window. The renderer should touch only the spans inside it, which means answering one question fast, every frame: *which spans overlap `[t0, t1]`?*
+
+Scanning all 50k to find a few hundred is wasteful. Instead, spans are sorted by start time once at ingest, and a **max-end segment tree** is built over that order. A span overlaps the window when its start is before `t1` and its end is after `t0`; the tree lets the query skip whole subtrees whose maximum end falls before the window. The visible set comes back in `O(log n + k)` - logarithmic in the trace size, linear only in what is actually visible.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Built once at ingest',
+      items: ['Spans sorted by start', 'Max-end segment tree', 'Per-span token streams', 'id to index maps'],
+    },
+    {
+      title: 'Queried every frame',
+      items: ['Spans overlapping the viewport', 'Active spans at the playhead', 'Token prefix at time T'],
+    },
+    {
+      title: 'Never on the hot path',
+      items: ['Inputs and outputs', 'Chat messages', 'Attributes and raw JSON'],
+    },
+  ]}
+  caption="The same interval structure answers viewport culling and the time-travel playhead's 'what is running at time T' - both are interval queries."
+/>
+
+The nice part: the playhead's "world at time T" - the set of spans active at a given instant - is the same query with a zero-width window. One index serves both culling and time travel.
+
+## Level of detail: shape, not mush
+
+Culling bounds the work to the visible window, but a fully zoomed-out 50k trace still has every span on screen, most of them narrower than a pixel. Drawing tens of thousands of sub-pixel rectangles is both slow and useless - it reads as noise.
+
+So below a ~2px width, a span stops being a rectangle. It accumulates into a per-row, per-column density buffer that renders as a heat band: opacity by how many spans landed in that column, color by the most salient kind there. Zoomed out, the trace reads as shape and density. Zoom in and individual bars resolve again.
+
+The payoff is that draw calls are capped at roughly rows times columns, **regardless of span count**. A 50k trace and a 200k trace cost about the same to draw when fully zoomed out, because the screen only has so many pixels.
+
+## The render loop never re-renders React
+
+This is the part that most often gets missed. You can have perfect geometry and still ship a slideshow if React is in the hot path.
+
+Pan, zoom, hover, and scrub happen at pointer speed. If each one calls `setState`, React reconciles and commits on every mouse move, and the frame budget is gone to framework overhead. So the viewport, the playhead, and the drag state do not live in React state. They live in refs.
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'Slideshow',
+    title: 'State in React',
+    items: [
+      'Every pan calls setState',
+      'Reconcile + commit per mouse move',
+      'Framework work inside the frame budget',
+      'Janky at any real span count',
+    ],
+  }}
+  right={{
+    eyebrow: '60fps',
+    title: 'State in refs, one rAF loop',
+    items: [
+      'Pointer handlers mutate a ref',
+      'A single requestAnimationFrame owns the canvas',
+      'React renders only on settle (selection)',
+      'The loop is on-demand: a frame only when dirty',
+    ],
+  }}
+  caption="React is great for the panels around the canvas. It should not be in the loop that runs at 120Hz."
+/>
+
+A single `requestAnimationFrame` loop owns the canvas. Pointer handlers mutate the viewport ref and mark the canvas dirty; the loop draws at most once per frame and idles completely when nothing moves. React still drives the inspector, the tree, and the transport bar - but those update on *settle* (you select a span, you let go of the scrubber), not on every frame. The boundary is the whole trick: refs for the things that move at pointer speed, React for the things that change when you stop.
+
+## Parsing happens off the main thread
+
+A 50k-span trace is a ~50MB JSONL file. Parsing it and building the index takes a few hundred milliseconds - enough to freeze the tab if it runs on the main thread while the user is waiting.
+
+So ingest runs in a Web Worker. It parses the JSONL, builds the typed arrays and the segment tree, and hands the result back to the main thread by **transferring** the underlying `ArrayBuffer`s rather than copying them. Transfer is a pointer handoff: the buffers move to the main thread in constant time, no serialization of 50MB.
+
+<HubDiagram
+  left={{ title: 'Main thread', body: 'Stays responsive; receives buffers by transfer (zero-copy).' }}
+  center="Comlink"
+  right={[
+    { title: 'Worker: parse', body: 'JSONL to objects' },
+    { title: 'Worker: index', body: 'typed arrays + segment tree' },
+    { title: 'Worker: transfer', body: 'hand back ArrayBuffers' },
+  ]}
+  caption="The main thread never blocks on ingest. The numeric buffers move across the boundary by transfer; only strings and payloads are cloned."
+/>
+
+## The numbers
+
+Render time per frame, worst case - fully zoomed out, every span processed - on a 1440px canvas:
+
+| spans  | draw / frame | of the 16.6ms budget |
+| -----: | -----------: | -------------------: |
+|  1,500 |       0.6 ms |                 3.7% |
+| 10,000 |       5.0 ms |                29.9% |
+| 50,000 |   **6.9 ms** |                41.4% |
+
+Ingest (parse JSONL plus build the index), median of five runs:
+
+| spans   | JSONL    | parse    | index    | total        |
+| ------: | -------: | -------: | -------: | -----------: |
+|   1,000 |   1.0 MB |   6.6 ms |   1.5 ms |       8.2 ms |
+|  10,000 |  10.4 MB |  56.0 ms |  11.6 ms |      67.6 ms |
+|  50,000 |  52.2 MB | 302.1 ms |  53.8 ms | **355.9 ms** |
+| 100,000 | 104.1 MB | 861.0 ms | 165.9 ms |    1026.9 ms |
+
+Two things stand out. The 50k frame lands at **6.9ms**, comfortably inside the budget, because level-of-detail makes draw cost grow with screen pixels, not span count. And building the index is cheap (54ms at 50k) - the cost is `JSON.parse` over a fat string, which is exactly why it belongs in a worker.
+
+## What the engine unlocks
+
+Performance here is not a vanity metric. The interval index that makes culling fast is the same primitive that makes the product features possible:
+
+- **Time travel.** A scrubbable playhead that reconstructs the world at any instant is just the active-span query at a moving `T`.
+- **Token replay.** The selected model span's response types out in sync with the playhead, found by binary-searching its token stream for the prefix at `T`.
+- **Diff.** Two runs align by span path, and added / removed / changed spans fall out of comparing the two indices.
+
+Event streaming, in the earlier post, was the idea. A fast index over those events is what turns the idea into something you can actually scrub through at 60fps.
+
+## The main idea
+
+Rendering a lot of anything in the browser comes down to the same moves, and they generalize well past agent traces:
+
+- **Keep the hot-path data flat.** Structure-of-arrays beats array-of-objects whenever you iterate every frame.
+- **Never touch what is off screen.** A good index makes the visible set `O(log n + k)`, and often answers more than one question.
+- **Degrade to shape when detail is sub-pixel.** Level-of-detail caps cost at the screen, not the dataset.
+- **Keep your framework out of the frame.** Refs for what moves at pointer speed; React for what changes on settle.
+- **Do the heavy parse off the main thread,** and hand results back by transfer, not copy.
+
+None of these is exotic. Put together, they are the difference between a viewer that stalls at 10k spans and one that scrubs 50k without dropping a frame.

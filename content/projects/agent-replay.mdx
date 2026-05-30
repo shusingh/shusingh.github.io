@@ -1,0 +1,98 @@
+---
+title: "Agent Replay"
+slug: "agent-replay"
+description: "A browser-based time-travel debugger for LLM agent runs: scrub a trace like a video on a Canvas waterfall, replay token streams, and diff two runs. Renders 50k+ spans at 60fps."
+kind: "personal"
+link: "https://github.com/shusingh/agent-replay"
+repo: "https://github.com/shusingh/agent-replay"
+liveUrl: "https://agent-replay.onrender.com"
+tags: ["React", "TypeScript", "Canvas", "Web Workers", "Performance"]
+year: 2026
+status: "active"
+featured: true
+order: 1
+stat:
+  number: "60fps"
+  label: "at 50,000 spans"
+diagram:
+  nodes: ["JSONL trace", "Web Worker index", "Canvas waterfall"]
+  caption: "Parsing and indexing run off the main thread; the canvas draws only the visible window from flat typed arrays."
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+## System intent
+
+When an LLM agent runs, it does a lot of invisible work: it plans, calls tools, calls the model, retries failures, and accumulates state. You usually only see the final answer. If a run is slow or wrong, there is nothing to inspect.
+
+Agent Replay makes that work visible. You drop in a trace and scrub through it like a video: a Canvas waterfall shows every span on a time axis, a playhead reconstructs what was running at any instant, the focused model span replays its tokens as they streamed, and two runs can be diffed structurally and by timing.
+
+It mirrors the internal tooling AI labs build - trace viewers, agent debuggers, eval surfaces - and the load-bearing constraint is performance: a real run is tens of thousands of spans, and it has to stay at 60fps while you pan, zoom, and scrub.
+
+<FlowDiagram
+  nodes={['JSONL trace', 'parse', 'TraceIndex', 'cull to viewport', 'draw frame']}
+  caption="A trace is parsed once into a render-ready index; every frame reads from that index, never from the original objects."
+/>
+
+## Requirements
+
+- Render a 50k-span waterfall and hold 60fps during pan, zoom, and scrub.
+- Reconstruct the world at any time T: which spans are active, which tokens have streamed.
+- Drive every panel from real per-span data, not hardcoded placeholders.
+- Parse multi-MB traces without freezing the tab.
+- Stay accessible: the canvas needs a keyboard-navigable equivalent.
+- Load instantly as a static demo, with no backend required.
+
+## High-level design
+
+The timeline is a single `<canvas>`, never DOM - the browser's layout engine is the bottleneck past ~10k nodes. Span geometry lives in flat typed arrays (structure-of-arrays), so the render loop iterates 50k spans per frame with no allocation. A max-end segment tree answers "which spans overlap the viewport?" in `O(log n + k)`, and below ~2px a span degrades into a density band so a zoomed-out trace reads as shape, not mush.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Ingest (Web Worker)',
+      items: ['Parse JSONL', 'Build typed arrays', 'Build interval index', 'Transfer buffers zero-copy'],
+    },
+    {
+      title: 'Render (one rAF loop)',
+      items: ['Cull to the viewport', 'Bucket draws by color', 'Level-of-detail bands', 'Playhead + active spans'],
+    },
+    {
+      title: 'React (on settle)',
+      items: ['Inspector tabs', 'Token replay', 'Span tree (a11y)', 'Diff view'],
+    },
+  ]}
+  caption="The hot path (parse, index, draw) stays off React; React drives the panels that change when you stop, not every frame."
+/>
+
+A single `requestAnimationFrame` loop owns the canvas, with viewport and playhead state in refs so interaction never triggers a React render. Parsing and indexing happen in a Web Worker and the typed-array buffers are transferred back zero-copy. The full engineering story is in the writeup: [How I rendered 50k agent spans at 60fps](/writing/rendering-50k-agent-spans-at-60fps).
+
+## Design decisions
+
+**Canvas, not DOM.** A div per span collapses around 10k nodes. One canvas drawn by hand scales to 50k and beyond.
+
+**Geometry as structure-of-arrays.** One typed array per field (start, end, depth, kind) keeps the per-frame loop cache-friendly and GC-free. Heavy payloads sit in a lazy store keyed by index, off the hot path.
+
+**One index, many features.** The interval structure that culls the viewport also powers the time-travel playhead and run diffing - they are all interval and alignment queries over the same data.
+
+**Keep the framework out of the frame.** Refs for what moves at pointer speed, React for what changes on settle.
+
+## Performance
+
+Worst-case render is ~6.9ms per frame at 50k spans (fully zoomed out, every span processed) - comfortably inside the 16.6ms budget, because level-of-detail makes draw cost grow with screen pixels, not span count. Parsing plus indexing a 50k-span (~52MB) trace takes ~356ms, which is why it runs in a worker.
+
+<LoopDiagram
+  steps={['load trace', 'parse + index in worker', 'cull visible window', 'draw frame']}
+  decision="Frame under 16.6ms?"
+  yes="60fps pan / zoom / scrub"
+  no="degrade detail to density bands"
+  caption="The frame budget is the design constraint; level-of-detail is the release valve that keeps it met at any zoom."
+/>
+
+## What I would improve
+
+The next phase is a thin backend (Node + SQLite + WebSocket) for live mode, so a run can stream into the UI in real time as it executes - bars growing toward "now," tokens arriving live. After that: a WebGL renderer to push past 500k spans, and an eval overlay to compare scores across a cohort of runs.
