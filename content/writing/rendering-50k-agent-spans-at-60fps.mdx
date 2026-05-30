@@ -21,6 +21,8 @@ import {
 
 I built [Agent Replay](https://agent-replay.onrender.com), a time-travel debugger for LLM agent runs: drop in a trace, scrub it like a video, watch tool calls and model steps fire on a waterfall, replay token streams, and diff two runs. ([Live demo](https://agent-replay.onrender.com), [source](https://github.com/shusingh/agent-replay).)
 
+<img src="/agent-replay-demo.gif" alt="Agent Replay: scrubbing the canvas waterfall, replaying tokens in sync with the playhead, and diffing two runs" />
+
 In [an earlier post](/writing/designing-interfaces-for-agentic-systems) I argued that production agent UIs should stream events, not just tokens - that the same event model can power progress indicators, tool-call inspection, debug traces, and latency breakdowns. Agent Replay is what that looks like when you actually build it. And the moment you build it, you hit a wall: a real agent run is tens of thousands of spans, and the browser falls over long before you get there.
 
 This is the story of getting one trace to **50,000 spans at a locked 60fps** - smooth pan, zoom, and scrub - and the handful of techniques that made it possible.
