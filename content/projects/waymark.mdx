@@ -1,0 +1,139 @@
+---
+title: "Waymark"
+slug: "waymark"
+description: "A local-first terminal companion for personal memory: capture notes, import documents, track decisions, ask grounded questions with sources, and publish as a real Python CLI on PyPI."
+kind: "personal"
+link: "https://github.com/shusingh/waymark"
+repo: "https://github.com/shusingh/waymark"
+liveUrl: "https://shusingh.github.io/waymark/"
+tags: ["Python", "CLI", "SQLite", "Textual", "Local-first", "PyPI"]
+year: 2026
+status: "released"
+featured: true
+order: 0
+stat:
+  number: "PyPI"
+  label: "published as waymark-memory"
+diagram:
+  nodes: ["capture", "local SQLite memory", "ask with sources"]
+  caption: "Manual capture and explicit imports write to a local SQLite store; retrieval answers only from saved memories and citations."
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+## System intent
+
+Waymark is a local-first terminal companion for personal memory. It captures
+messy thoughts, imports explicit files, tracks decisions, saves reflections, and
+answers questions over the user's own context with visible sources.
+
+The product constraint is privacy. Personal memory is not a casual data stream.
+Waymark stores data locally in SQLite, makes AI optional, and avoids background
+folder scans or hidden indexing jobs. The CLI can be installed from PyPI as
+`waymark-memory`, while the command users run stays simple:
+
+```bash
+waymark
+```
+
+<FlowDiagram
+  nodes={['capture', 'timeline', 'ask with sources', 'reflect', 'review decisions']}
+  caption="The core loop is intentionally small: save the memory, find it again, ask grounded questions, and review what changed over time."
+/>
+
+## Requirements
+
+- Work offline for manual capture, timeline review, decisions, and backups.
+- Store user data in a local SQLite database, not a hosted service.
+- Make file imports explicit and preview-first.
+- Answer questions only from saved memories and imported sources.
+- Keep AI optional through local Ollama integration.
+- Package the tool like real software: docs, tests, releases, GitHub artifacts,
+  and PyPI publishing.
+
+## High-level design
+
+The project is a Python CLI/TUI built around a local data model. Typer owns the
+command surface, Textual provides the guided terminal app, and SQLite is the
+source of truth for entries, tags, sources, reflections, decisions, and backup
+metadata.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Interface',
+      items: ['Typer commands', 'Textual guided app', 'doctor checks'],
+    },
+    {
+      title: 'Memory model',
+      items: ['entries', 'sources', 'tags', 'reflections', 'decisions'],
+    },
+    {
+      title: 'Portability',
+      items: ['explicit imports', 'backup bundles', 'GitHub + PyPI releases'],
+    },
+  ]}
+  caption="The CLI and TUI are thin surfaces over the same local memory model, so interactive and scripted workflows stay consistent."
+/>
+
+The important boundary is between memory and generation. Waymark can draft a
+structured card or use local embeddings, but the durable record is still the
+user-owned memory entry. Generated summaries and answers are not allowed to
+become ungrounded narrative. They need saved sources.
+
+## Design decisions
+
+**Local-first by default.** The default storage model is a local Waymark home
+directory. The tool does not require a hosted account to be useful.
+
+**Explicit import over ambient indexing.** Files and folders are never scanned
+automatically. Folder import is preview-first, bounded, resumable, and visible
+about duplicates or skipped files.
+
+**SQLite as the product spine.** The database is not an implementation detail.
+It is what makes the memory trail inspectable, portable, and testable.
+
+**Citations before fluency.** `waymark ask` is designed to retrieve relevant
+saved memories and show sources. If nothing matches, the correct behavior is to
+say so rather than fill the gap.
+
+**Release discipline matters.** The project ships with strict typing, test
+coverage, package smoke tests, docs builds, GitHub Releases, and Trusted
+Publishing to PyPI. That release machinery is part of the product quality, not
+an afterthought.
+
+## Publishing path
+
+The public release exposed a surprisingly useful packaging lesson: the PyPI
+package name and the command name do not have to match. The `waymark` name was
+already taken on PyPI, so the distribution publishes as `waymark-memory` while
+the installed command remains `waymark`.
+
+<LoopDiagram
+  steps={[
+    'build wheel and sdist',
+    'check metadata',
+    'install in a fresh env',
+    'publish from trusted GitHub tag',
+  ]}
+  decision="Smoke test passes?"
+  yes="ship to GitHub Releases and PyPI"
+  no="fix before users see it"
+  caption="The release workflow tests the artifact users actually install, not only the source checkout."
+/>
+
+The final publish used PyPI Trusted Publishing instead of a long-lived token.
+That keeps credentials out of the repository and ties the upload to a specific
+GitHub workflow, repository, tag, and environment.
+
+## What I would improve
+
+The next phase is a better retrieval layer: tighter semantic search, clearer
+source ranking, and stronger review flows for memories that came from imported
+documents. I would also like the TUI to become the main daily surface rather
+than a wrapper around commands, with richer keyboard-first workflows for
+capture, decision review, and weekly reflection.
