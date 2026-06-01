@@ -1,0 +1,214 @@
+---
+title: Shipping a local-first memory CLI
+date: 2026-06-01
+slug: shipping-a-local-first-memory-cli
+excerpt: "What Waymark taught me about building personal AI tools: privacy is an architecture constraint, memory needs a data model, citations beat fluency, and release engineering is part of product trust."
+readTime: 9 min read
+tags:
+  - local-first
+  - cli
+  - ai
+  - product-engineering
+---
+
+import {
+  ComparisonDiagram,
+  FlowDiagram,
+  LayerDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Personal AI tools are easy to over-imagine.
+
+The tempting version is ambient and magical. It watches everything, remembers
+everything, summarizes everything, and promises that nothing important will ever
+be forgotten again.
+
+I do not think that is the right starting point.
+
+For a personal memory tool, trust is not a feature you bolt on later. It is the
+architecture. The system has to be boring in the places where the user's life is
+sensitive: where data is stored, when files are read, which sources support an
+answer, and whether model output is treated as fact.
+
+That is the design lesson behind Waymark, a local-first terminal companion I
+shipped as a Python CLI and published to PyPI as `waymark-memory`.
+
+## The product shape
+
+Waymark's loop is small on purpose:
+
+<FlowDiagram
+  nodes={['capture', 'timeline', 'ask with sources', 'reflect', 'review decisions']}
+  caption="The loop is not ambient surveillance. It is explicit capture, grounded recall, and periodic review."
+/>
+
+The user captures a memory, imports an explicit file, records a decision, or
+runs a reflection. Later, they can ask a question over that saved context. The
+answer has to cite saved memories or imported sources.
+
+That sounds modest. It is also the point.
+
+A memory tool does not become trustworthy by sounding human. It becomes
+trustworthy when the user understands what it saw, what it saved, where it
+stored the data, and why it answered the way it did.
+
+## Privacy as an architecture constraint
+
+The first design decision was local storage.
+
+Waymark uses a local SQLite database under a user-owned Waymark home directory.
+Manual capture, timeline review, decisions, reflections, backups, and restore
+work without a hosted service.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Local state',
+      items: ['SQLite database', 'entries', 'sources', 'decisions'],
+    },
+    {
+      title: 'Explicit actions',
+      items: ['capture', 'import file', 'preview folder', 'backup'],
+    },
+    {
+      title: 'Optional AI',
+      items: ['Ollama detection', 'local embeddings', 'drafts only'],
+    },
+  ]}
+  caption="The local database is the product boundary; AI can help structure or retrieve, but it does not own the memory."
+/>
+
+That changes the product posture. There is no default cloud account. There is
+no silent upload path. There is no background folder scan. If a folder import
+exists, it has to be explicit, preview-first, bounded, and honest about skipped
+or duplicate files.
+
+This is slower than "just index everything."
+
+It is also more respectful.
+
+## Memory needs a data model
+
+One mistake in AI products is treating chat history as memory.
+
+Chat history is context. It is not a durable model of a life, a project, a
+decision, or a source. If the only way to understand the past is to reread a
+transcript and hope the model infers the right thing, the system is fragile.
+
+Waymark uses a more ordinary shape:
+
+- entries for saved memories
+- tags for lightweight organization
+- sources for imported documents
+- reflections for periodic summaries
+- decisions for choices and later outcomes
+- backup bundles for portability
+
+This is not glamorous. It is load-bearing.
+
+The schema gives the product stable questions to answer:
+
+- What was captured?
+- Where did it come from?
+- Which memories informed this decision?
+- Which imported file supports this answer?
+- What changed since the last reflection?
+
+Those questions are hard to answer cleanly if "memory" is only a pile of prompt
+text.
+
+## Citations beat fluency
+
+The most important behavior in `waymark ask` is not the phrasing of the answer.
+It is the refusal to invent context.
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'Weak memory tool',
+    title: 'Sounds right',
+    items: ['Searches vaguely', 'Answers fluently', 'Hides uncertainty'],
+  }}
+  right={{
+    eyebrow: 'Trustworthy memory tool',
+    title: 'Shows its work',
+    items: ['Retrieves saved entries', 'Cites sources', 'Says when nothing matches'],
+  }}
+  caption="For personal memory, unsupported confidence is worse than a quiet miss."
+/>
+
+This is where a local memory product differs from a general chatbot. The user is
+not asking for generic knowledge. They are asking about their own saved context.
+If the system cannot find support, the honest answer is: I do not have enough
+saved evidence for that.
+
+That constraint makes the product less flashy. It also makes it more useful.
+
+## The terminal is a good first surface
+
+Waymark started as a terminal tool because the terminal forces product clarity.
+
+A command has to have a contract:
+
+```bash
+waymark capture --type project "Shipped the first import flow today."
+waymark timeline
+waymark ask "import flow"
+waymark reflect --period week
+```
+
+There is not much room to hide fuzzy behavior behind UI animation. Inputs,
+outputs, errors, previews, and confirmation points have to be explicit.
+
+The guided Textual interface builds on the same commands and storage model, but
+the CLI came first because it made the workflows testable. That mattered when
+the project moved from "local experiment" to "installable tool."
+
+## Shipping changes the engineering bar
+
+Publishing to PyPI was not just distribution work. It changed the quality bar.
+
+Before publishing, a project can pass tests and still be awkward to install.
+After publishing, the artifact is the product. The wheel has to install cleanly
+in a fresh environment. The command has to resolve. The package metadata has to
+pass validation. The docs have to show platform-specific commands. Release tags
+have to match versions.
+
+<LoopDiagram
+  steps={[
+    'run tests',
+    'build package',
+    'install fresh wheel',
+    'publish from tag',
+  ]}
+  decision="Can a new user install it?"
+  yes="release"
+  no="fix packaging"
+  caption="A release workflow should test what users install, not only what developers run from source."
+/>
+
+One concrete packaging wrinkle: the PyPI name `waymark` was already taken. The
+fix was to publish the distribution as `waymark-memory` while keeping the Python
+package and console command as `waymark`.
+
+That required explicit build configuration so the wheel still shipped the
+`src/waymark` package. Small detail, real release blocker.
+
+## What I would do next
+
+The next version should make retrieval better without making privacy worse.
+
+That means stronger local embeddings, clearer source ranking, better import
+review flows, and a richer TUI for daily use. I want capture, decision review,
+and weekly reflection to feel like one coherent workspace instead of a set of
+commands the user has to remember.
+
+The larger lesson is the same one I keep finding in production AI systems:
+
+the model is interesting, but the boundaries are the product.
+
+For Waymark, those boundaries are local storage, explicit import, grounded
+answers, portable backups, and release discipline. The result is less magical
+than an ambient memory assistant.
+
+That is why I trust it more.
