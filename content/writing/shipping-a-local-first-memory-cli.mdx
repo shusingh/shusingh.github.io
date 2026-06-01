@@ -1,13 +1,15 @@
 ---
-title: Shipping a local-first memory CLI
+title: Shipping a local-first AI memory CLI
 date: 2026-06-01
 slug: shipping-a-local-first-memory-cli
-excerpt: "What Waymark taught me about building personal AI tools: privacy is an architecture constraint, memory needs a data model, citations beat fluency, and release engineering is part of product trust."
+excerpt: "What Waymark taught me about building AI memory for personal agents: privacy is an architecture constraint, memory needs a data model, citations beat fluency, and release engineering is part of product trust."
 readTime: 9 min read
 tags:
   - local-first
   - cli
   - ai
+  - agents
+  - retrieval
   - product-engineering
 ---
 
@@ -31,12 +33,12 @@ architecture. The system has to be boring in the places where the user's life is
 sensitive: where data is stored, when files are read, which sources support an
 answer, and whether model output is treated as fact.
 
-That is the design lesson behind Waymark, a local-first terminal companion I
-shipped as a Python CLI and published to PyPI as `waymark-memory`.
+That is the design lesson behind Waymark, a local-first AI memory CLI I shipped
+as a Python package and published to PyPI as `waymark-memory`.
 
 ## The product shape
 
-Waymark's loop is small on purpose:
+Waymark's AI memory loop is small on purpose:
 
 <FlowDiagram
   nodes={['capture', 'timeline', 'ask with sources', 'reflect', 'review decisions']}
@@ -52,6 +54,10 @@ That sounds modest. It is also the point.
 A memory tool does not become trustworthy by sounding human. It becomes
 trustworthy when the user understands what it saw, what it saved, where it
 stored the data, and why it answered the way it did.
+
+That also makes it useful for agentic systems. Before an AI agent can act
+reliably on a person's behalf, it needs durable memory, source boundaries,
+retrieval behavior, and a clear refusal path when evidence is missing.
 
 ## Privacy as an architecture constraint
 
@@ -118,6 +124,27 @@ The schema gives the product stable questions to answer:
 Those questions are hard to answer cleanly if "memory" is only a pile of prompt
 text.
 
+## Agents need grounded memory
+
+The current agent conversation is full of tools, planners, MCP servers, and
+automation loops. Those pieces matter, but memory is often treated as a vague
+feature: the agent remembers things because the chat is long, or because a
+vector store has some chunks in it.
+
+That is not enough.
+
+An agentic memory layer should answer product questions before model questions:
+
+- What did the user explicitly save?
+- Which source supports this claim?
+- Was this imported from a document or captured manually?
+- Which decision did this memory influence?
+- Can the user delete, export, or back up the record?
+
+Waymark is intentionally not an autonomous agent yet. It is the grounded memory
+substrate an agent would need: local state, explicit import, retrieval, citations,
+and user-owned context.
+
 ## Citations beat fluency
 
 The most important behavior in `waymark ask` is not the phrasing of the answer.
@@ -137,10 +164,10 @@ It is the refusal to invent context.
   caption="For personal memory, unsupported confidence is worse than a quiet miss."
 />
 
-This is where a local memory product differs from a general chatbot. The user is
-not asking for generic knowledge. They are asking about their own saved context.
-If the system cannot find support, the honest answer is: I do not have enough
-saved evidence for that.
+This is where a local AI memory product differs from a general chatbot. The
+user is not asking for generic knowledge. They are asking about their own saved
+context. If the system cannot find support, the honest answer is: I do not have
+enough saved evidence for that.
 
 That constraint makes the product less flashy. It also makes it more useful.
 
@@ -162,7 +189,7 @@ outputs, errors, previews, and confirmation points have to be explicit.
 
 The guided Textual interface builds on the same commands and storage model, but
 the CLI came first because it made the workflows testable. That mattered when
-the project moved from "local experiment" to "installable tool."
+the project moved from "local AI experiment" to "installable tool."
 
 ## Shipping changes the engineering bar
 
@@ -201,7 +228,8 @@ The next version should make retrieval better without making privacy worse.
 That means stronger local embeddings, clearer source ranking, better import
 review flows, and a richer TUI for daily use. I want capture, decision review,
 and weekly reflection to feel like one coherent workspace instead of a set of
-commands the user has to remember.
+commands the user has to remember. After that, the natural next step is an
+agent mode that can reason over the memory store without owning it.
 
 The larger lesson is the same one I keep finding in production AI systems:
 
