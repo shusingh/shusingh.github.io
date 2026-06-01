@@ -7,8 +7,19 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Sat, 30 May 2026 20:16:16 GMT</lastBuildDate>
-    <pubDate>Sat, 30 May 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Mon, 01 Jun 2026 01:38:51 GMT</lastBuildDate>
+    <pubDate>Mon, 01 Jun 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Shipping a local-first memory CLI</title>
+      <link>https://shusingh.github.io/writing/shipping-a-local-first-memory-cli</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/shipping-a-local-first-memory-cli</guid>
+      <pubDate>Mon, 01 Jun 2026 00:00:00 GMT</pubDate>
+      <description>What Waymark taught me about building personal AI tools: privacy is an architecture constraint, memory needs a data model, citations beat fluency, and release engineering is part of product trust.</description>
+      <category>local-first</category>
+      <category>cli</category>
+      <category>ai</category>
+      <category>product-engineering</category>
+    </item>
     <item>
       <title>How I rendered 50k agent spans at 60fps</title>
       <link>https://shusingh.github.io/writing/rendering-50k-agent-spans-at-60fps</link>
