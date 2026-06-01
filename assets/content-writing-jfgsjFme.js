@@ -1,4 +1,4 @@
-import{j as e}from"./react-vendor-DRnTuPlI.js";import{F as r,L as o,H as h,S as l,a as i,C as a,I as S,T as A}from"./content-projects-CrUjmuDz.js";import{u as s}from"./mdx-vendor-q2tj1Xgi.js";const C={title:"Agentic systems, explained from first principles",date:"2026-05-15",slug:"agentic-systems-basics",excerpt:"A plain-English map of agents, tools, MCP servers, streaming responses, agent frameworks, runtime infrastructure, memory, state, and the engineering choices that make agentic systems production-ready.",readTime:"13 min read",tags:["agents","architecture","production"]};function d(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",pre:"pre",strong:"strong",table:"table",tbody:"tbody",td:"td",th:"th",thead:"thead",tr:"tr",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:'Most explanations of agentic systems start in the wrong place. They start with frameworks, model names, or diagrams full of boxes labeled "planner" and "executor."'}),`
+import{j as e}from"./react-vendor-DRnTuPlI.js";import{F as r,L as o,H as h,S as l,a as i,C as a,I as S,T as A}from"./content-projects-D4xtVUP7.js";import{u as s}from"./mdx-vendor-q2tj1Xgi.js";const C={title:"Agentic systems, explained from first principles",date:"2026-05-15",slug:"agentic-systems-basics",excerpt:"A plain-English map of agents, tools, MCP servers, streaming responses, agent frameworks, runtime infrastructure, memory, state, and the engineering choices that make agentic systems production-ready.",readTime:"13 min read",tags:["agents","architecture","production"]};function d(n){const t={a:"a",code:"code",h2:"h2",h3:"h3",li:"li",p:"p",pre:"pre",strong:"strong",table:"table",tbody:"tbody",td:"td",th:"th",thead:"thead",tr:"tr",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:'Most explanations of agentic systems start in the wrong place. They start with frameworks, model names, or diagrams full of boxes labeled "planner" and "executor."'}),`
 `,e.jsx(t.p,{children:"The simpler starting point is this:"}),`
 `,e.jsx(t.p,{children:e.jsx(t.strong,{children:"An agentic system is a software system where an LLM is allowed to choose the next step inside a controlled loop."})}),`
 `,e.jsx(t.p,{children:"That is the whole idea. The rest is engineering."}),`
@@ -1503,7 +1503,7 @@ status: Uint8Array;
 `,e.jsxs(t.p,{children:[e.jsx(t.strong,{children:"Pick the validator that matches the language at the seam."})," Pydantic for Python, Zod for TS, JSON Schema for cross-language contracts."]}),`
 `,e.jsxs(t.p,{children:[e.jsx(t.strong,{children:"Consider the normalize-then-validate split."})," It is more work upfront and pays off when the model's behavior drifts."]}),`
 `,e.jsx(t.p,{children:"The schema problem is not solved. It is managed. The teams that take it seriously build systems that age well as the underlying models change. The teams that treat it as a checkbox build systems that work in the first quarter and break in the second."}),`
-`,e.jsx(t.p,{children:"The good news is the engineering is not exotic. It is the same kind of boundary-design work that has always made the difference between code that works on a happy path and code that works in production. The fact that an LLM sits on one side of the boundary does not change the principles. It just makes the boundary more important."})]})}function Q(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(b,{...n})}):b(n)}const we=Object.freeze(Object.defineProperty({__proto__:null,default:Q,frontmatter:Y},Symbol.toStringTag,{value:"Module"})),K={title:"Shipping a local-first memory CLI",date:"2026-06-01",slug:"shipping-a-local-first-memory-cli",excerpt:"What Waymark taught me about building personal AI tools: privacy is an architecture constraint, memory needs a data model, citations beat fluency, and release engineering is part of product trust.",readTime:"9 min read",tags:["local-first","cli","ai","product-engineering"]};function v(n){const t={a:"a",code:"code",h2:"h2",li:"li",p:"p",pre:"pre",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"Personal AI tools are easy to over-imagine."}),`
+`,e.jsx(t.p,{children:"The good news is the engineering is not exotic. It is the same kind of boundary-design work that has always made the difference between code that works on a happy path and code that works in production. The fact that an LLM sits on one side of the boundary does not change the principles. It just makes the boundary more important."})]})}function Q(n={}){const{wrapper:t}={...s(),...n.components};return t?e.jsx(t,{...n,children:e.jsx(b,{...n})}):b(n)}const we=Object.freeze(Object.defineProperty({__proto__:null,default:Q,frontmatter:Y},Symbol.toStringTag,{value:"Module"})),K={title:"Shipping a local-first AI memory CLI",date:"2026-06-01",slug:"shipping-a-local-first-memory-cli",excerpt:"What Waymark taught me about building AI memory for personal agents: privacy is an architecture constraint, memory needs a data model, citations beat fluency, and release engineering is part of product trust.",readTime:"9 min read",tags:["local-first","cli","ai","agents","retrieval","product-engineering"]};function v(n){const t={a:"a",code:"code",h2:"h2",li:"li",p:"p",pre:"pre",ul:"ul",...s(),...n.components};return e.jsxs(e.Fragment,{children:[e.jsx(t.p,{children:"Personal AI tools are easy to over-imagine."}),`
 `,e.jsx(t.p,{children:`The tempting version is ambient and magical. It watches everything, remembers
 everything, summarizes everything, and promises that nothing important will ever
 be forgotten again.`}),`
@@ -1512,10 +1512,10 @@ be forgotten again.`}),`
 architecture. The system has to be boring in the places where the user's life is
 sensitive: where data is stored, when files are read, which sources support an
 answer, and whether model output is treated as fact.`}),`
-`,e.jsxs(t.p,{children:[`That is the design lesson behind Waymark, a local-first terminal companion I
-shipped as a Python CLI and published to PyPI as `,e.jsx(t.code,{children:"waymark-memory"}),"."]}),`
+`,e.jsxs(t.p,{children:[`That is the design lesson behind Waymark, a local-first AI memory CLI I shipped
+as a Python package and published to PyPI as `,e.jsx(t.code,{children:"waymark-memory"}),"."]}),`
 `,e.jsx(t.h2,{id:"the-product-shape",children:e.jsx(t.a,{href:"#the-product-shape",children:"The product shape"})}),`
-`,e.jsx(t.p,{children:"Waymark's loop is small on purpose:"}),`
+`,e.jsx(t.p,{children:"Waymark's AI memory loop is small on purpose:"}),`
 `,e.jsx(r,{nodes:["capture","timeline","ask with sources","reflect","review decisions"],caption:"The loop is not ambient surveillance. It is explicit capture, grounded recall, and periodic review."}),`
 `,e.jsx(t.p,{children:`The user captures a memory, imports an explicit file, records a decision, or
 runs a reflection. Later, they can ask a question over that saved context. The
@@ -1524,6 +1524,9 @@ answer has to cite saved memories or imported sources.`}),`
 `,e.jsx(t.p,{children:`A memory tool does not become trustworthy by sounding human. It becomes
 trustworthy when the user understands what it saw, what it saved, where it
 stored the data, and why it answered the way it did.`}),`
+`,e.jsx(t.p,{children:`That also makes it useful for agentic systems. Before an AI agent can act
+reliably on a person's behalf, it needs durable memory, source boundaries,
+retrieval behavior, and a clear refusal path when evidence is missing.`}),`
 `,e.jsx(t.h2,{id:"privacy-as-an-architecture-constraint",children:e.jsx(t.a,{href:"#privacy-as-an-architecture-constraint",children:"Privacy as an architecture constraint"})}),`
 `,e.jsx(t.p,{children:"The first design decision was local storage."}),`
 `,e.jsx(t.p,{children:`Waymark uses a local SQLite database under a user-owned Waymark home directory.
@@ -1561,14 +1564,31 @@ transcript and hope the model infers the right thing, the system is fragile.`}),
 `]}),`
 `,e.jsx(t.p,{children:`Those questions are hard to answer cleanly if "memory" is only a pile of prompt
 text.`}),`
+`,e.jsx(t.h2,{id:"agents-need-grounded-memory",children:e.jsx(t.a,{href:"#agents-need-grounded-memory",children:"Agents need grounded memory"})}),`
+`,e.jsx(t.p,{children:`The current agent conversation is full of tools, planners, MCP servers, and
+automation loops. Those pieces matter, but memory is often treated as a vague
+feature: the agent remembers things because the chat is long, or because a
+vector store has some chunks in it.`}),`
+`,e.jsx(t.p,{children:"That is not enough."}),`
+`,e.jsx(t.p,{children:"An agentic memory layer should answer product questions before model questions:"}),`
+`,e.jsxs(t.ul,{children:[`
+`,e.jsx(t.li,{children:"What did the user explicitly save?"}),`
+`,e.jsx(t.li,{children:"Which source supports this claim?"}),`
+`,e.jsx(t.li,{children:"Was this imported from a document or captured manually?"}),`
+`,e.jsx(t.li,{children:"Which decision did this memory influence?"}),`
+`,e.jsx(t.li,{children:"Can the user delete, export, or back up the record?"}),`
+`]}),`
+`,e.jsx(t.p,{children:`Waymark is intentionally not an autonomous agent yet. It is the grounded memory
+substrate an agent would need: local state, explicit import, retrieval, citations,
+and user-owned context.`}),`
 `,e.jsx(t.h2,{id:"citations-beat-fluency",children:e.jsx(t.a,{href:"#citations-beat-fluency",children:"Citations beat fluency"})}),`
 `,e.jsxs(t.p,{children:["The most important behavior in ",e.jsx(t.code,{children:"waymark ask"}),` is not the phrasing of the answer.
 It is the refusal to invent context.`]}),`
 `,e.jsx(a,{left:{eyebrow:"Weak memory tool",title:"Sounds right",items:["Searches vaguely","Answers fluently","Hides uncertainty"]},right:{eyebrow:"Trustworthy memory tool",title:"Shows its work",items:["Retrieves saved entries","Cites sources","Says when nothing matches"]},caption:"For personal memory, unsupported confidence is worse than a quiet miss."}),`
-`,e.jsx(t.p,{children:`This is where a local memory product differs from a general chatbot. The user is
-not asking for generic knowledge. They are asking about their own saved context.
-If the system cannot find support, the honest answer is: I do not have enough
-saved evidence for that.`}),`
+`,e.jsx(t.p,{children:`This is where a local AI memory product differs from a general chatbot. The
+user is not asking for generic knowledge. They are asking about their own saved
+context. If the system cannot find support, the honest answer is: I do not have
+enough saved evidence for that.`}),`
 `,e.jsx(t.p,{children:"That constraint makes the product less flashy. It also makes it more useful."}),`
 `,e.jsx(t.h2,{id:"the-terminal-is-a-good-first-surface",children:e.jsx(t.a,{href:"#the-terminal-is-a-good-first-surface",children:"The terminal is a good first surface"})}),`
 `,e.jsx(t.p,{children:"Waymark started as a terminal tool because the terminal forces product clarity."}),`
@@ -1582,7 +1602,7 @@ waymark reflect --period week
 outputs, errors, previews, and confirmation points have to be explicit.`}),`
 `,e.jsx(t.p,{children:`The guided Textual interface builds on the same commands and storage model, but
 the CLI came first because it made the workflows testable. That mattered when
-the project moved from "local experiment" to "installable tool."`}),`
+the project moved from "local AI experiment" to "installable tool."`}),`
 `,e.jsx(t.h2,{id:"shipping-changes-the-engineering-bar",children:e.jsx(t.a,{href:"#shipping-changes-the-engineering-bar",children:"Shipping changes the engineering bar"})}),`
 `,e.jsx(t.p,{children:"Publishing to PyPI was not just distribution work. It changed the quality bar."}),`
 `,e.jsx(t.p,{children:`Before publishing, a project can pass tests and still be awkward to install.
@@ -1601,7 +1621,8 @@ package and console command as `,e.jsx(t.code,{children:"waymark"}),"."]}),`
 `,e.jsx(t.p,{children:`That means stronger local embeddings, clearer source ranking, better import
 review flows, and a richer TUI for daily use. I want capture, decision review,
 and weekly reflection to feel like one coherent workspace instead of a set of
-commands the user has to remember.`}),`
+commands the user has to remember. After that, the natural next step is an
+agent mode that can reason over the memory store without owning it.`}),`
 `,e.jsx(t.p,{children:"The larger lesson is the same one I keep finding in production AI systems:"}),`
 `,e.jsx(t.p,{children:"the model is interesting, but the boundaries are the product."}),`
 `,e.jsx(t.p,{children:`For Waymark, those boundaries are local storage, explicit import, grounded

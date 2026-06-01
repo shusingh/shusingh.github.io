@@ -7,17 +7,19 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Mon, 01 Jun 2026 01:38:51 GMT</lastBuildDate>
+    <lastBuildDate>Mon, 01 Jun 2026 01:45:00 GMT</lastBuildDate>
     <pubDate>Mon, 01 Jun 2026 00:00:00 GMT</pubDate>
     <item>
-      <title>Shipping a local-first memory CLI</title>
+      <title>Shipping a local-first AI memory CLI</title>
       <link>https://shusingh.github.io/writing/shipping-a-local-first-memory-cli</link>
       <guid isPermaLink="true">https://shusingh.github.io/writing/shipping-a-local-first-memory-cli</guid>
       <pubDate>Mon, 01 Jun 2026 00:00:00 GMT</pubDate>
-      <description>What Waymark taught me about building personal AI tools: privacy is an architecture constraint, memory needs a data model, citations beat fluency, and release engineering is part of product trust.</description>
+      <description>What Waymark taught me about building AI memory for personal agents: privacy is an architecture constraint, memory needs a data model, citations beat fluency, and release engineering is part of product trust.</description>
       <category>local-first</category>
       <category>cli</category>
       <category>ai</category>
+      <category>agents</category>
+      <category>retrieval</category>
       <category>product-engineering</category>
     </item>
     <item>
