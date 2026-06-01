@@ -47,6 +47,7 @@ export interface ProjectFrontmatter {
   link: string;
   repo?: string;
   liveUrl?: string;
+  pypiUrl?: string;
   upstream?: string;
   prUrl?: string;
   prNumber?: number;
@@ -224,6 +225,10 @@ export function parseProjectFrontmatter(value: unknown, source: string): Project
   if (liveUrl !== undefined && typeof liveUrl !== 'string') {
     throw new Error(`[${source}] frontmatter.liveUrl must be a string`);
   }
+  const pypiUrl = value.pypiUrl;
+  if (pypiUrl !== undefined && typeof pypiUrl !== 'string') {
+    throw new Error(`[${source}] frontmatter.pypiUrl must be a string`);
+  }
   const upstream = value.upstream;
   if (upstream !== undefined && typeof upstream !== 'string') {
     throw new Error(`[${source}] frontmatter.upstream must be a string`);
@@ -267,6 +272,7 @@ export function parseProjectFrontmatter(value: unknown, source: string): Project
     link,
     repo,
     liveUrl,
+    pypiUrl,
     upstream,
     prUrl,
     prNumber,
