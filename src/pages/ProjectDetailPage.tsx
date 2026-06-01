@@ -86,6 +86,11 @@ export function ProjectDetailPage() {
                   Live demo <span aria-hidden="true">↗</span>
                 </a>
               ) : null}
+              {frontmatter.pypiUrl ? (
+                <a href={frontmatter.pypiUrl} target="_blank" rel="noreferrer">
+                  PyPI package <span aria-hidden="true">↗</span>
+                </a>
+              ) : null}
             </div>
           </div>
           {frontmatter.stat ? (
