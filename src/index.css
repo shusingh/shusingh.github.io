@@ -17,6 +17,7 @@
   --scrollbar-thumb: rgba(155, 196, 178, 0.32);
   --scrollbar-thumb-hover: rgba(155, 196, 178, 0.52);
   --nav-bg: rgba(14, 14, 16, 0.7);
+  --card-shadow-hover: 0 18px 40px -22px rgba(0, 0, 0, 0.75);
   --grain-opacity: 0.04;
   --grain-blend: overlay;
   --pixel-dot: rgba(155, 196, 178, 0.11);
@@ -57,6 +58,7 @@
   --scrollbar-thumb: rgba(45, 111, 91, 0.28);
   --scrollbar-thumb-hover: rgba(45, 111, 91, 0.46);
   --nav-bg: rgba(250, 249, 245, 0.8);
+  --card-shadow-hover: 0 18px 38px -24px rgba(31, 85, 71, 0.28);
   --grain-opacity: 0.025;
   --grain-blend: multiply;
   --pixel-dot: rgba(45, 111, 91, 0.1);
