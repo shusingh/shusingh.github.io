@@ -51,9 +51,9 @@ export function Hero() {
           <div className={styles.right}>
             <PhotoFrame src="/shubham.jpg" alt="Shubham Singh at Lake Union, Seattle" />
             <StatusCard label="Currently">
-              Leading frontend architecture for ZeroTouch, the control launch platform that
-              coordinates ownership, review status, blockers, and launch artifacts across partner
-              teams so 2,000+ controls can move without spreadsheet-driven handoffs.
+              I lead frontend architecture for an Amazon platform that orchestrates AI-assisted
+              compliance workflows, coordinating review and approval across partner teams so 2,000+
+              launches move without spreadsheet-driven handoffs.
             </StatusCard>
           </div>
         </div>
