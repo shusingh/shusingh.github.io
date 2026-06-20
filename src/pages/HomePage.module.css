@@ -34,15 +34,25 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  padding: 9px 16px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-shadow: var(--text-halo-strong);
   transition:
     gap 0.2s ease,
-    color 0.2s ease;
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .sectionFooter a:hover,
 .sectionFooter a:focus-visible {
   gap: 12px;
   color: var(--accent-strong);
+  /* Opaque paper pill on hover, matching the "Get in touch" button. */
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  text-shadow: none;
 }
 
 @media (max-width: 900px) {

@@ -20,6 +20,7 @@
   letter-spacing: -0.01em;
   line-height: 1.2;
   max-width: 420px;
+  text-shadow: var(--text-halo);
 }
 
 .statement span {
@@ -35,25 +36,39 @@
   letter-spacing: 0.08em;
   margin-bottom: 18px;
   font-weight: 500;
+  text-shadow: var(--text-halo-strong);
 }
 
 .column ul {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .column a {
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 14px;
-  transition: color 0.2s ease;
+  padding: 5px 10px;
+  margin-inline: -10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  text-shadow: var(--text-halo);
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .column a:hover,
 .column a:focus-visible {
   color: var(--accent);
+  /* Opaque paper pill on hover, matching the other links. */
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  text-shadow: none;
 }
 
 .bottom {
@@ -67,6 +82,7 @@
   font-size: 11px;
   color: var(--text-tertiary);
   letter-spacing: 0.04em;
+  text-shadow: var(--text-halo-strong);
 }
 
 @media (max-width: 900px) {

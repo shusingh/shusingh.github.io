@@ -1,6 +1,6 @@
 .frame {
   width: 100%;
-  max-width: 360px;
+  max-width: 320px;
   aspect-ratio: 4 / 5;
   background: var(--bg-elevated);
   border: 1px solid var(--border-strong);
