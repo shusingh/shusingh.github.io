@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 
+import { BackToTop } from '@/components/BackToTop/BackToTop';
 import { Footer } from '@/components/Footer/Footer';
 import { FluidBackground } from '@/components/FluidBackground/FluidBackground';
 import { LoadingIntro } from '@/components/LoadingIntro/LoadingIntro';
@@ -183,6 +184,7 @@ export function SiteLayout() {
         <Outlet />
       </main>
       <Footer />
+      <BackToTop />
     </>
   );
 }
