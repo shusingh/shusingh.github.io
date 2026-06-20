@@ -1,8 +1,6 @@
 import type { MouseEvent } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
-import { useTheme } from '@/lib/theme';
-
 import styles from './Nav.module.css';
 
 const navItems = [
@@ -12,23 +10,6 @@ const navItems = [
   { to: '/about', label: 'About' },
   { to: '/now', label: 'Now' },
 ] as const;
-
-function SunIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-    </svg>
-  );
-}
-
-function MoonIcon() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  );
-}
 
 function isPlainLeftClick(event: MouseEvent<HTMLAnchorElement>): boolean {
   return (
@@ -45,7 +26,6 @@ function scrollToPageTop() {
 }
 
 export function Nav() {
-  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
   function handleSamePageClick(event: MouseEvent<HTMLAnchorElement>, to: string) {
@@ -92,19 +72,6 @@ export function Nav() {
               </a>
             </li>
           </ul>
-          <button
-            className={styles.themeToggle}
-            type="button"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
-          >
-            <span className={styles.sun}>
-              <SunIcon />
-            </span>
-            <span className={styles.moon}>
-              <MoonIcon />
-            </span>
-          </button>
         </div>
       </div>
     </nav>

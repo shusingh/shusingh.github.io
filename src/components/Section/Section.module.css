@@ -18,6 +18,10 @@
   font-size: 36px;
   font-weight: 400;
   letter-spacing: -0.02em;
+  /* Paper halo so headings stay legible when ink drifts behind them. */
+  text-shadow:
+    0 0 14px var(--paper),
+    0 0 6px var(--paper);
 }
 
 .num {
@@ -26,6 +30,7 @@
   color: var(--text-tertiary);
   margin-right: 16px;
   vertical-align: 6px;
+  text-shadow: var(--text-halo-strong);
 }
 
 .meta {
@@ -33,6 +38,7 @@
   font-size: 12px;
   color: var(--text-tertiary);
   letter-spacing: 0.04em;
+  text-shadow: var(--text-halo-strong);
 }
 
 @media (max-width: 900px) {

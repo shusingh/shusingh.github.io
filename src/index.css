@@ -1,34 +1,47 @@
 :root {
-  --bg: #0e0e10;
-  --bg-elevated: #161618;
-  --bg-elevated-2: #1c1c1f;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --text-primary: #ededed;
-  --text-secondary: #b7b7bd;
-  --text-tertiary: #85858d;
-  --accent: #9bc4b2;
-  --accent-strong: #b3d4c4;
-  --accent-dim: #5e8276;
-  --accent-bg: rgba(155, 196, 178, 0.08);
-  --selection-bg: rgba(155, 196, 178, 0.72);
-  --selection-text: #07110d;
-  --scrollbar-track: rgba(255, 255, 255, 0.035);
-  --scrollbar-thumb: rgba(155, 196, 178, 0.32);
-  --scrollbar-thumb-hover: rgba(155, 196, 178, 0.52);
-  --nav-bg: rgba(14, 14, 16, 0.7);
-  --card-shadow-hover: 0 18px 40px -22px rgba(0, 0, 0, 0.75);
-  --grain-opacity: 0.04;
-  --grain-blend: overlay;
-  --pixel-dot: rgba(155, 196, 178, 0.11);
-  --pixel-dot-active: rgba(155, 196, 178, 0.26);
-  --pixel-dot-spacing: 22px;
+  /* Suminagashi paper and traditional ink accents. */
+  --paper: #efeae0;
+  --sumi: #1a1a1f;
+  --ai: #16407a;
+  --shu: #c8372d;
+  --matsuba: #2e6e52;
+  --line: rgba(26, 26, 31, 0.18);
+  --bg: var(--paper);
+  --bg-elevated: #f7f3eb;
+  --bg-elevated-2: #e6dfd3;
+  --border: rgba(26, 26, 31, 0.1);
+  --border-strong: var(--line);
+  --text-primary: var(--sumi);
+  --text-secondary: #3a3833;
+  --text-tertiary: #67635b;
+  --accent: var(--matsuba);
+  --accent-strong: #245840;
+  --accent-dim: #79a18e;
+  --accent-bg: rgba(46, 110, 82, 0.09);
+  --selection-bg: rgba(46, 110, 82, 0.84);
+  --selection-text: #f7f2e6;
+  --scrollbar-track: rgba(58, 46, 26, 0.06);
+  --scrollbar-thumb: rgba(45, 111, 91, 0.3);
+  --scrollbar-thumb-hover: rgba(45, 111, 91, 0.48);
+  --nav-bg: transparent;
+  /* Soft paper halo for larger text, dense knockout for small text over ink. */
+  --text-halo: 0 0 10px var(--paper), 0 0 5px var(--paper);
+  --text-halo-strong: 0 0 2px var(--paper), 0 0 2px var(--paper), 0 0 4px var(--paper),
+    0 0 8px var(--paper);
+  --card-shadow-hover: 0 18px 38px -24px rgba(26, 26, 31, 0.24);
+  --grain-opacity: 0.42;
+  --grain-blend: multiply;
   --cursor-x: 50vw;
   --cursor-y: 22vh;
   --cursor-spotlight-opacity: 0;
   --cursor-follower-x: 50vw;
   --cursor-follower-y: 22vh;
   --cursor-follower-size: 18px;
+  --cursor-follower-width: var(--cursor-follower-size);
+  --cursor-follower-height: var(--cursor-follower-size);
+  --cursor-follower-radius: 999px;
+  --cursor-follower-bg: transparent;
+  --cursor-follower-shadow: none;
   --cursor-follower-opacity: 0;
   --interactive-cursor: auto;
   --font-display: 'Fraunces', Georgia, serif;
@@ -36,33 +49,6 @@
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
   --max-width: 1180px;
   --nav-height: 73px;
-  color-scheme: dark;
-}
-
-[data-theme='light'] {
-  --bg: #faf9f5;
-  --bg-elevated: #ffffff;
-  --bg-elevated-2: #f3f1eb;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-strong: rgba(0, 0, 0, 0.14);
-  --text-primary: #1a1a1d;
-  --text-secondary: #545459;
-  --text-tertiary: #9c9ca1;
-  --accent: #2d6f5b;
-  --accent-strong: #1f5547;
-  --accent-dim: #7ba593;
-  --accent-bg: rgba(45, 111, 91, 0.07);
-  --selection-bg: rgba(45, 111, 91, 0.82);
-  --selection-text: #ffffff;
-  --scrollbar-track: rgba(0, 0, 0, 0.04);
-  --scrollbar-thumb: rgba(45, 111, 91, 0.28);
-  --scrollbar-thumb-hover: rgba(45, 111, 91, 0.46);
-  --nav-bg: rgba(250, 249, 245, 0.8);
-  --card-shadow-hover: 0 18px 38px -24px rgba(31, 85, 71, 0.28);
-  --grain-opacity: 0.025;
-  --grain-blend: multiply;
-  --pixel-dot: rgba(45, 111, 91, 0.1);
-  --pixel-dot-active: rgba(45, 111, 91, 0.24);
   color-scheme: light;
 }
 
@@ -104,7 +90,10 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.42), transparent 34%),
+    radial-gradient(circle at 82% 78%, rgba(112, 88, 53, 0.045), transparent 42%),
+    var(--bg);
   color: var(--text-primary);
   font-family: var(--font-body);
   font-weight: 400;
@@ -123,23 +112,21 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  /* Real washi photo for authentic paper fibres. We lift the darks and soften
+     so the deepest fibres no longer read as "dirt" specks on the screen. */
+  background: url('/paper-texture.jpg') center / cover no-repeat;
   opacity: var(--grain-opacity);
   pointer-events: none;
   z-index: 1;
   mix-blend-mode: var(--grain-blend);
+  filter: brightness(1.12) contrast(0.8) saturate(0.68) blur(0.3px);
+  box-shadow: inset 0 0 200px rgba(76, 59, 36, 0.14);
 }
 
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: radial-gradient(circle at center, var(--pixel-dot) 1px, transparent 1.5px);
-  background-size: var(--pixel-dot-spacing) var(--pixel-dot-spacing);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.72) 42%, transparent 100%);
-  mask-image: linear-gradient(to bottom, black 0%, rgba(0, 0, 0, 0.72) 42%, transparent 100%);
-  pointer-events: none;
-  z-index: 0;
+/* On the homepage the fluid canvas renders its own procedural paper, so the
+   CSS paper layer is suppressed to avoid doubling the texture. */
+body.fluid-bg-active::before {
+  display: none;
 }
 
 button,
@@ -196,44 +183,18 @@ a:focus-visible {
   position: relative;
 }
 
-#root::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  background-image: radial-gradient(
-    circle at center,
-    var(--pixel-dot-active) 1px,
-    transparent 1.5px
-  );
-  background-size: var(--pixel-dot-spacing) var(--pixel-dot-spacing);
-  opacity: var(--cursor-spotlight-opacity);
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-  -webkit-mask-image: radial-gradient(
-    circle 170px at var(--cursor-x) var(--cursor-y),
-    black 0%,
-    rgba(0, 0, 0, 0.78) 34%,
-    transparent 72%
-  );
-  mask-image: radial-gradient(
-    circle 170px at var(--cursor-x) var(--cursor-y),
-    black 0%,
-    rgba(0, 0, 0, 0.78) 34%,
-    transparent 72%
-  );
-}
-
 #root::after {
   content: '';
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  width: var(--cursor-follower-size);
-  height: var(--cursor-follower-size);
+  width: var(--cursor-follower-width);
+  height: var(--cursor-follower-height);
   border: 1px solid var(--accent);
-  border-radius: 999px;
+  border-radius: var(--cursor-follower-radius);
+  background: var(--cursor-follower-bg);
+  box-shadow: var(--cursor-follower-shadow);
   opacity: var(--cursor-follower-opacity);
   pointer-events: none;
   transform: translate3d(
@@ -241,9 +202,10 @@ a:focus-visible {
     calc(var(--cursor-follower-y) - 50%),
     0
   );
+  will-change: transform, width, height, border-radius;
   transition:
-    width 0.18s ease,
-    height 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
     opacity 0.2s ease,
     border-color 0.2s ease;
 }

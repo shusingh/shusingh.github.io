@@ -1,16 +1,10 @@
 .nav {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
   left: 0;
   z-index: 100;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   background: var(--nav-bg);
-  border-bottom: 1px solid var(--border);
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease;
 }
 
 .inner {
@@ -31,6 +25,7 @@
   text-decoration: none;
   display: flex;
   align-items: center;
+  text-shadow: var(--text-halo);
 }
 
 .right {
@@ -41,7 +36,7 @@
 
 .links {
   display: flex;
-  gap: 32px;
+  gap: 10px;
   align-items: center;
   list-style: none;
 }
@@ -52,13 +47,27 @@
   font-size: 13px;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: color 0.2s ease;
+  text-shadow: var(--text-halo-strong);
+}
+
+.link {
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .link:hover,
 .link:focus-visible,
 .active {
   color: var(--text-primary);
+  /* Opaque paper pill on hover / for the current page, like the other links. */
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  text-shadow: none;
 }
 
 .resume {
@@ -77,50 +86,6 @@
 .resume:hover,
 .resume:focus-visible {
   background: var(--accent-bg);
-}
-
-.themeToggle {
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--border-strong);
-  background: transparent;
-  border-radius: 4px;
-  cursor: var(--interactive-cursor);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  transition:
-    color 0.2s ease,
-    border-color 0.2s ease;
-}
-
-.themeToggle:hover,
-.themeToggle:focus-visible {
-  color: var(--text-primary);
-  border-color: var(--text-primary);
-}
-
-.themeToggle svg {
-  width: 14px;
-  height: 14px;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.sun,
-.moon {
-  display: flex;
-}
-
-:global([data-theme='dark']) .moon {
-  display: none;
-}
-
-:global([data-theme='light']) .sun {
-  display: none;
 }
 
 @media (max-width: 900px) {
