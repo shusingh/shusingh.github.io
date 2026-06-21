@@ -1,11 +1,9 @@
-import '@fontsource/fraunces/latin-300.css';
-import '@fontsource/fraunces/latin-300-italic.css';
-import '@fontsource/fraunces/latin-400.css';
-import '@fontsource/fraunces/latin-400-italic.css';
-import '@fontsource/fraunces/latin-500.css';
-import '@fontsource/fraunces/latin-500-italic.css';
-import '@fontsource/fraunces/latin-700.css';
-import '@fontsource-variable/geist/index.css';
+import '@fontsource/newsreader/latin-400.css';
+import '@fontsource/newsreader/latin-400-italic.css';
+import '@fontsource/newsreader/latin-500.css';
+import '@fontsource/newsreader/latin-500-italic.css';
+import '@fontsource/newsreader/latin-600.css';
+import '@fontsource-variable/hanken-grotesk/index.css';
 import '@fontsource-variable/jetbrains-mono/index.css';
 
 import { StrictMode } from 'react';

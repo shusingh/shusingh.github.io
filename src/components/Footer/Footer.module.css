@@ -85,6 +85,23 @@
   text-shadow: var(--text-halo-strong);
 }
 
+.colophon {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footSeal {
+  width: 28px;
+  height: 28px;
+  font-size: 15px;
+}
+
+.colophonJp {
+  font-family: var(--font-jp);
+  font-size: 13px;
+}
+
 @media (max-width: 900px) {
   .grid {
     grid-template-columns: 1fr;

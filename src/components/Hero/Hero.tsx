@@ -1,4 +1,5 @@
 import { PhotoFrame } from '@/components/PhotoFrame/PhotoFrame';
+import { Seal } from '@/components/Seal/Seal';
 import { StatusCard } from '@/components/StatusCard/StatusCard';
 
 import styles from './Hero.module.css';
@@ -14,6 +15,9 @@ function ArrowIcon() {
 export function Hero() {
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
+      <div className={styles.kanjiMotif} aria-hidden="true">
+        墨流し
+      </div>
       <div className="container">
         <div className={styles.grid}>
           <div>
@@ -46,14 +50,14 @@ export function Hero() {
               >
                 Get in touch
               </a>
+              <Seal char="信" className={styles.ctaSeal} />
             </div>
           </div>
           <div className={styles.right}>
             <PhotoFrame src="/shubham.jpg" alt="Shubham Singh at Lake Union, Seattle" />
             <StatusCard label="Currently">
-              I lead frontend architecture for an Amazon platform that orchestrates AI-assisted
-              compliance workflows, coordinating review and approval across partner teams so 2,000+
-              launches move without spreadsheet-driven handoffs.
+              Leading frontend and backend architecture for AI-assisted compliance launch workflows
+              at Amazon.
             </StatusCard>
           </div>
         </div>
