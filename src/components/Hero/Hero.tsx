@@ -1,5 +1,4 @@
 import { PhotoFrame } from '@/components/PhotoFrame/PhotoFrame';
-import { Seal } from '@/components/Seal/Seal';
 import { StatusCard } from '@/components/StatusCard/StatusCard';
 
 import styles from './Hero.module.css';
@@ -50,7 +49,6 @@ export function Hero() {
               >
                 Get in touch
               </a>
-              <Seal char="信" className={styles.ctaSeal} />
             </div>
           </div>
           <div className={styles.right}>

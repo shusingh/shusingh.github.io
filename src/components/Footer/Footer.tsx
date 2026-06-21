@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-import { Seal } from '@/components/Seal/Seal';
+import { InkMark } from '@/components/InkMark/InkMark';
 
 import styles from './Footer.module.css';
 
@@ -74,8 +74,9 @@ export function Footer() {
         <div className={styles.bottom}>
           <span>© 2026 Shubham Singh · Built with care in Seattle</span>
           <span className={styles.colophon}>
-            <Seal char="流" className={styles.footSeal} />
-            <span className={styles.colophonJp}>墨流し</span> / v2.0
+            <InkMark className={styles.footMark} />
+            Background: <span className={styles.colophonJp}>墨流し</span> suminagashi, Japanese ink
+            marbling
           </span>
         </div>
       </div>
