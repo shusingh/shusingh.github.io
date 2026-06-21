@@ -3,6 +3,34 @@
   position: relative;
 }
 
+.kanjiMotif {
+  position: absolute;
+  top: 84px;
+  right: 14px;
+  z-index: 1;
+  writing-mode: vertical-rl;
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: clamp(56px, 8vw, 104px);
+  letter-spacing: 0.12em;
+  color: rgba(26, 26, 31, 0.06);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ctaSeal {
+  width: 46px;
+  height: 46px;
+  font-size: 24px;
+  margin-left: 6px;
+}
+
+@media (max-width: 900px) {
+  .kanjiMotif {
+    display: none;
+  }
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1.4fr 1fr;
@@ -36,11 +64,8 @@
   font-weight: 400;
   font-size: clamp(48px, 7vw, 84px);
   line-height: 0.95;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   margin-bottom: 28px;
-  font-variation-settings:
-    'SOFT' 50,
-    'opsz' 144;
   text-shadow:
     0 0 16px var(--paper),
     0 0 7px var(--paper);

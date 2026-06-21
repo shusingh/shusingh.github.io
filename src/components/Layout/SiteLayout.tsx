@@ -99,7 +99,7 @@ function CursorSpotlight() {
         followerIsInteractive = isInteractive;
         root.style.setProperty(
           '--cursor-follower-bg',
-          isInteractive ? 'rgba(46, 110, 82, 0.1)' : 'transparent'
+          isInteractive ? 'rgba(192, 67, 46, 0.1)' : 'transparent'
         );
         root.style.setProperty(
           '--cursor-follower-shadow',

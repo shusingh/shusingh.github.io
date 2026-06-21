@@ -1,9 +1,18 @@
+@font-face {
+  font-family: 'Shippori Mincho';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/shippori-mincho-marks.woff2') format('woff2');
+  unicode-range: U+3057, U+4FE1, U+58A8, U+6D41;
+  font-display: swap;
+}
+
 :root {
   /* Suminagashi paper and traditional ink accents. */
   --paper: #efeae0;
   --sumi: #1a1a1f;
   --ai: #16407a;
-  --shu: #c8372d;
+  --shu: #c0432e;
   --matsuba: #2e6e52;
   --line: rgba(26, 26, 31, 0.18);
   --bg: var(--paper);
@@ -14,15 +23,15 @@
   --text-primary: var(--sumi);
   --text-secondary: #3a3833;
   --text-tertiary: #67635b;
-  --accent: var(--matsuba);
-  --accent-strong: #245840;
-  --accent-dim: #79a18e;
-  --accent-bg: rgba(46, 110, 82, 0.09);
-  --selection-bg: rgba(46, 110, 82, 0.84);
+  --accent: var(--shu);
+  --accent-strong: #a5371f;
+  --accent-dim: #cf9a8c;
+  --accent-bg: rgba(192, 67, 46, 0.09);
+  --selection-bg: rgba(192, 67, 46, 0.85);
   --selection-text: #f7f2e6;
   --scrollbar-track: rgba(58, 46, 26, 0.06);
-  --scrollbar-thumb: rgba(45, 111, 91, 0.3);
-  --scrollbar-thumb-hover: rgba(45, 111, 91, 0.48);
+  --scrollbar-thumb: rgba(192, 67, 46, 0.3);
+  --scrollbar-thumb-hover: rgba(192, 67, 46, 0.5);
   --nav-bg: transparent;
   /* Soft paper halo for larger text, dense knockout for small text over ink. */
   --text-halo: 0 0 10px var(--paper), 0 0 5px var(--paper);
@@ -44,9 +53,10 @@
   --cursor-follower-shadow: none;
   --cursor-follower-opacity: 0;
   --interactive-cursor: auto;
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Geist Variable', -apple-system, system-ui, sans-serif;
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'Hanken Grotesk Variable', -apple-system, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --font-jp: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
   --max-width: 1180px;
   --nav-height: 73px;
   color-scheme: light;

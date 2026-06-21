@@ -1,0 +1,17 @@
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  background: var(--accent);
+  color: var(--paper);
+  font-family: var(--font-jp);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1;
+  transform: rotate(-4deg);
+  user-select: none;
+  flex-shrink: 0;
+}

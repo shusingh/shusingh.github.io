@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 
+import { Seal } from '@/components/Seal/Seal';
+
 import styles from './Footer.module.css';
 
 export function Footer() {
@@ -71,7 +73,10 @@ export function Footer() {
         </div>
         <div className={styles.bottom}>
           <span>© 2026 Shubham Singh · Built with care in Seattle</span>
-          <span>v2.0</span>
+          <span className={styles.colophon}>
+            <Seal char="流" className={styles.footSeal} />
+            <span className={styles.colophonJp}>墨流し</span> / v2.0
+          </span>
         </div>
       </div>
     </footer>

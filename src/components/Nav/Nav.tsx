@@ -1,6 +1,8 @@
 import type { MouseEvent } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
+import { Seal } from '@/components/Seal/Seal';
+
 import styles from './Nav.module.css';
 
 const navItems = [
@@ -44,7 +46,8 @@ export function Nav() {
           aria-label="Shubham Singh home"
           onClick={(event) => handleSamePageClick(event, '/')}
         >
-          Shubham Singh
+          <Seal char="墨" className={styles.logoSeal} />
+          <span>Shubham Singh</span>
         </Link>
         <div className={styles.right}>
           <ul className={styles.links}>
