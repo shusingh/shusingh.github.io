@@ -36,6 +36,13 @@ const CONFIG = {
   baseFillDensity: 0.16,
   // Absorbance the moving cursor leaves behind (small — mostly displaces ink).
   cursorDye: 0.045,
+  // Click = a brush touching wet paper: a soft ink blot with a few uneven
+  // satellite dabs and a gentle feathering bloom (not a violent burst).
+  rippleForce: 820,
+  rippleArms: 8,
+  rippleSpread: 0.0065,
+  rippleSplatRadius: 0.0058,
+  rippleDye: 0.105,
 };
 
 interface DoubleFbo {
@@ -239,10 +246,16 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       renderer.render(scene, camera);
     }
 
-    function splatVelocity(x: number, y: number, dx: number, dy: number) {
+    function splatVelocity(
+      x: number,
+      y: number,
+      dx: number,
+      dy: number,
+      radius = CONFIG.splatRadius
+    ) {
       const sp = programs.splat;
       sp.uniforms.aspectRatio.value = width / height;
-      sp.uniforms.radius.value = CONFIG.splatRadius;
+      sp.uniforms.radius.value = radius;
       sp.uniforms.uTarget.value = velocity.read.texture;
       (sp.uniforms.point.value as THREE.Vector2).set(x, y);
       (sp.uniforms.color.value as THREE.Vector3).set(dx, dy, 0);
@@ -266,6 +279,46 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
     function inkSplatColor(strength: number, ink = INKS.sumi): THREE.Vector3 {
       const jitter = 0.92 + Math.random() * 0.16;
       return inkAbsorption(ink, strength * jitter);
+    }
+
+    // A click ripple: velocity pushed outward in a ring so the surrounding ink
+    // a brush touching wet paper — a soft ink blot that feathers outward.
+    const aspectAtRipple = () => width / height;
+    function ripple(x: number, y: number, ink: THREE.Vector3) {
+      const ar = aspectAtRipple();
+
+      // Gentle, slightly uneven feathering bloom so the ink bleeds rather than
+      // bursts. Jittered angles keep it organic instead of a perfect ring.
+      const arms = CONFIG.rippleArms;
+      for (let i = 0; i < arms; i += 1) {
+        const angle = (i / arms) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+        const ox = x + (Math.cos(angle) * CONFIG.rippleSpread) / ar;
+        const oy = y + Math.sin(angle) * CONFIG.rippleSpread;
+        const force = CONFIG.rippleForce * (0.6 + Math.random() * 0.6);
+        splatVelocity(
+          ox,
+          oy,
+          Math.cos(angle) * force,
+          Math.sin(angle) * force,
+          CONFIG.rippleSplatRadius
+        );
+      }
+
+      // The ink mark: a soft core plus a few uneven satellite dabs, like the
+      // irregular blot a brush leaves where it first lands.
+      splatDye(x, y, inkSplatColor(CONFIG.rippleDye, ink), CONFIG.rippleSplatRadius * 1.5);
+      for (let i = 0; i < 4; i += 1) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = CONFIG.rippleSpread * (0.35 + Math.random() * 0.8);
+        const dx = x + (Math.cos(angle) * dist) / ar;
+        const dy = y + Math.sin(angle) * dist;
+        splatDye(
+          dx,
+          dy,
+          inkSplatColor(CONFIG.rippleDye * (0.35 + Math.random() * 0.45), ink),
+          CONFIG.rippleSplatRadius * (0.6 + Math.random() * 0.7)
+        );
+      }
     }
 
     function step(dt: number) {
@@ -361,6 +414,17 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       lastMove = now;
     }
 
+    // Queue clicks and apply them inside the frame loop so the ripple renders
+    // in sync with the simulation.
+    const pendingRipples: { x: number; y: number; ink: THREE.Vector3 }[] = [];
+    function handlePointerDown(event: PointerEvent) {
+      if (event.pointerType === 'touch') return;
+      const nx = event.clientX / window.innerWidth;
+      const ny = 1 - event.clientY / window.innerHeight;
+      pendingRipples.push({ x: nx, y: ny, ink: cursorPigment });
+      lastMove = performance.now();
+    }
+
     function resize() {
       width = Math.max(1, window.innerWidth);
       height = Math.max(1, window.innerHeight);
@@ -425,6 +489,12 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       const dt = Math.min((now - lastTime) / 1000, 0.016666);
       lastTime = now;
 
+      // Clicks send a ripple outward through the ink.
+      while (pendingRipples.length > 0) {
+        const r = pendingRipples.shift()!;
+        ripple(r.x, r.y, r.ink);
+      }
+
       // Moving the cursor pushes the existing ink (velocity) and trails a
       // little fresh dye — so it feels like moving a finger through paint.
       if (pointer.moved) {
@@ -469,6 +539,7 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
 
     if (interactive && !reducedMotion.matches) {
       window.addEventListener('pointermove', handlePointerMove, { passive: true });
+      window.addEventListener('pointerdown', handlePointerDown, { passive: true });
       document.addEventListener('visibilitychange', handleVisibility);
       raf = window.requestAnimationFrame(frame);
     }
@@ -479,6 +550,7 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       document.body.classList.remove('fluid-bg-active');
       if (raf) window.cancelAnimationFrame(raf);
       window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerdown', handlePointerDown);
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', handleVisibility);
       velocity?.dispose();

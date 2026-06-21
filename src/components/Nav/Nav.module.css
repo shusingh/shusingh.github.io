@@ -29,10 +29,9 @@
   text-shadow: var(--text-halo);
 }
 
-.logoSeal {
-  width: 32px;
-  height: 32px;
-  font-size: 18px;
+.logoMark {
+  width: 24px;
+  height: 24px;
 }
 
 .right {

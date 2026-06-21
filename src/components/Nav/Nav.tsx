@@ -1,7 +1,7 @@
 import type { MouseEvent } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
-import { Seal } from '@/components/Seal/Seal';
+import { InkMark } from '@/components/InkMark/InkMark';
 
 import styles from './Nav.module.css';
 
@@ -46,7 +46,7 @@ export function Nav() {
           aria-label="Shubham Singh home"
           onClick={(event) => handleSamePageClick(event, '/')}
         >
-          <Seal char="墨" className={styles.logoSeal} />
+          <InkMark className={styles.logoMark} />
           <span>Shubham Singh</span>
         </Link>
         <div className={styles.right}>

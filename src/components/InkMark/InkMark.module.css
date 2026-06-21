@@ -1,0 +1,6 @@
+.mark {
+  display: inline-block;
+  fill: var(--accent);
+  flex-shrink: 0;
+  vertical-align: middle;
+}
