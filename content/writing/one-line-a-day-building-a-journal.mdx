@@ -1,0 +1,78 @@
+---
+title: 'One line a day: building a journal small enough to survive'
+date: 2026-07-03
+slug: one-line-a-day-building-a-journal
+excerpt: 'Every journaling habit I ever started died of ambition. So I built One Line: a journal that accepts exactly one sentence and one mood per day, stores everything in the browser, and marbles a year of entries into ink on paper. The constraint is the product; everything else followed from it.'
+readTime: 7 min read
+tags:
+  - local-first
+  - design
+  - side-projects
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Every journaling habit I ever started died the same death. Day one is three pages. Day four is a paragraph. Day nine is a guilty blank page, and the guilt is what kills it: the app now represents a debt, so I stop opening it.
+
+The failure is not discipline. The failure is scope. A journal that accepts unlimited text implicitly asks for it, and anything that asks for more than I can give on my worst day will eventually collect a missed day, and missed days compound into abandonment.
+
+So I built [One Line](https://shusingh.github.io/one-line/), a journal that accepts exactly one sentence and one mood per day, and refuses more. Ten seconds of effort on the worst day. That number is the entire product thesis; everything else in the design followed from it.
+
+## The constraint is the feature, not the limitation
+
+One Line stores a single entry per calendar day: a line of up to 240 characters and one of five moods. There is no second entry, no attachments, no tags, no streak-shaming notification. The date is the primary key, so the core rule is structural rather than validated: writing again today simply revises today.
+
+<FlowDiagram
+  nodes={['type one line', 'pick a mood', 'persist to date key', 'derive everything else at render']}
+  caption="One date-keyed map of entries. Streaks, statistics, and the year view are all pure derivations from it."
+/>
+
+What the constraint buys back is the payoff curve. A one-line journal is trivially cheap to write but compounds: after a few weeks, the app starts resurfacing what you wrote one week, one month, and one year ago today. Those flashbacks are the actual product. Nobody rereads three-page entries; everybody wants to know what last July's Thursday felt like, provided the answer is one sentence long.
+
+## Local-first, because a journal is the worst thing to rent
+
+A journal is among the most private documents a person can own, which makes it the clearest possible case for the local-first argument I made in [the previous essay](/writing/local-first-ai-is-personal-computing-again): certain guarantees can only be made by architecture.
+
+One Line has no backend, no account, and no analytics. The whole journal lives in `localStorage`; export and import are a JSON file you can hold. The privacy policy is enforced by physics, since the words cannot leak from a device they never leave.
+
+<LayerDiagram
+  groups={[
+    { title: 'Presentation', items: ['composer', 'mood picker', 'flashbacks', 'marbled year map'] },
+    { title: 'State', items: ['date-keyed entry map', 'derived streaks and balances'] },
+    { title: 'Persistence', items: ['localStorage', 'JSON export / import'] },
+  ]}
+  caption="Three thin layers, no server. The interesting work was deciding how little each layer is allowed to do."
+/>
+
+The stack is deliberately boring: three static HTML pages, vanilla JavaScript, CSS, and one small WebGL shader. No framework, no build step, deployed as files on GitHub Pages. For an app this size, the frameworkless version is not a compromise; it is the honest weight of the problem.
+
+## Moods as pigments, and why red got fired
+
+The visual system extends this site's suminagashi language: the same washi paper, sumi ink, and Newsreader/mono typography. Each mood is a small ink-blob face in a traditional pigment, and the year view renders every day as an ink droplet in its mood's colour, so twelve months of entries literally marble the page.
+
+Two decisions here earned their keep. First, the moods needed faces, not just swatches; five coloured dots read as a chart, five blobs with tiny kaomoji expressions read as company. Second, the original scale ended at shu vermillion for the best days, and it was wrong in a way that took a while to name: red at the happy end of a scale still reads as an alarm. The pigment scale now runs cool to warm and ends at yamabuki gold. Vermillion survives only as the streak accent, where a little fire is the point.
+
+## The paper was never a photograph
+
+The best bug of the build was not in the code; it was in my understanding of my own website.
+
+One Line was supposed to share this site's paper background, so it copied the obvious thing: the washi photograph that the CSS layers over every page, multiply-blended and softened. It looked almost right, and "almost right" for an entire day of comparing screenshots. The One Line paper read as a scan of paper; the portfolio's read as a sheet.
+
+The answer was that the portfolio's paper is not the photograph at all. The fluid-ink canvas on my homepage mounts on every page of the site, and its display shader paints paper procedurally: three octaves of value noise over the paper colour, with a deckled-edge vignette, rendered per-pixel. The photo overlay it was hiding is only a fallback. The lesson generalizes: when you copy a design system, copy the thing that renders, not the first matching asset you find in the repository.
+
+One Line now ships a forty-line WebGL port of that shader's paper path, drawn once per resize. One draw call, no animation, and the two sites are finally cut from the same sheet.
+
+## Layout: nothing hides behind a toggle
+
+The first layout had a collapsible sidebar, and it taught me a rule I intend to keep: **secondary information either earns permanent space or it does not exist.** A collapsed rail is furniture pretending to be information; the toggle is a tax on the feature it hides, and an empty 52-pixel spine looks exactly as embarrassed as it should.
+
+The final layout is what I think of as marginalia. The sheet with the composer sits centred and alone. This week's moods, the flashbacks, and the mood balance live as quiet typographic notes in the left margin, like annotations in a well-read book, separated by a single fading hairline. On narrow screens the margin notes flow into the sheet below the composer. Nothing collapses; nothing needs to be asked for.
+
+## What one day of scope discipline ships
+
+One Line went from first mock to deployed in a day, and not because the day was heroic. The scope was one screen, one constraint, and a design system that already existed. The features that did not make the cut, backfilling missed days, encrypted sync, a PWA manifest, are all real and all deferred, because the version that ships today builds the habit that justifies them later.
+
+The journal is live at [shusingh.github.io/one-line](https://shusingh.github.io/one-line/), and the code is on [GitHub](https://github.com/shusingh/one-line). Tonight it will ask me how today was, in one line. Building it, in one line: the smallest version of a habit is the one that survives, so build for the worst day, not the first.

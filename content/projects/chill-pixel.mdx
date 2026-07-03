@@ -1,0 +1,33 @@
+---
+title: "Chill Pixel"
+slug: "chill-pixel"
+description: "A lofi music player wrapped in a pixel-art world. Relaxing beats, a nostalgic retro aesthetic, and nothing else competing for your attention."
+kind: "personal"
+link: "https://github.com/shusingh/chill-pixel"
+repo: "https://github.com/shusingh/chill-pixel"
+liveUrl: "https://chill-pixel.onrender.com/"
+tags: ["React", "TypeScript", "Tailwind CSS", "Vite"]
+year: 2025
+status: "released"
+featured: false
+order: 8
+---
+
+## System intent
+
+Chill Pixel is a lofi music player with a pixel-art theme: relaxing beats inside a nostalgic scene, built to be left open in a corner tab while you work. It is intentionally a mood piece rather than a feature-rich audio product; the design goal is that the whole page feels like one cohesive place, and the player controls dissolve into it.
+
+## Requirements
+
+- Streams a curated rotation of lofi tracks with simple, reliable playback controls.
+- The pixel-art scene carries the atmosphere; UI chrome stays minimal and in-theme.
+- Loads fast and runs quietly for hours as a background tab.
+- Works at desktop and mobile widths without breaking the scene's composition.
+
+## High-level design
+
+A small React and TypeScript app built with Vite and styled with Tailwind CSS. Playback state lives in a single player store; the scene and controls render from it. There is no backend of its own: the app is a static bundle deployed on Render, which keeps hosting as low-maintenance as the product's ambitions.
+
+## What I would improve
+
+A richer scene that reacts to the time of day, user-selectable stations, and a tiny visualizer that stays within the pixel-art language rather than fighting it.
