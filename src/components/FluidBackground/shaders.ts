@@ -239,6 +239,10 @@ void main() {
   // Subtractive ink: paper light absorbed by the dye (Beer–Lambert). Overlapping
   // sumi / ai / shu / matsuba pools blend into real mixed colours.
   vec3 absorbance = texture2D(uTexture, vUv).rgb;
+  // Soft ceiling on accumulation: marbling structure is preserved, but the
+  // paper can never darken past a floor, so overlaid text keeps a guaranteed
+  // contrast no matter how much ink pools up.
+  absorbance = absorbance / (1.0 + 0.55 * absorbance);
   vec3 col = uPaper * exp(-absorbance) + fibre;
 
   // Soft darkening toward the edges, like the deckled rim of a sheet.

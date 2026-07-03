@@ -3,6 +3,26 @@
   position: relative;
 }
 
+/* Paper sizing: a wide, heavily feathered wash of paper behind the text
+   column, like the sizing that makes a sheet resist ink where words go.
+   The ink appears to flow beneath it; there is no visible panel edge. */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -6%;
+  left: -12%;
+  width: 74%;
+  height: 112%;
+  background: radial-gradient(
+    ellipse 62% 58% at 38% 46%,
+    color-mix(in srgb, var(--paper) 68%, transparent) 0%,
+    color-mix(in srgb, var(--paper) 40%, transparent) 45%,
+    transparent 72%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
 .kanjiMotif {
   position: absolute;
   top: 84px;

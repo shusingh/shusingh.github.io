@@ -590,7 +590,15 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
         if (Math.random() < 0.35) {
           const roll = Math.random();
           const pigment = roll < 0.5 ? INKS.sumi : roll < 0.8 ? INKS.matcha : INKS.ai;
-          splatDye(x, y, inkSplatColor(CONFIG.baseFillDensity * 0.38, pigment), 0.01);
+          // Fresh pigment lands on a perimeter ring, away from the copy in the
+          // centre-left, so idle drift replenishes the margins rather than
+          // slowly darkening the text column. Currents may still carry some
+          // inward; the display shader's absorbance ceiling covers that case.
+          const ringAngle = Math.random() * Math.PI * 2;
+          const ringRadius = 0.38 + Math.random() * 0.14;
+          const dyeX = Math.min(0.97, Math.max(0.03, 0.5 + Math.cos(ringAngle) * ringRadius));
+          const dyeY = Math.min(0.97, Math.max(0.03, 0.5 + Math.sin(ringAngle) * ringRadius * 0.9));
+          splatDye(dyeX, dyeY, inkSplatColor(CONFIG.baseFillDensity * 0.38, pigment), 0.01);
         }
         injected = true;
       }
