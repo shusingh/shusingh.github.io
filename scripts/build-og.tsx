@@ -12,20 +12,21 @@ import {
   loadWritingFrontmatter,
 } from './lib/content';
 import { loadFonts, type LoadedFont } from './lib/fonts';
+import { cssVar } from './theme';
 
 const WIDTH = 1200;
 const HEIGHT = 630;
 
-// Mirrors --bg / --bg-elevated / --text-primary / --text-secondary / --accent / --border
-// from src/index.css (dark theme).
+// Dark OG surface with the accent read from src/index.css, the single source
+// of truth for site colors (see --accent-on-dark there).
 const TOKENS = {
   bg: '#0e0e10',
   bgElevated: '#161618',
   textPrimary: '#ededed',
   textSecondary: '#a1a1a6',
   textTertiary: '#6b6b72',
-  accent: '#9bc4b2',
-  accentDim: '#5e8276',
+  accent: cssVar('--accent-on-dark'),
+  accentDim: cssVar('--accent-on-dark-dim'),
   border: 'rgba(255, 255, 255, 0.08)',
 };
 

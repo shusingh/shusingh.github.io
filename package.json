@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "tsx scripts/sync-theme.ts",
     "build": "tsc -b && vite build && tsx scripts/postbuild.ts",
     "lint": "eslint .",
     "preview": "vite preview",
