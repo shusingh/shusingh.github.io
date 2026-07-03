@@ -55,15 +55,13 @@ The visual system extends this site's suminagashi language: the same washi paper
 
 Two decisions here earned their keep. First, the moods needed faces, not just swatches; five coloured dots read as a chart, five blobs with tiny kaomoji expressions read as company. Second, the original scale ended at shu vermillion for the best days, and it was wrong in a way that took a while to name: red at the happy end of a scale still reads as an alarm. The pigment scale now runs cool to warm and ends at yamabuki gold. Vermillion survives only as the streak accent, where a little fire is the point.
 
-## The paper was never a photograph
+## Paper is a render, not an asset
 
-The best bug of the build was not in the code; it was in my understanding of my own website.
+This site's paper is not a photograph. The fluid-ink canvas from my homepage mounts on every page, and its display shader paints the sheet procedurally: three octaves of value noise over the paper colour, finished with a deckled-edge vignette, computed per pixel. There is a washi photo in the repository too, but it is the fallback for browsers without WebGL, not the paper anyone actually sees.
 
-One Line was supposed to share this site's paper background, so it copied the obvious thing: the washi photograph that the CSS layers over every page, multiply-blended and softened. It looked almost right, and "almost right" for an entire day of comparing screenshots. The One Line paper read as a scan of paper; the portfolio's read as a sheet.
+So when One Line borrowed the design system, the honest move was to port the render, not the asset. A texture photo has a fixed resolution; stretch it across a 5K display and the fibres smear, and every multiply-blended layer you stack on top flattens it further. Procedural paper has none of those failure modes. It is crisp at any viewport, costs no download, and its look is a handful of parameters instead of a million frozen pixels, which means the two sites can share the *recipe* rather than an export of it.
 
-The answer was that the portfolio's paper is not the photograph at all. The fluid-ink canvas on my homepage mounts on every page of the site, and its display shader paints paper procedurally: three octaves of value noise over the paper colour, with a deckled-edge vignette, rendered per-pixel. The photo overlay it was hiding is only a fallback. The lesson generalizes: when you copy a design system, copy the thing that renders, not the first matching asset you find in the repository.
-
-One Line now ships a forty-line WebGL port of that shader's paper path, drawn once per resize. One draw call, no animation, and the two sites are finally cut from the same sheet.
+The port came out to about forty lines of raw WebGL: one full-screen triangle, one fragment shader, one draw call, redrawn only on resize. No Three.js, no animation, and the 354KB photograph stayed out of the bundle entirely. The rule I would generalize: a design system should share sources, not artifacts. When two properties need the same surface, hand them the function that draws it, because any exported copy starts drifting the moment it is saved.
 
 ## Layout: nothing hides behind a toggle
 
