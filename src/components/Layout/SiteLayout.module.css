@@ -26,6 +26,70 @@
   animation: pageEnter 0.28s ease backwards;
 }
 
+/* ---- Kentō cursor: registration marks + fine ink dot ---- */
+
+.corner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 11px;
+  height: 11px;
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: multiply;
+  will-change: transform;
+  transition: opacity 0.25s ease;
+}
+
+.corner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 0 solid color-mix(in srgb, var(--sumi) 80%, transparent);
+  transition: border-color 0.2s ease;
+}
+
+.cornerNw::before {
+  border-top-width: 1.5px;
+  border-left-width: 1.5px;
+}
+
+.cornerNe::before {
+  border-top-width: 1.5px;
+  border-right-width: 1.5px;
+}
+
+.cornerSw::before {
+  border-bottom-width: 1.5px;
+  border-left-width: 1.5px;
+}
+
+.cornerSe::before {
+  border-bottom-width: 1.5px;
+  border-right-width: 1.5px;
+}
+
+.cornerHot::before {
+  border-color: var(--accent);
+}
+
+.cursorDot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 999px;
+  background: var(--sumi);
+  z-index: 1000;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: multiply;
+  will-change: transform;
+  transition: opacity 0.2s ease;
+}
+
 @keyframes pageEnter {
   from {
     opacity: 0;

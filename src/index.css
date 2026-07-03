@@ -43,22 +43,6 @@
   --card-shadow-hover: 0 18px 38px -24px rgba(26, 26, 31, 0.24);
   --grain-opacity: 0.42;
   --grain-blend: multiply;
-  --cursor-x: 50vw;
-  --cursor-y: 22vh;
-  --cursor-spotlight-opacity: 0;
-  --cursor-follower-x: 50vw;
-  --cursor-follower-y: 22vh;
-  --cursor-follower-size: 10px;
-  --cursor-follower-width: var(--cursor-follower-size);
-  --cursor-follower-height: var(--cursor-follower-size);
-  --cursor-follower-radius: 999px;
-  --cursor-follower-rotate: 0rad;
-  /* The brush tip: a soft ink dot that multiplies into the paper below it. */
-  --cursor-follower-ink: rgba(86, 122, 38, 0.5);
-  --cursor-follower-bg: var(--cursor-follower-ink);
-  --cursor-follower-border: transparent;
-  --cursor-follower-active-bg: rgba(86, 122, 38, 0.1);
-  --cursor-follower-opacity: 0;
   --interactive-cursor: auto;
   --font-display: 'Newsreader', Georgia, serif;
   --font-body: 'Hanken Grotesk Variable', -apple-system, system-ui, sans-serif;
@@ -200,32 +184,11 @@ a:focus-visible {
   position: relative;
 }
 
-#root::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1000;
-  width: var(--cursor-follower-width);
-  height: var(--cursor-follower-height);
-  border: 1px solid var(--cursor-follower-border);
-  border-radius: var(--cursor-follower-radius);
-  background: var(--cursor-follower-bg);
-  opacity: var(--cursor-follower-opacity);
-  /* Pigment, not overlay: the tip darkens the ink and paper beneath it. */
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  transform: translate3d(
-      calc(var(--cursor-follower-x) - 50%),
-      calc(var(--cursor-follower-y) - 50%),
-      0
-    )
-    rotate(var(--cursor-follower-rotate));
-  will-change: transform, width, height, border-radius;
-  transition:
-    background-color 0.18s ease,
-    opacity 0.2s ease,
-    border-color 0.2s ease;
+/* While the kentō cursor is active, its fine ink dot IS the pointer. Touch
+   and reduced-motion sessions never get this class and keep native cursors. */
+html.kento-cursor,
+html.kento-cursor * {
+  cursor: none !important;
 }
 
 .container {
