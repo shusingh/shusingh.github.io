@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { SEO } from '@/components/SEO/SEO';
+import { NOW_DATE } from '@/lib/site';
 
 import styles from './NowPage.module.css';
 
@@ -8,8 +9,6 @@ interface NowEntry {
   label: string;
   value: ReactNode;
 }
-
-const NOW_DATE = 'May 2026 · Seattle';
 
 const entries: NowEntry[] = [
   {
@@ -70,7 +69,7 @@ const entries: NowEntry[] = [
     value: (
       <ul>
         <li>5 AM gym, four days a week</li>
-        <li>Film photography on the Fujifilm X100VI</li>
+        <li>Street photography on the Fujifilm X100VI</li>
         <li>Taoist philosophy, currently reading Chuang Tzu</li>
       </ul>
     ),

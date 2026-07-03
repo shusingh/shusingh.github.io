@@ -1,0 +1,91 @@
+---
+title: Local-first AI is personal computing, again
+date: 2026-07-02
+slug: local-first-ai-is-personal-computing-again
+excerpt: 'The most personal dataset ever assembled about you is your AI context: what you asked, what you saved, what you decided. The default architecture sends all of it to someone else''s computer. Local-first AI is not a privacy hobby; it is the personal computer argument, replayed.'
+readTime: 9 min read
+tags:
+  - local-first
+  - ai
+  - privacy
+  - personal-computing
+---
+
+import {
+  ComparisonDiagram,
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Computing has flipped between two poles for seventy years: the shared machine you rent and the personal machine you own.
+
+The mainframe era said computing is scarce, central, and administered; you submit jobs and receive results. The personal computer said no: the machine sits on your desk, the files are yours, nobody audits your usage. Then the cloud quietly re-centralized almost everything the PC had claimed, and we accepted it because the tradeoff was genuinely good.
+
+AI is now forcing the question a third time, and the stakes are higher than either previous round, because of what the new systems consume.
+
+An assistant is only as useful as its context, and its context is you: what you asked at 1 AM, what you are worried about, what you decided and why, your files, your calendar, your contradictions. Aggregated, that is **the most personal dataset that has ever existed about a person**, more intimate than a search history because it includes your reasoning.
+
+The default architecture of the AI era sends that dataset, continuously, to a computer you do not control. Local-first AI is the refusal. Not a hobbyist preference, not privacy theater: the personal computer argument, replayed with better hardware.
+
+## The argument is architectural, not moral
+
+The weak version of local AI advocacy says "clouds are creepy." The strong version says something more precise: **certain guarantees can only be made by architecture, and where data lives is an architectural decision.**
+
+A cloud provider can promise not to train on your conversations, to encrypt at rest, to honor deletion. Those are policies. Policies change with ownership, subpoenas, quarterly pressure, and settings screens you did not read. A local SQLite file on your own disk does not require anyone's continued good behavior. The promise is enforced by physics: the data cannot leak from a place it never left.
+
+I keep relearning this on Waymark, the local-first memory CLI I built. The trustworthy version of every feature was the one where the boundary did the work:
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Owned by the user',
+      items: ['local database', 'explicit imports', 'backups they can hold'],
+    },
+    {
+      title: 'Earned by the software',
+      items: ['grounded answers', 'citations to saved sources', 'honest refusals'],
+    },
+    {
+      title: 'Optional, visiting',
+      items: ['local models via Ollama', 'cloud reasoning on excerpts', 'nothing ambient'],
+    },
+  ]}
+  caption="The data is a resident. The models are visitors. That ordering is the whole design."
+/>
+
+The pattern generalizes past one CLI. The right mental model for personal AI is not "my assistant lives in the cloud and knows me." It is "my context lives with me, and intelligence visits it."
+
+## The hardware finally showed up
+
+For years the local argument lost on capability, and deserved to. That excuse is expiring.
+
+A 2026 laptop ships with a neural accelerator and enough memory to run models that would have been state of the art three years ago. Small open-weight models handle summarization, extraction, classification, embedding, and retrieval, which is to say, most of what a personal assistant actually does all day. The unglamorous secret of assistant workloads is that they are mostly not frontier reasoning. They are "find the note," "structure this," "what did I decide about X," and a local model with good retrieval answers those faster than a network round trip.
+
+What remains genuinely better in the cloud is the top end: long-horizon reasoning, hard synthesis, the queries where you want the best model in the world. Which suggests the honest architecture is not purity but a gradient:
+
+<FlowDiagram
+  nodes={['context stays local', 'local model handles the routine', 'hard queries send minimal excerpts', 'answers return and are kept local']}
+  caption="Hybrid, with a bias: the cloud sees questions, never the corpus."
+/>
+
+The design principle is disclosure minimization. The frontier model is a consultant you hand a briefing to, not a landlord who holds your archive. The difference between "sync everything and let the provider be smart" and "send this paragraph, get the answer, hang up" is the difference between renting your memory and owning it.
+
+## Why the market will not build this for you
+
+Be clear-eyed about the incentives. Every major AI company is racing to be your ambient, ever-present assistant, and their business models make centralized context accumulation the entire point. Memory features are marketed as convenience and function as switching costs. The more of your life a provider holds, the more expensive leaving becomes, which is exactly the dynamic that made PC people distrust timesharing.
+
+This is why local-first AI will look like the early PC movement for a while: slightly worse, more effort, championed by people who care about the principle before the convenience catches up. That was also true of personal computers in 1978, encrypted messaging in 2012, and password managers before your employer mandated one. The pattern of these arguments is that the inconvenient position becomes the obvious one about a decade after it was dismissed.
+
+The pieces are further along than the mood suggests: capable open-weight models, one-command local runtimes, mature embedded databases, sync protocols that treat the server as a dumb relay for encrypted state. Nothing about a private, local, genuinely personal assistant requires an invention. It requires assembly and the conviction that it matters.
+
+## Ownership is the feature
+
+Strip away the model benchmarks and the question underneath is old and simple: **when a machine knows you this well, who should own the knowing?**
+
+The mainframe answer is back in fashion, wearing better UX: let the center hold everything, it is so capable, so convenient, so aligned with you for now. And the personal computing answer is the same as it was: capability is temporary, terms of service are temporary, ownership is structural.
+
+I want AI that is personal in the strong sense. Not personalized, which describes what a provider's model does with data about me, but personal, which describes what I possess. My memory in files I can copy. My assistant's knowledge auditable, exportable, deletable by me, without a request form.
+
+The first personal computer revolution gave people their own machines and their own files, and everything else followed from that. The second one is available now, for the most intimate data we have ever produced.
+
+It starts the same way the first one did: with the unfashionable insistence that the computer on your desk, and what it knows about you, is yours.

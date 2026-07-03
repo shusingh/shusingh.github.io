@@ -103,49 +103,6 @@
   line-height: 1.6;
 }
 
-.photoGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.photoCell {
-  aspect-ratio: 4 / 5;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: var(--bg-elevated);
-  position: relative;
-  overflow: hidden;
-  background-image:
-    linear-gradient(135deg, var(--accent-bg) 0%, transparent 50%),
-    repeating-linear-gradient(
-      45deg,
-      var(--border) 0px,
-      var(--border) 1px,
-      transparent 1px,
-      transparent 12px
-    );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.photoCell::after {
-  content: 'photo placeholder';
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  color: var(--text-tertiary);
-}
-
-.photoCaption {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-tertiary);
-  margin-top: 12px;
-}
-
 @media (max-width: 900px) {
   .factList {
     grid-template-columns: 1fr;
@@ -154,9 +111,5 @@
 
   .factLabel {
     padding-top: 0;
-  }
-
-  .photoGrid {
-    grid-template-columns: repeat(2, 1fr);
   }
 }

@@ -1,0 +1,99 @@
+---
+title: The disappearing junior engineer
+date: 2026-07-02
+slug: the-disappearing-junior-engineer
+excerpt: 'AI agents are best at exactly the work junior engineers used to learn on. The industry is responding by hiring fewer juniors, which is a rational decision for every individual team and a catastrophic one for the profession. Where do the seniors of 2032 come from?'
+readTime: 10 min read
+tags:
+  - ai
+  - careers
+  - engineering-culture
+  - mentorship
+---
+
+import {
+  ComparisonDiagram,
+  FlowDiagram,
+  LoopDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Ask a senior engineer how they got good and the honest answer is embarrassing: by doing a large volume of unglamorous work. Small features under supervision. Test coverage nobody else wanted to write. Bug tickets with clear reproduction steps. CRUD endpoints. The thousandth code review comment absorbed and internalized.
+
+Now write that list again and notice what it also is: a near-perfect description of what coding agents do well in 2026.
+
+The overlap is not a coincidence. We spent decades decomposing engineering work so that its simplest units could be handed to the least experienced people. Work decomposed that cleanly is work a model can do. The bottom rungs of the career ladder were, by design, the most automatable part of the profession.
+
+So teams face a quiet decision, made one hiring cycle at a time: the tasks we used to justify a junior headcount with are now a subscription. Every individual team choosing "the agent" is being locally rational. The profession, in aggregate, is eating its seed corn.
+
+## The apprenticeship was the product
+
+The software industry never really had formal training. It had proximity.
+
+A junior sat near production code, near incidents, near people who had seen failure before. The daily work was low-stakes by design, but the learning was not in the tasks themselves. It was in the correction loop around them:
+
+<LoopDiagram
+  steps={['attempt the task', 'get it reviewed', 'absorb the correction', 'own the consequence']}
+  decision="Did the lesson generalize?"
+  yes="judgment forms"
+  no="repeat with new task"
+  caption="The tasks were never the point. The loop was the point."
+/>
+
+Delete the attempt step and the loop does not run. A junior who reviews agent output instead of writing their own attempts skips the failure that makes the correction stick. Reading a correct diff teaches you almost nothing about the four wrong approaches you did not get to try. Judgment is compression of personal error, and we are removing the errors.
+
+## "We've heard this before" is half right
+
+The standard rebuttal: compilers did not kill junior engineers, nor did garbage collection, frameworks, or Stack Overflow. Abstraction always moves up; juniors just start higher.
+
+I think the rebuttal fails on a specific distinction: **those were abstractions; this is delegation.**
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'Abstraction',
+    title: 'Removes toil, keeps thinking',
+    items: ['You still decompose the problem', 'You still choose the approach', 'Failure still lands on you'],
+  }}
+  right={{
+    eyebrow: 'Delegation',
+    title: 'Removes the thinking itself',
+    items: ['The agent decomposes', 'The agent chooses', 'Failure is diffuse and deferred'],
+  }}
+  caption="A compiler never did your problem decomposition. An agent will happily do exactly that."
+/>
+
+A junior using a garbage collector still had to think about ownership of data, object lifetimes, and system structure. A junior delegating to an agent can ship a working feature while skipping the decomposition, the approach selection, and the debugging. The artifact appears; the cognition it used to force does not happen.
+
+That would be fine if the cognition were obsolete. It is not, because someone still has to verify the output, and verification draws on exactly the judgment that unassisted production used to build. We are automating the training ground for the one skill the automation makes more valuable.
+
+## What actually trained the engineer I mentored
+
+I mentored a new-grad SDE from onboarding to independent on-call. Watching that transition up close made me distrust the "juniors just start higher now" story, because almost none of the growth came from producing code.
+
+The inflection points were all consequence-shaped. The first time a change they shipped caused a ticket, and they had to read their own logs at 2 AM. The first sev where they were the one paged, with a runbook they had skimmed and suddenly needed. The first time they had to defend a design choice to an adjacent team that did not care about their feelings. The first RCA where "the code worked" was true and insufficient.
+
+None of that is automatable, because none of it is production. It is ownership under uncertainty. An agent can write the service; it cannot be the person whose name is on the page rotation, and being that person is what converted my mentee from someone who writes code into someone who operates systems.
+
+Which suggests what the junior role has to become.
+
+## The junior role, rebuilt
+
+If the production rungs are gone, the ladder needs new rungs, and I think they look like a verification apprenticeship rather than a production one:
+
+- **Own consequences early, not tasks.** Put juniors on-call for something real, sized to be survivable. Operational ownership builds judgment faster than feature work ever did, and it cannot be delegated to a model.
+- **Review before write.** Make reading agent output critically, with authority to reject it, a core junior skill. Train the discriminator directly: here are five plausible diffs, two are subtly wrong, find them.
+- **Specify, then compare.** Have juniors write the spec and their own approach sketch before invoking the agent, then diff their intent against the machine's. The gap between the two is the curriculum.
+- **Protect slow work.** Some fraction of tasks should be done unassisted, deliberately, the way pilots still hand-fly approaches. Not out of nostalgia: because calibration decays without practice, and someone has to notice when the autopilot is wrong.
+
+Teams will object that this is expensive. It is. It was always expensive; the cost used to be hidden inside salaries and slow first years. The difference is that the expense is now a visible choice, and visible choices get cut.
+
+## The uncomfortable equilibrium
+
+Run the current incentives forward. Teams hire fewer juniors because agents cover the entry-level work. The juniors who are hired produce more but accumulate judgment slower, because the correction loop is thinner. Meanwhile the seniors carrying the verification load age toward other jobs, and the pipeline behind them narrows.
+
+Nobody decided this. Every step is a reasonable quarterly decision. The failure mode is not a crash; it is a slow hollowing, the kind that manufacturing and airline pilots and radiology have each met in their own way: **automation that consumes the practice field for the experts it still depends on.**
+
+The professions that handled it well did so deliberately. Aviation kept simulators, check rides, and mandatory hand-flying currency precisely because the plane no longer requires them. Software has no licensing board to force the equivalent, so it will have to come from engineering culture: teams that treat growing verifiers as a first-class output, not a side effect of cheap labor that no longer exists.
+
+I do not think the junior engineer disappears. I think the title survives and the substance is up for grabs. The seniors of 2032 are being decided right now, by whether we hand the next generation tasks or consequences.
+
+The agents can have the tasks. The consequences have to stay human, because that was always where the engineers came from.

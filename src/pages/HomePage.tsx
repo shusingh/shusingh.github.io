@@ -8,6 +8,7 @@ import { Section } from '@/components/Section/Section';
 import { WorkCard } from '@/components/WorkCard/WorkCard';
 import { WritingItem } from '@/components/WritingItem/WritingItem';
 import { formatWritingDate, projectEntries, workEntries, writingEntries } from '@/content/load';
+import { NOW_DATE } from '@/lib/site';
 
 import styles from './HomePage.module.css';
 
@@ -120,7 +121,7 @@ export function HomePage() {
         <NowCard
           headingPrefix="What I'm"
           headingAccent="working on"
-          date="May 2026 · Seattle"
+          date={NOW_DATE}
           entries={[
             {
               label: 'Building',
@@ -145,7 +146,7 @@ export function HomePage() {
               label: 'Outside work',
               value: (
                 <span className="muted">
-                  5 AM gym · film photography (Fujifilm X100VI) · Taoist philosophy
+                  5 AM gym · street photography (Fujifilm X100VI) · Taoist philosophy
                 </span>
               ),
             },

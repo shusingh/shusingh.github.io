@@ -45,8 +45,9 @@ export function AboutPage() {
               for cross-team programs.
             </p>
             <p>
-              Outside work I'm at the gym at 5 AM, doing street photography on a Fujifilm X100VI, or
-              somewhere in a non-fiction stack. Lately: Taoist philosophy and re-reading Kleppmann.
+              Outside work I'm at the gym at 5 AM, out doing street photography with a Fujifilm
+              X100VI, or somewhere in a non-fiction stack. Lately: Taoist philosophy and re-reading
+              Kleppmann.
             </p>
             <p>
               If you're building serious AI infrastructure and looking for engineers who care about
@@ -71,7 +72,7 @@ export function AboutPage() {
 
             <dt className={styles.factLabel}>Off-hours</dt>
             <dd className={styles.factValue}>
-              5 AM gym · film photography (Fujifilm X100VI) · Taoist philosophy
+              5 AM gym · street photography (Fujifilm X100VI) · Taoist philosophy
             </dd>
 
             <dt className={styles.factLabel}>Resume</dt>
@@ -87,21 +88,6 @@ export function AboutPage() {
             </dd>
           </dl>
 
-          <h2 className={styles.sectionTitle}>Photography</h2>
-          <p className={styles.body}>
-            I shoot mostly film, mostly on the Fujifilm X100VI. A rotating selection lives below;
-            real images will replace these placeholders when I get around to scanning the last few
-            rolls.
-          </p>
-          <div className={styles.photoGrid} aria-label="Photography placeholders">
-            <div className={styles.photoCell} role="img" aria-label="Photo placeholder" />
-            <div className={styles.photoCell} role="img" aria-label="Photo placeholder" />
-            <div className={styles.photoCell} role="img" aria-label="Photo placeholder" />
-            <div className={styles.photoCell} role="img" aria-label="Photo placeholder" />
-            <div className={styles.photoCell} role="img" aria-label="Photo placeholder" />
-            <div className={styles.photoCell} role="img" aria-label="Photo placeholder" />
-          </div>
-          <p className={styles.photoCaption}>Placeholders · real frames to follow</p>
         </div>
       </section>
     </>

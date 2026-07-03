@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+declare const __NOW_DATE__: string;
+
 declare module '*.mdx' {
   import type { ComponentType } from 'react';
 

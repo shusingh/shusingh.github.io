@@ -1,0 +1,94 @@
+---
+title: The web is being rebuilt for agents
+date: 2026-07-02
+slug: the-web-is-being-rebuilt-for-agents
+excerpt: 'A growing share of your site''s visitors cannot see your CSS, will never watch your ad, and read your entire page in forty milliseconds. The web is quietly splitting into a human surface and a machine surface, and most teams are only designing for one of them.'
+readTime: 10 min read
+tags:
+  - agents
+  - web
+  - frontend
+  - product-engineering
+---
+
+import {
+  ComparisonDiagram,
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+The most important visitor to your website this year does not have eyes.
+
+It is a model with a browsing tool, an agent booking something on a user's behalf, or a crawler feeding an answer engine. It does not see your hero animation. It does not scroll, so it does not care what is above the fold. It will not click your ad, accept your cookie banner, or join your newsletter. It reads your entire site in milliseconds, extracts the three facts it came for, and leaves to synthesize them into an answer where your brand may or may not be mentioned.
+
+Every assumption underneath web design, web economics, and web measurement quietly presumes a human on the other end. That presumption is now false a meaningful fraction of the time, and the fraction only moves one direction.
+
+The web is not dying. It is bifurcating: **a human surface for experience, and a machine surface for capability.** The teams that notice are building both on purpose. Everyone else is serving one of them by accident.
+
+## The reader changed, the page did not
+
+Consider what a modern page actually is: markup for structure, CSS for perception, JavaScript for interaction, and an enormous amount of scaffolding aimed at human psychology. Visual hierarchy, social proof, urgency, delight. Decades of craft, all of it addressed to a nervous system.
+
+An agent parses none of that as meaning. For the machine reader, your site reduces to something much more austere:
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'Human surface',
+    title: 'Experience',
+    items: ['layout and motion', 'brand and trust signals', 'attention and persuasion'],
+  }}
+  right={{
+    eyebrow: 'Machine surface',
+    title: 'Capability',
+    items: ['facts with provenance', 'actions with contracts', 'structure and permissions'],
+  }}
+  caption="Same product, two readers. Only one of them can be persuaded."
+/>
+
+You can see the machine surface assembling itself in public: `llms.txt` files describing sites to models, MCP servers exposing product actions as typed tools, structured data graduating from an SEO garnish to a load-bearing interface, agentic browsers that treat the visual page as a fallback when no API exists.
+
+The pattern rhymes with the mobile transition. First we squeezed the desktop site onto the new surface, then responsive design admitted the surface was real, and eventually "mobile-first" inverted the priority. Agent traffic is at the squeezing stage: models heroically parsing DOM meant for eyeballs. The responsive-design moment, designing the machine surface deliberately, is happening now at the companies paying attention.
+
+## The economic rupture is the real story
+
+The technical shift is manageable. The economic one is not, because the open web's business model is a tax on human attention, and agents do not pay attention taxes.
+
+The old loop was stable for twenty years: sites publish freely, search sends humans, humans see ads or convert, revenue funds more publishing. Answer engines and agents break the loop at its first joint. The content still gets read, more than ever, but by a machine that synthesizes an answer upstream of the visit. The human who would have landed on the page never arrives.
+
+<FlowDiagram
+  nodes={['content published', 'machine reads it', 'answer synthesized upstream', 'visit never happens', 'revenue never happens']}
+  caption="Consumption without visitation. The content is more read and less funded than ever."
+/>
+
+The responses are forming fast: licensing deals between publishers and model providers, pay-per-crawl schemes at the CDN layer, paywalls hardening, and lawsuits sketching the price of training data. What they share is an admission that **reading by machines is consumption and has to be priced as something**, because the ad impression it displaced was never free.
+
+I do not know which pricing model wins. I am fairly confident about the loser: the ad-funded open web of anonymous human page views. Sites built purely on that model are holding an asset whose buyer is leaving the market.
+
+## Design when your user is a delegate
+
+For product engineers, the more interesting question is not traffic economics but interaction design: what does your product look like when the "user" is an agent acting for a human?
+
+It looks like an API with unusual requirements. Not a developer API, designed for engineers reading docs, but a delegate API, consumed at runtime by a model representing someone who has never seen your product. That changes the contract in specific ways:
+
+- **Capabilities over pages.** The unit of the machine surface is an action with typed inputs, honest errors, and stated side effects. "Book, cancel, check availability" beats a beautiful booking funnel that only a human can navigate.
+- **Provenance over prose.** Facts need timestamps and sources, because the agent's synthesis will strip your context and keep your claims. Wrong data propagates at machine speed with your name on it.
+- **Idempotency and confirmation.** An agent will retry. An agent will misread ambiguity. Any consequential action needs the same discipline as a payments API: idempotency keys, dry-run modes, explicit confirmation steps a human can review.
+- **Legibility as marketing.** When an answer engine composes a response from six sources, the sites that are structured, current, and unambiguous get quoted; the rest get paraphrased anonymously. Being machine-legible is the new distribution.
+
+Notice how backend-flavored that list is. The machine surface of the web is being built with the instincts of API engineering, contracts, permissions, rate limits, audit, aimed at a consumer that behaves like software while answering to a person. Frontend and backend stop being layers and become audiences.
+
+## What survives on the human surface
+
+If capability migrates to the machine surface, what is the human surface still for?
+
+Everything agents cannot want. Trust formed by seeing how a thing presents itself. Browsing with no extraction target, taste, the feeling that a product respects you. Brands will discover that the human surface is where preference is formed even when the transaction later flows through an agent: people tell their delegate "book the one I like," and the liking happened somewhere.
+
+Even this site is an example at miniature scale. Some of its readers arrive through models now; the structured metadata, feeds, and OG images are its machine surface, and posts get summarized in answers by systems that never render the CSS I fussed over. I write knowing both audiences are real. The essay is for the human. The frontmatter is for the machine. Neither is optional anymore.
+
+## The instrument panel is lying
+
+One practical closing note: your analytics are increasingly measuring the wrong species. Bot detection was built to exclude fraud, not to account for legitimate machine readers acting for real customers. An agent that reads your pricing page and completes a purchase through your API may register as either a bot to be filtered or a suspiciously efficient human, and both readings corrupt the numbers a product team steers by.
+
+The fix starts with an honest question added to every funnel review: **which of our "users" were delegates, and did we serve them well?** Teams that can answer will design for the web that is actually arriving. Teams that cannot will keep polishing a surface their fastest-growing audience cannot see.
+
+The web was built as a library for people. It is becoming, additionally, a switchboard for their software. The sites that thrive will be the ones that stopped treating that as an intrusion and started treating it as a second front door.
