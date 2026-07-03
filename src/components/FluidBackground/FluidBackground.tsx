@@ -56,8 +56,8 @@ interface DoubleFbo {
  * Real-time "stable fluids" ink simulation rendered with Three.js. The pointer
  * injects pigment + velocity into a GPU fluid field that advects, swirls
  * (vorticity confinement) and is kept divergence-free via a Jacobi pressure
- * solve. Themed as subtractive sumi/ai/shu/matsuba ink on the warm paper
- * background; runs only on the homepage, behind all content.
+ * solve. Themed as subtractive sumi/ai/shu/matsuba/matcha ink on the warm
+ * paper background; runs only on the homepage, behind all content.
  */
 export function FluidBackground({ interactive = true }: { interactive?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -91,6 +91,21 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
     const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
     renderer.setPixelRatio(dpr);
 
+    // The sim needs renderable, linearly-filterable half-float targets. Where
+    // they are missing (older mobile GPUs) the renderer constructs fine but the
+    // buffers fail silently, so check up front and fall back to the CSS paper.
+    const gl = renderer.getContext();
+    const halfFloatRenderable = renderer.capabilities.isWebGL2
+      ? gl.getExtension('EXT_color_buffer_float') !== null ||
+        gl.getExtension('EXT_color_buffer_half_float') !== null
+      : gl.getExtension('OES_texture_half_float') !== null &&
+        gl.getExtension('OES_texture_half_float_linear') !== null;
+    if (!halfFloatRenderable) {
+      renderer.dispose();
+      document.body.classList.remove('fluid-bg-active');
+      return undefined;
+    }
+
     const scene = new THREE.Scene();
     const camera = new THREE.Camera();
     const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2));
@@ -104,6 +119,8 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       ai: new THREE.Vector3(0.086, 0.251, 0.478),
       shu: new THREE.Vector3(0.784, 0.216, 0.176),
       matsuba: new THREE.Vector3(0.18, 0.431, 0.322),
+      // Mirrors --matcha in src/index.css so the marbling echoes the accent.
+      matcha: new THREE.Vector3(0.337, 0.478, 0.149),
     };
     const PAPER = new THREE.Vector3(0.937, 0.918, 0.878);
     const INK_EPS = 0.012;
@@ -223,8 +240,9 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       const dyeRes = getResolution(DYE_RESOLUTION);
       simTexel.set(1 / sim.w, 1 / sim.h);
 
-      velocity?.dispose();
-      dye?.dispose();
+      const previousVelocity = velocity;
+      const previousDye = dye;
+
       divergence?.dispose();
       curl?.dispose();
       pressure?.dispose();
@@ -234,6 +252,24 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       dye = createDoubleFbo(dyeRes.w, dyeRes.h);
       divergence = createFbo(sim.w, sim.h);
       curl = createFbo(sim.w, sim.h);
+
+      // Carry the current painting and flow into the new buffers (the clear
+      // program with value = 1 is a plain copy, and linear filtering handles
+      // the rescale) so a resize never wipes the visitor's ink.
+      if (previousDye) {
+        programs.clear.uniforms.uTexture.value = previousDye.read.texture;
+        programs.clear.uniforms.value.value = 1;
+        blit(programs.clear, dye.write);
+        dye.swap();
+        previousDye.dispose();
+      }
+      if (previousVelocity) {
+        programs.clear.uniforms.uTexture.value = previousVelocity.read.texture;
+        programs.clear.uniforms.value.value = 1;
+        blit(programs.clear, velocity.write);
+        velocity.swap();
+        previousVelocity.dispose();
+      }
 
       Object.values(programs).forEach((p) => {
         (p.uniforms.texelSize.value as THREE.Vector2).copy(simTexel);
@@ -377,14 +413,15 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       blit(programs.display, null);
     }
 
-    // Pointer tracking.
+    // Pointer tracking. The cycle leans on matcha so the trail most often
+    // echoes the site accent.
     const cursorPigments = [
+      INKS.matcha,
       INKS.ai,
+      INKS.sumi,
+      INKS.matcha,
       INKS.matsuba,
-      INKS.sumi,
       INKS.shu,
-      INKS.ai,
-      INKS.sumi,
     ];
     const pointer = { x: 0.5, y: 0.5, dx: 0, dy: 0, moved: false };
     let cursorPigmentIndex = 0;
@@ -425,14 +462,42 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       lastMove = performance.now();
     }
 
+    let seeded = false;
+    let lastEnergy = performance.now();
+
     function resize() {
       width = Math.max(1, window.innerWidth);
       height = Math.max(1, window.innerHeight);
       renderer.setSize(width, height, false);
       initFramebuffers();
-      // Interactive pages seed the ink pools; others show plain paper.
-      if (interactive) seed();
+      // Interactive pages seed the ink pools once; others show plain paper.
+      // Later resizes keep the current painting via the framebuffer copy.
+      if (interactive && !seeded) {
+        seed();
+        seeded = true;
+      }
+      lastEnergy = performance.now();
       render();
+    }
+
+    // Debounced: dragging a window edge fires dozens of resize events, and on
+    // mobile the collapsing URL bar fires height-only changes during scroll.
+    // Neither should rebuild buffers mid-gesture, and the URL-bar case should
+    // not rebuild at all.
+    let resizeTimer = 0;
+    function handleResize() {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(() => {
+        const w = Math.max(1, window.innerWidth);
+        const h = Math.max(1, window.innerHeight);
+        if (w === width && Math.abs(h - height) < 140) {
+          height = h;
+          renderer.setSize(w, h, false);
+          render();
+          return;
+        }
+        resize();
+      }, 200);
     }
 
     // Paint the whole canvas with a marbled ink base coat, give it a gentle
@@ -453,14 +518,14 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       const pools = [
         [0.06, 0.09, INKS.sumi],
         [0.34, 0.05, INKS.ai],
-        [0.64, 0.05, INKS.sumi],
+        [0.64, 0.05, INKS.matcha],
         [0.91, 0.1, INKS.matsuba],
         [0.96, 0.34, INKS.sumi],
         [0.93, 0.6, INKS.ai],
         [0.95, 0.85, INKS.sumi],
         [0.7, 0.95, INKS.matsuba],
         [0.44, 0.97, INKS.shu],
-        [0.12, 0.95, INKS.sumi],
+        [0.12, 0.95, INKS.matcha],
         [0.03, 0.68, INKS.ai],
         [0.02, 0.34, INKS.sumi],
       ] as const;
@@ -485,14 +550,21 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
     let lastTime = performance.now();
     let autoTimer = 0;
 
+    // How long after the last injection the fluid keeps simulating. Velocity
+    // dissipation (3.2) makes motion visually settle well within this window.
+    const SETTLE_MS = 3500;
+
     function frame(now: number) {
       const dt = Math.min((now - lastTime) / 1000, 0.016666);
       lastTime = now;
+
+      let injected = false;
 
       // Clicks send a ripple outward through the ink.
       while (pendingRipples.length > 0) {
         const r = pendingRipples.shift()!;
         ripple(r.x, r.y, r.ink);
+        injected = true;
       }
 
       // Moving the cursor pushes the existing ink (velocity) and trails a
@@ -501,6 +573,7 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
         splatVelocity(pointer.x, pointer.y, pointer.dx, pointer.dy);
         splatDye(pointer.x, pointer.y, inkSplatColor(CONFIG.cursorDye, cursorPigment));
         pointer.moved = false;
+        injected = true;
       }
 
       // Auto-play: a slow wandering current keeps the painted canvas drifting
@@ -515,13 +588,23 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
         const speed = CONFIG.splatForce * 0.035;
         splatVelocity(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed);
         if (Math.random() < 0.35) {
-          const pigment = Math.random() < 0.75 ? INKS.sumi : INKS.ai;
+          const roll = Math.random();
+          const pigment = roll < 0.5 ? INKS.sumi : roll < 0.8 ? INKS.matcha : INKS.ai;
           splatDye(x, y, inkSplatColor(CONFIG.baseFillDensity * 0.38, pigment), 0.01);
         }
+        injected = true;
       }
 
-      step(dt);
-      render();
+      if (injected) lastEnergy = now;
+
+      // Energy gate: once the fluid has settled there is nothing to solve, so
+      // skip the GPU work instead of re-computing a static image at 60fps. The
+      // loop stays alive only to catch the next input or auto-splat.
+      if (now - lastEnergy < SETTLE_MS) {
+        step(dt);
+        render();
+      }
+
       raf = window.requestAnimationFrame(frame);
     }
 
@@ -535,13 +618,19 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
       }
     }
 
-    window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
 
+    let welcomeTimer = 0;
     if (interactive && !reducedMotion.matches) {
       window.addEventListener('pointermove', handlePointerMove, { passive: true });
       window.addEventListener('pointerdown', handlePointerDown, { passive: true });
       document.addEventListener('visibilitychange', handleVisibility);
       raf = window.requestAnimationFrame(frame);
+      // A single gentle matcha bloom beside the headline shortly after load —
+      // a quiet hint that the paper is interactive.
+      welcomeTimer = window.setTimeout(() => {
+        pendingRipples.push({ x: 0.26, y: 0.62, ink: INKS.matcha });
+      }, 1400);
     }
     // Non-interactive pages (and reduced motion) just show the static paper /
     // settled ink already painted by resize() — no live simulation loop.
@@ -549,9 +638,11 @@ export function FluidBackground({ interactive = true }: { interactive?: boolean 
     return () => {
       document.body.classList.remove('fluid-bg-active');
       if (raf) window.cancelAnimationFrame(raf);
+      window.clearTimeout(resizeTimer);
+      window.clearTimeout(welcomeTimer);
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerdown', handlePointerDown);
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibility);
       velocity?.dispose();
       dye?.dispose();

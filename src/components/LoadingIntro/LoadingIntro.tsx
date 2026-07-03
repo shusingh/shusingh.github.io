@@ -3,16 +3,18 @@ import { useEffect, useState } from 'react';
 import styles from './LoadingIntro.module.css';
 
 const STORAGE_KEY = 'intro:seen';
-const TOTAL_MS = 1500;
+const TOTAL_MS = 800;
 
 function prefersReducedMotion(): boolean {
   if (typeof window === 'undefined' || !window.matchMedia) return false;
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+// localStorage, not sessionStorage: the curtain greets a visitor once ever,
+// not once per tab.
 function alreadySeen(): boolean {
   try {
-    return sessionStorage.getItem(STORAGE_KEY) === '1';
+    return localStorage.getItem(STORAGE_KEY) === '1';
   } catch {
     return false;
   }
@@ -25,7 +27,7 @@ export function LoadingIntro() {
     if (hidden) return;
 
     try {
-      sessionStorage.setItem(STORAGE_KEY, '1');
+      localStorage.setItem(STORAGE_KEY, '1');
     } catch {
       // Storage may be unavailable (private mode, locked-down browsers); intro will replay.
     }

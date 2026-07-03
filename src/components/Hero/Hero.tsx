@@ -1,5 +1,8 @@
+import { Link } from 'react-router-dom';
+
 import { PhotoFrame } from '@/components/PhotoFrame/PhotoFrame';
 import { StatusCard } from '@/components/StatusCard/StatusCard';
+import { writingEntries } from '@/content/load';
 
 import styles from './Hero.module.css';
 
@@ -12,6 +15,7 @@ function ArrowIcon() {
 }
 
 export function Hero() {
+  const latest = writingEntries[0];
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
       <div className={styles.kanjiMotif} aria-hidden="true">
@@ -25,11 +29,11 @@ export function Hero() {
               Shubham <span className={styles.accent}>Singh</span>
             </h1>
             <p className={styles.role}>
-              I build <strong>production software end-to-end</strong>: backend services,
-              full-stack platforms, and (currently) agentic AI systems on AWS.
+              I build <strong>production agentic AI systems</strong> and the backend and
+              full-stack infrastructure they run on, end to end on AWS.
             </p>
             <p className={styles.description}>
-              Previously shipped: regulatory data pipelines processing 30M+ records a month,
+              Shipped: regulatory data pipelines processing 30M+ records a month,
               citation-grounded retrieval systems on Bedrock, and full-stack platforms used across
               three Amazon partner teams.
             </p>
@@ -50,6 +54,14 @@ export function Hero() {
                 Get in touch
               </a>
             </div>
+            {latest ? (
+              <Link className={styles.latest} to={`/writing/${latest.frontmatter.slug}`}>
+                Latest essay: {latest.frontmatter.title} <span aria-hidden="true">→</span>
+              </Link>
+            ) : null}
+            <p className={styles.hint} aria-hidden="true">
+              the ink responds to your cursor
+            </p>
           </div>
           <div className={styles.right}>
             <PhotoFrame src="/shubham.jpg" alt="Shubham Singh at Lake Union, Seattle" />

@@ -23,7 +23,7 @@ export function HomePage() {
       <SEO />
       <Hero />
 
-      <Section id="work" num="01" title="Featured work" meta="Selected projects · 2024–2026">
+      <Section id="work" num="01" title="Featured work" meta="Case studies · 2024–2026">
         <div className={styles.workGrid}>
           {primaryWork ? (
             <WorkCard
