@@ -14,7 +14,13 @@ const navItemsAfterProjects = [
   { to: '/now', label: 'Now' },
 ] as const;
 
-const liveProjects = projectEntries.filter((entry) => entry.frontmatter.liveUrl);
+/* One Line leads the menu; the rest keep the projects-page order. */
+const liveProjects = projectEntries
+  .filter((entry) => entry.frontmatter.liveUrl)
+  .sort(
+    (a, b) =>
+      Number(b.frontmatter.slug === 'one-line') - Number(a.frontmatter.slug === 'one-line')
+  );
 
 function isPlainLeftClick(event: MouseEvent<HTMLAnchorElement>): boolean {
   return (
