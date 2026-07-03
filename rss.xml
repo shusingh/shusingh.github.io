@@ -7,8 +7,52 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Sun, 21 Jun 2026 15:50:00 GMT</lastBuildDate>
-    <pubDate>Mon, 01 Jun 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Fri, 03 Jul 2026 00:41:49 GMT</lastBuildDate>
+    <pubDate>Thu, 02 Jul 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Local-first AI is personal computing, again</title>
+      <link>https://shusingh.github.io/writing/local-first-ai-is-personal-computing-again</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/local-first-ai-is-personal-computing-again</guid>
+      <pubDate>Thu, 02 Jul 2026 00:00:00 GMT</pubDate>
+      <description>The most personal dataset ever assembled about you is your AI context: what you asked, what you saved, what you decided. The default architecture sends all of it to someone else&apos;s computer. Local-first AI is not a privacy hobby; it is the personal computer argument, replayed.</description>
+      <category>local-first</category>
+      <category>ai</category>
+      <category>privacy</category>
+      <category>personal-computing</category>
+    </item>
+    <item>
+      <title>The disappearing junior engineer</title>
+      <link>https://shusingh.github.io/writing/the-disappearing-junior-engineer</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/the-disappearing-junior-engineer</guid>
+      <pubDate>Thu, 02 Jul 2026 00:00:00 GMT</pubDate>
+      <description>AI agents are best at exactly the work junior engineers used to learn on. The industry is responding by hiring fewer juniors, which is a rational decision for every individual team and a catastrophic one for the profession. Where do the seniors of 2032 come from?</description>
+      <category>ai</category>
+      <category>careers</category>
+      <category>engineering-culture</category>
+      <category>mentorship</category>
+    </item>
+    <item>
+      <title>The web is being rebuilt for agents</title>
+      <link>https://shusingh.github.io/writing/the-web-is-being-rebuilt-for-agents</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/the-web-is-being-rebuilt-for-agents</guid>
+      <pubDate>Thu, 02 Jul 2026 00:00:00 GMT</pubDate>
+      <description>A growing share of your site&apos;s visitors cannot see your CSS, will never watch your ad, and read your entire page in forty milliseconds. The web is quietly splitting into a human surface and a machine surface, and most teams are only designing for one of them.</description>
+      <category>agents</category>
+      <category>web</category>
+      <category>frontend</category>
+      <category>product-engineering</category>
+    </item>
+    <item>
+      <title>Verification is the new bottleneck</title>
+      <link>https://shusingh.github.io/writing/verification-is-the-new-bottleneck</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/verification-is-the-new-bottleneck</guid>
+      <pubDate>Thu, 02 Jul 2026 00:00:00 GMT</pubDate>
+      <description>AI collapsed the cost of producing code, prose, images, and answers. It did not collapse the cost of trusting them. That asymmetry is quietly restructuring every knowledge profession, and it explains where the real engineering work in AI systems has gone.</description>
+      <category>ai</category>
+      <category>trust</category>
+      <category>production</category>
+      <category>evaluation</category>
+    </item>
     <item>
       <title>Shipping a local-first AI memory CLI</title>
       <link>https://shusingh.github.io/writing/shipping-a-local-first-memory-cli</link>
