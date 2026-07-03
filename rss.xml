@@ -7,8 +7,18 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Fri, 03 Jul 2026 23:13:00 GMT</lastBuildDate>
-    <pubDate>Thu, 02 Jul 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Fri, 03 Jul 2026 23:21:53 GMT</lastBuildDate>
+    <pubDate>Fri, 03 Jul 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>One line a day: building a journal small enough to survive</title>
+      <link>https://shusingh.github.io/writing/one-line-a-day-building-a-journal</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/one-line-a-day-building-a-journal</guid>
+      <pubDate>Fri, 03 Jul 2026 00:00:00 GMT</pubDate>
+      <description>Every journaling habit I ever started died of ambition. So I built One Line: a journal that accepts exactly one sentence and one mood per day, stores everything in the browser, and marbles a year of entries into ink on paper. The constraint is the product; everything else followed from it.</description>
+      <category>local-first</category>
+      <category>design</category>
+      <category>side-projects</category>
+    </item>
     <item>
       <title>Local-first AI is personal computing, again</title>
       <link>https://shusingh.github.io/writing/local-first-ai-is-personal-computing-again</link>
