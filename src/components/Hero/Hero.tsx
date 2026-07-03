@@ -56,7 +56,7 @@ export function Hero() {
             </div>
             {latest ? (
               <Link className={styles.latest} to={`/writing/${latest.frontmatter.slug}`}>
-                Latest essay: {latest.frontmatter.title} <span aria-hidden="true">→</span>
+                Fresh ink: {latest.frontmatter.title} <span aria-hidden="true">→</span>
               </Link>
             ) : null}
             <p className={styles.hint} aria-hidden="true">
