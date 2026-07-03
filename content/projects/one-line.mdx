@@ -1,0 +1,66 @@
+---
+title: "One Line"
+slug: "one-line"
+description: "A local-first, one-sentence-a-day journal. One line, one mood, and a year that marbles like suminagashi ink as the entries accumulate. No backend, no account: everything lives in the browser."
+kind: "personal"
+link: "https://github.com/shusingh/one-line"
+repo: "https://github.com/shusingh/one-line"
+liveUrl: "https://shusingh.github.io/one-line/"
+tags: ["Vanilla JS", "LocalStorage", "Local-first", "Design system"]
+year: 2026
+status: "released"
+featured: false
+order: 4
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+## System intent
+
+One Line is a journal built around a single constraint: you write exactly one sentence a day and pick a mood. The constraint is the product. Ten seconds of effort is small enough to survive contact with real life, and after a few weeks the app starts paying you back, resurfacing what you wrote a week, a month, and a year ago today.
+
+It is deliberately not a notes app, not a habit platform, and not a cloud service. There is no backend, no account, and no network dependency for data: the entire journal lives in `localStorage`, with JSON export and import as the escape hatch.
+
+<LayerDiagram
+  groups={[
+    { title: 'Presentation', items: ['composer', 'mood picker', 'flashbacks', 'marbled year map'] },
+    { title: 'State', items: ['date-keyed entry store', 'streak + stats derivation', 'day rollover'] },
+    { title: 'Persistence', items: ['localStorage', 'JSON export / import'] },
+  ]}
+  caption="Three thin layers; the interesting decisions are all in how little each one is allowed to do."
+/>
+
+## Requirements
+
+- Writing today's line must take seconds: no login, no navigation, no save anxiety.
+- Each day stores at most one entry: a line of text and a mood.
+- Old entries resurface on their anniversaries (week, month, year).
+- The full year renders as a mood-coloured field of ink droplets.
+- Data must be exportable and restorable without any server.
+- The visual language extends this site's suminagashi system: washi paper, sumi ink, and traditional pigments.
+
+## High-level design
+
+<FlowDiagram
+  nodes={['type one line', 'pick a mood', 'persist to date key', 'derive streaks and stats', 'render flashbacks and year map']}
+  caption="Every feature is a pure derivation from one date-keyed map of entries."
+/>
+
+The store is a single object mapping `YYYY-MM-DD` keys to `{ text, mood }`. Everything else, streaks, flashbacks, the year map, monthly insight counts, is derived at render time. There is no cache to invalidate and no second source of truth.
+
+## Design decisions
+
+**One entry per day, enforced by the key.** Using the date as the primary key makes the core rule structural rather than validated. Editing is just overwriting today's key.
+
+**Derive, never store, statistics.** Streaks and mood balances are recomputed from the map on every render. The journal is small (a year is a few kilobytes), so correctness wins over caching.
+
+**The mood scale avoids alarm colours.** Moods map to traditional pigments running cool to warm, ending in yamabuki gold rather than red, so a great day never reads as a warning.
+
+**Local-first is a feature, not a fallback.** A journal is among the most private documents a person owns. Keeping it on-device is the honest architecture, and export/import keeps the user in control of backup.
+
+## What I would improve
+
+Backfilling missed days from the year map, an optional encrypted sync target for people with multiple devices, and a small PWA manifest so the journal installs to a phone home screen.
