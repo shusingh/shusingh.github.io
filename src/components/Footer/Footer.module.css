@@ -91,6 +91,15 @@
   gap: 10px;
 }
 
+.craft {
+  margin-top: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  text-shadow: var(--text-halo-strong);
+}
+
 .footMark {
   width: 15px;
   height: 15px;

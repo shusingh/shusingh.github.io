@@ -14,5 +14,8 @@ export function cssVar(name: string): string {
   if (!match) {
     throw new Error(`[theme] ${name} not found in src/index.css`);
   }
-  return match[1].trim();
+  const value = match[1].trim();
+  // Resolve one level of var() indirection (e.g. --accent: var(--matcha)).
+  const reference = value.match(/^var\((--[\w-]+)\)$/);
+  return reference ? cssVar(reference[1]) : value;
 }

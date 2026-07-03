@@ -28,9 +28,8 @@
   --accent-strong: #435f1d;
   --accent-dim: #a9b985;
   --accent-bg: rgba(86, 122, 38, 0.09);
-  /* Accent tints for dark surfaces; the favicon and OG images sync from these at build time. */
+  /* Accent tint for dark surfaces; the favicon syncs from this at build time. */
   --accent-on-dark: #a3c46b;
-  --accent-on-dark-dim: #6b8544;
   --selection-bg: rgba(86, 122, 38, 0.85);
   --selection-text: #f7f2e6;
   --scrollbar-track: rgba(58, 46, 26, 0.06);
@@ -49,13 +48,16 @@
   --cursor-spotlight-opacity: 0;
   --cursor-follower-x: 50vw;
   --cursor-follower-y: 22vh;
-  --cursor-follower-size: 18px;
+  --cursor-follower-size: 10px;
   --cursor-follower-width: var(--cursor-follower-size);
   --cursor-follower-height: var(--cursor-follower-size);
   --cursor-follower-radius: 999px;
-  --cursor-follower-bg: transparent;
+  --cursor-follower-rotate: 0rad;
+  /* The brush tip: a soft ink dot that multiplies into the paper below it. */
+  --cursor-follower-ink: rgba(86, 122, 38, 0.5);
+  --cursor-follower-bg: var(--cursor-follower-ink);
+  --cursor-follower-border: transparent;
   --cursor-follower-active-bg: rgba(86, 122, 38, 0.1);
-  --cursor-follower-shadow: none;
   --cursor-follower-opacity: 0;
   --interactive-cursor: auto;
   --font-display: 'Newsreader', Georgia, serif;
@@ -206,21 +208,22 @@ a:focus-visible {
   z-index: 1000;
   width: var(--cursor-follower-width);
   height: var(--cursor-follower-height);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--cursor-follower-border);
   border-radius: var(--cursor-follower-radius);
   background: var(--cursor-follower-bg);
-  box-shadow: var(--cursor-follower-shadow);
   opacity: var(--cursor-follower-opacity);
+  /* Pigment, not overlay: the tip darkens the ink and paper beneath it. */
+  mix-blend-mode: multiply;
   pointer-events: none;
   transform: translate3d(
-    calc(var(--cursor-follower-x) - 50%),
-    calc(var(--cursor-follower-y) - 50%),
-    0
-  );
+      calc(var(--cursor-follower-x) - 50%),
+      calc(var(--cursor-follower-y) - 50%),
+      0
+    )
+    rotate(var(--cursor-follower-rotate));
   will-change: transform, width, height, border-radius;
   transition:
     background-color 0.18s ease,
-    box-shadow 0.18s ease,
     opacity 0.2s ease,
     border-color 0.2s ease;
 }

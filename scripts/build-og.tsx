@@ -17,17 +17,17 @@ import { cssVar } from './theme';
 const WIDTH = 1200;
 const HEIGHT = 630;
 
-// Dark OG surface with the accent read from src/index.css, the single source
-// of truth for site colors (see --accent-on-dark there).
+// Warm paper-and-ink OG surface matching the live site. All colors are read
+// from src/index.css, the single source of truth for the theme.
 const TOKENS = {
-  bg: '#0e0e10',
-  bgElevated: '#161618',
-  textPrimary: '#ededed',
-  textSecondary: '#a1a1a6',
-  textTertiary: '#6b6b72',
-  accent: cssVar('--accent-on-dark'),
-  accentDim: cssVar('--accent-on-dark-dim'),
-  border: 'rgba(255, 255, 255, 0.08)',
+  bg: cssVar('--paper'),
+  bgElevated: cssVar('--bg-elevated'),
+  textPrimary: cssVar('--sumi'),
+  textSecondary: cssVar('--text-secondary'),
+  textTertiary: cssVar('--text-tertiary'),
+  accent: cssVar('--accent'),
+  accentDim: cssVar('--accent-dim'),
+  border: 'rgba(26, 26, 31, 0.16)',
 };
 
 function frame(eyebrow: string, title: string, footer: string) {

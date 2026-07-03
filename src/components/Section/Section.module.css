@@ -3,6 +3,26 @@
   position: relative;
 }
 
+.pending {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.revealed {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.22, 0.8, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pending {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .header {
   display: flex;
   align-items: baseline;

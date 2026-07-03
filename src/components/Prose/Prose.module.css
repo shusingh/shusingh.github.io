@@ -49,6 +49,25 @@
   color: var(--accent);
 }
 
+/* Headings are linkable (rehype-autolink); surface that on hover. */
+.prose h2 a::after,
+.prose h3 a::after,
+.prose h4 a::after {
+  content: '#';
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  margin-left: 12px;
+  color: var(--accent-dim);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.prose h2:hover a::after,
+.prose h3:hover a::after,
+.prose h4:hover a::after {
+  opacity: 1;
+}
+
 .prose p {
   color: var(--text-secondary);
 }

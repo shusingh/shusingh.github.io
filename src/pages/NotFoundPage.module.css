@@ -3,6 +3,35 @@
   padding: 100px 0 80px;
 }
 
+.inkblot {
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 36px;
+  font-family: var(--font-jp);
+  font-size: 40px;
+  color: var(--paper);
+  background: var(--sumi);
+  /* An irregular blot, not a perfect circle — ink never lands cleanly. */
+  border-radius: 58% 42% 55% 45% / 48% 55% 45% 52%;
+  transform: rotate(-4deg);
+}
+
+.subtitle {
+  max-width: 460px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 40px;
+}
+
+.actions {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
 .eyebrow {
   font-family: var(--font-mono);
   color: var(--accent);

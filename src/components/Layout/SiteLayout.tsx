@@ -30,6 +30,7 @@ function CursorSpotlight() {
       return undefined;
     }
 
+    const BRUSH_SIZE = 10;
     let animationFrame = 0;
     let nextX = window.innerWidth / 2;
     let nextY = window.innerHeight * 0.22;
@@ -37,13 +38,14 @@ function CursorSpotlight() {
     let followerY = nextY;
     let followerTargetX = nextX;
     let followerTargetY = nextY;
-    let followerWidth = 18;
-    let followerHeight = 18;
-    let followerRadius = 9;
+    let followerWidth = BRUSH_SIZE;
+    let followerHeight = BRUSH_SIZE;
+    let followerRadius = 999;
     let followerTargetWidth = followerWidth;
     let followerTargetHeight = followerHeight;
     let followerTargetRadius = followerRadius;
     let lastFollowerTime = performance.now();
+    let lastPointerMove = performance.now();
     let followerIsInteractive = false;
     let followerFrame = 0;
 
@@ -51,7 +53,6 @@ function CursorSpotlight() {
       root.style.setProperty('--cursor-x', `${nextX}px`);
       root.style.setProperty('--cursor-y', `${nextY}px`);
       root.style.setProperty('--cursor-spotlight-opacity', '1');
-      root.style.setProperty('--cursor-follower-opacity', '1');
       animationFrame = 0;
     }
 
@@ -59,11 +60,33 @@ function CursorSpotlight() {
       const dt = Math.min((now - lastFollowerTime) / 1000, 0.05);
       const ease = 1 - Math.exp(-18 * dt);
       lastFollowerTime = now;
-      followerX += (followerTargetX - followerX) * ease;
-      followerY += (followerTargetY - followerY) * ease;
-      followerWidth += (followerTargetWidth - followerWidth) * ease;
-      followerHeight += (followerTargetHeight - followerHeight) * ease;
-      followerRadius += (followerTargetRadius - followerRadius) * ease;
+      const lagX = followerTargetX - followerX;
+      const lagY = followerTargetY - followerY;
+      followerX += lagX * ease;
+      followerY += lagY * ease;
+
+      if (followerIsInteractive) {
+        // Ease into the pill that hugs the hovered element.
+        followerWidth += (followerTargetWidth - followerWidth) * ease;
+        followerHeight += (followerTargetHeight - followerHeight) * ease;
+        followerRadius += (followerTargetRadius - followerRadius) * ease;
+        root.style.setProperty('--cursor-follower-rotate', '0rad');
+      } else {
+        // Brush behaviour: the tip stretches along its direction of travel
+        // (the lag distance is a smooth proxy for velocity), and blooms a
+        // touch while resting, like ink soaking into the paper.
+        const lag = Math.hypot(lagX, lagY);
+        const stretch = Math.min(lag / 70, 1);
+        const bloom = Math.min(Math.max((now - lastPointerMove - 900) / 2600, 0), 1) * 3;
+        const base = BRUSH_SIZE + bloom;
+        followerWidth = base * (1 + stretch * 1.2);
+        followerHeight = base * Math.max(1 - stretch * 0.4, 0.55);
+        followerRadius = 999;
+        if (lag > 2) {
+          root.style.setProperty('--cursor-follower-rotate', `${Math.atan2(lagY, lagX)}rad`);
+        }
+      }
+
       root.style.setProperty('--cursor-follower-x', `${followerX}px`);
       root.style.setProperty('--cursor-follower-y', `${followerY}px`);
       root.style.setProperty('--cursor-follower-width', `${followerWidth}px`);
@@ -90,22 +113,23 @@ function CursorSpotlight() {
       } else {
         followerTargetX = nextX;
         followerTargetY = nextY;
-        followerTargetWidth = 18;
-        followerTargetHeight = 18;
-        followerTargetRadius = 9;
       }
 
       if (isInteractive !== followerIsInteractive) {
         followerIsInteractive = isInteractive;
         root.style.setProperty(
           '--cursor-follower-bg',
-          isInteractive ? 'var(--cursor-follower-active-bg)' : 'transparent'
+          isInteractive ? 'var(--cursor-follower-active-bg)' : 'var(--cursor-follower-ink)'
         );
         root.style.setProperty(
-          '--cursor-follower-shadow',
-          isInteractive ? '0 0 0 3px rgba(239, 234, 224, 0.72)' : 'none'
+          '--cursor-follower-border',
+          isInteractive ? 'var(--accent-dim)' : 'transparent'
         );
       }
+
+      // A reader's cursor parked over prose should not have a loud companion.
+      const overProse = !isInteractive && Boolean(element?.closest('p, li, blockquote, pre'));
+      root.style.setProperty('--cursor-follower-opacity', overProse ? '0.25' : '1');
       root.style.setProperty('--interactive-cursor', isInteractive ? 'none' : 'auto');
     }
 
@@ -113,6 +137,7 @@ function CursorSpotlight() {
       if (event.pointerType !== 'mouse') return;
       nextX = event.clientX;
       nextY = event.clientY;
+      lastPointerMove = performance.now();
       setFollowerState(event.target);
       if (animationFrame === 0) {
         animationFrame = window.requestAnimationFrame(writeCursorPosition);
@@ -157,8 +182,9 @@ function CursorSpotlight() {
       root.style.removeProperty('--cursor-follower-width');
       root.style.removeProperty('--cursor-follower-height');
       root.style.removeProperty('--cursor-follower-radius');
+      root.style.removeProperty('--cursor-follower-rotate');
       root.style.removeProperty('--cursor-follower-bg');
-      root.style.removeProperty('--cursor-follower-shadow');
+      root.style.removeProperty('--cursor-follower-border');
       root.style.removeProperty('--cursor-follower-opacity');
       root.style.removeProperty('--interactive-cursor');
     };
@@ -168,7 +194,8 @@ function CursorSpotlight() {
 }
 
 export function SiteLayout() {
-  const isHome = useLocation().pathname === '/';
+  const { pathname } = useLocation();
+  const isHome = pathname === '/';
 
   return (
     <>
@@ -180,7 +207,8 @@ export function SiteLayout() {
         Skip to content
       </a>
       <Nav />
-      <main id="main-content" className={styles.main}>
+      {/* Keyed on the route so each page plays a soft entrance. */}
+      <main key={pathname} id="main-content" className={styles.main}>
         <Outlet />
       </main>
       <Footer />

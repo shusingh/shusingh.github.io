@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 
 import { Prose } from '@/components/Prose/Prose';
+import { ReadingProgress } from '@/components/ReadingProgress/ReadingProgress';
 import { SEO } from '@/components/SEO/SEO';
 import {
   formatWritingDate,
@@ -26,6 +27,7 @@ export function WritingDetailPage() {
 
   return (
     <article className={styles.page}>
+      <ReadingProgress />
       <SEO
         title={frontmatter.title}
         description={frontmatter.excerpt}

@@ -79,6 +79,10 @@ export function Footer() {
             marbling
           </span>
         </div>
+        <p className={styles.craft}>
+          Set in Newsreader &amp; Hanken Grotesk · ink simulated in WebGL · built with React &amp;
+          Vite
+        </p>
       </div>
     </footer>
   );
