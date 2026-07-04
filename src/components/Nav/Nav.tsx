@@ -14,13 +14,15 @@ const navItemsAfterProjects = [
   { to: '/now', label: 'Now' },
 ] as const;
 
-/* One Line leads the menu; the rest keep the projects-page order. */
+/* One Line leads the menu, then the trip planner; the rest keep the projects-page order. */
+const pinnedSlugs = ['one-line', 'trip-planner'];
+function pinnedRank(slug: string): number {
+  const index = pinnedSlugs.indexOf(slug);
+  return index === -1 ? pinnedSlugs.length : index;
+}
 const liveProjects = projectEntries
   .filter((entry) => entry.frontmatter.liveUrl)
-  .sort(
-    (a, b) =>
-      Number(b.frontmatter.slug === 'one-line') - Number(a.frontmatter.slug === 'one-line')
-  );
+  .sort((a, b) => pinnedRank(a.frontmatter.slug) - pinnedRank(b.frontmatter.slug));
 
 function isPlainLeftClick(event: MouseEvent<HTMLAnchorElement>): boolean {
   return (
@@ -40,6 +42,7 @@ function ProjectsDropdown() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLLIElement>(null);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Navigating anywhere closes the menu.
   useEffect(() => {
@@ -64,10 +67,39 @@ function ProjectsDropdown() {
     };
   }, [open]);
 
+  // Clear any pending close on unmount so it can't fire against a stale root.
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
+
+  function cancelScheduledClose() {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  }
+
+  // A short delay absorbs the gap between the trigger and the menu, so
+  // crossing it doesn't register as leaving before the menu opens below.
+  function scheduleClose() {
+    cancelScheduledClose();
+    closeTimeoutRef.current = setTimeout(() => setOpen(false), 150);
+  }
+
   const onProjectsPage = location.pathname.startsWith('/projects');
 
   return (
-    <li className={styles.dropdownRoot} ref={rootRef}>
+    <li
+      className={styles.dropdownRoot}
+      ref={rootRef}
+      onMouseEnter={() => {
+        cancelScheduledClose();
+        setOpen(true);
+      }}
+      onMouseLeave={scheduleClose}
+    >
       <button
         type="button"
         className={
