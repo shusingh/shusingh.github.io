@@ -1,0 +1,70 @@
+---
+title: 'Michi: building a trip planner that starts with the map'
+date: 2026-07-04
+slug: building-michi-a-map-first-trip-planner
+excerpt: 'Most trip planners hand you a list, but the first question a trip actually raises is spatial: where are these places relative to each other, and can I do them in one afternoon? Michi answers that by making the map the interface and letting an AI itinerary hang off it. Here is how it is built, from the request contract to the photos.'
+readTime: 7 min read
+tags:
+  - ai
+  - design
+  - side-projects
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Most trip planners hand you a list. Ten attractions, eight restaurants, a wall of names you now have to cross-reference against a map in another tab to find out whether any two of them are near each other. But proximity is the first real question a trip raises. Not "what is good here" so much as "what is good here that I can actually string into one afternoon without crossing the city twice."
+
+A list cannot answer that. A map can. So [Michi](https://atlas-trip-planner.vercel.app) is built the other way around: the map is the interface, and the AI itinerary is a set of annotations pinned onto it. You give it a destination, some dates, and what you are into; a model returns a structured itinerary; every stop lands as a marker on a living, three-dimensional map you can fly through.
+
+## The map is the interface, not a tab
+
+The layout is a split screen. A narrow panel on the left holds the plan; the rest of the window is a MapLibre GL map on keyless [OpenFreeMap](https://openfreemap.org/) tiles, with real building extrusions so that zooming into a stop gives you a city with depth instead of a flat grid. Selecting any recommendation flies the camera to it and opens its marker.
+
+<LayerDiagram
+  groups={[
+    { title: 'Frontend', items: ['React + TypeScript', 'typed wizard state', 'MapLibre 3D map', 'itinerary cards'] },
+    { title: 'Backend', items: ['Go serverless function', 'prompt assembly', 'JSON normalization', 'per-IP rate limit'] },
+    { title: 'Inference', items: ['Groq llama-3.3-70b', 'timeout handling', 'fallback messaging'] },
+  ]}
+  caption="Three layers with one rule between them: model-specific behavior never leaks past the API into the UI."
+/>
+
+The map earns the center because the value of the product is spatial. Everything else on the screen exists to feed it or to explain it.
+
+## Keep the model behind the API, and make it return coordinates
+
+The frontend never talks to the model. A small Go service owns the entire conversation: it assembles the prompt, calls the inference API, and shapes the response into a contract the UI can rely on. That contract is the important part. The model is asked for exactly one JSON object with three arrays, and each place is an object with a name, a description, latitude, longitude, and an optional link.
+
+<FlowDiagram
+  nodes={['trip form', 'typed request', 'Go prompt builder', 'Groq call', 'normalize itinerary', 'pins and cards']}
+  caption="The backend turns the user's constraints into a model request and turns model-shaped text back into a stable itinerary the UI can render."
+/>
+
+Asking for coordinates directly is what makes the map cheap. There is no second geocoding pass over the results; the model hands back places already located, and the UI just drops pins. **The backend's job is to turn model-shaped text into a contract the interface can trust,** so the UI only ever deals with product states: loading, a good itinerary, an empty category, or a recoverable error.
+
+## An input step that trusts the model
+
+The interests step started as nine fixed chips: Food, History, Nightlife, and so on. That is what you build for a weak model, and it quietly caps the product at whatever taxonomy you thought of in advance. Michi runs on a 70-billion-parameter model that reads free text without complaint, so leaving it a nine-item menu was wasting the engine.
+
+Now the step takes typed interests as well as chips. You can add "specialty coffee" or "brutalist architecture" or "quiet bars with a view," and those strings go into the prompt verbatim. Alongside them is a pace control, relaxed, balanced, or packed, that the backend folds into the request. Pace is not decorative: packed returns roughly twenty stops across the categories, relaxed about nine. **A fixed taxonomy is what you build when you do not trust the model; open input is what you build when you do.**
+
+## Grounding the suggestions in the real world
+
+Two things keep the results from feeling like generated text. The first is those coordinates, which turn every suggestion into a place you can see in relation to the others.
+
+The second is photographs. The tempting move is to ask the model for image URLs, and it will happily oblige with links that do not resolve, because a language model has no way to know which images exist. So Michi never asks. Instead the frontend takes each place name and looks it up against Wikipedia's keyless API, pulling the article's thumbnail when there is one. A relevance check rejects a photo whose article title shares no meaningful word with the place, and anything without an article, most restaurants and genuine local finds, gets a clean tinted tile with the place's initial rather than a wrong or broken image. **Let the model describe; let dedicated services locate and illustrate.**
+
+## Shipping it: serverless, with cold starts as a real state
+
+The whole thing deploys to Vercel from one CLI. The frontend is a static Vite build; the Go backend runs as a serverless function that Vercel's builder compiles on deploy. One small note for anyone doing the same: that builder does not honor Go's `internal/` package rule the way a local `go build` does, so shared code lives under `pkg/` instead, and nothing else about the structure changes.
+
+Serverless means the first request after an idle period pays a cold start. Rather than hide that, the UI treats slow generation as a first-class loading state, because a plan that takes a moment to arrive is fine, and a screen that looks frozen is not.
+
+## What comes next
+
+The version that ships today is deliberately one flow: three inputs, one generated itinerary, one map. The obvious next steps, streaming the itinerary in as it generates, saving and sharing trips, and editable day-by-day cards, are all real and all deferred behind getting the core loop to feel good first.
+
+Michi is live at [atlas-trip-planner.vercel.app](https://atlas-trip-planner.vercel.app), and the code is on [GitHub](https://github.com/shusingh/trip-planner). The one line I would keep from building it: the fastest way to make a plan feel real is to put it in space, so build the map first and let the words hang off it.
