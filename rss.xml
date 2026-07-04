@@ -7,15 +7,15 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Sat, 04 Jul 2026 17:58:50 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 04 Jul 2026 20:40:35 GMT</lastBuildDate>
     <pubDate>Sat, 04 Jul 2026 00:00:00 GMT</pubDate>
     <item>
-      <title>Rebuilding the trip planner as Atlas: a map-first redesign, and what broke</title>
-      <link>https://shusingh.github.io/writing/rebuilding-the-trip-planner-as-atlas</link>
-      <guid isPermaLink="true">https://shusingh.github.io/writing/rebuilding-the-trip-planner-as-atlas</guid>
+      <title>Michi: building a trip planner that starts with the map</title>
+      <link>https://shusingh.github.io/writing/building-michi-a-map-first-trip-planner</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/building-michi-a-map-first-trip-planner</guid>
       <pubDate>Sat, 04 Jul 2026 00:00:00 GMT</pubDate>
-      <description>The AI trip planner worked, but it looked like a component library demo and buried the map behind a results tab. I rebuilt the frontend around a local shadcn-style system and MapLibre, moved the Go backend onto Vercel serverless, and hit three genuinely instructive bugs along the way: a CSS custom property that silently lost a cascade war, a Go builder that treats the word &quot;internal&quot; as sacred, and a login wall nobody asked for.</description>
-      <category>engineering</category>
+      <description>Most trip planners hand you a list, but the first question a trip actually raises is spatial: where are these places relative to each other, and can I do them in one afternoon? Michi answers that by making the map the interface and letting an AI itinerary hang off it. Here is how it is built, from the request contract to the photos.</description>
+      <category>ai</category>
       <category>design</category>
       <category>side-projects</category>
     </item>
