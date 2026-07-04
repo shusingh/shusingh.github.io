@@ -7,6 +7,8 @@ export interface WritingFrontmatter {
   excerpt: string;
   readTime: string;
   tags: string[];
+  liveUrl?: string;
+  repo?: string;
   draft?: boolean;
 }
 
@@ -141,7 +143,15 @@ export function parseWritingFrontmatter(value: unknown, source: string): Writing
   if (draft !== undefined && typeof draft !== 'boolean') {
     throw new Error(`[${source}] frontmatter.draft must be a boolean`);
   }
-  return { title, date, slug, excerpt, readTime, tags, draft };
+  const liveUrl = value.liveUrl;
+  if (liveUrl !== undefined && typeof liveUrl !== 'string') {
+    throw new Error(`[${source}] frontmatter.liveUrl must be a string`);
+  }
+  const repo = value.repo;
+  if (repo !== undefined && typeof repo !== 'string') {
+    throw new Error(`[${source}] frontmatter.repo must be a string`);
+  }
+  return { title, date, slug, excerpt, readTime, tags, liveUrl, repo, draft };
 }
 
 export function parseWorkFrontmatter(value: unknown, source: string): WorkFrontmatter {

@@ -45,17 +45,45 @@ export function WritingDetailPage() {
           </div>
           <h1 className={styles.title}>{frontmatter.title}</h1>
           <p className={styles.excerpt}>{frontmatter.excerpt}</p>
-          {frontmatter.tags.length > 0 ? (
-            <ul className={styles.tags}>
-              {frontmatter.tags.map((tag) => (
-                <li key={tag}>
-                  <Link className={styles.tag} to={`/writing?tag=${encodeURIComponent(tag)}`}>
-                    #{tag}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : null}
+          <div className={styles.headerFooter}>
+            {frontmatter.tags.length > 0 ? (
+              <ul className={styles.tags}>
+                {frontmatter.tags.map((tag) => (
+                  <li key={tag}>
+                    <Link className={styles.tag} to={`/writing?tag=${encodeURIComponent(tag)}`}>
+                      #{tag}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <span />
+            )}
+            {frontmatter.liveUrl || frontmatter.repo ? (
+              <div className={styles.projectLinks}>
+                {frontmatter.liveUrl ? (
+                  <a
+                    className={styles.projectLink}
+                    href={frontmatter.liveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Live demo <span aria-hidden="true">↗</span>
+                  </a>
+                ) : null}
+                {frontmatter.repo ? (
+                  <a
+                    className={styles.projectLink}
+                    href={frontmatter.repo}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    GitHub <span aria-hidden="true">↗</span>
+                  </a>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         </header>
         <Prose>
           <Component />

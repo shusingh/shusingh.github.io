@@ -4,6 +4,8 @@ date: 2026-07-04
 slug: building-michi-a-map-first-trip-planner
 excerpt: 'Most trip planners hand you a list, but the first question a trip actually raises is spatial: where are these places relative to each other, and can I do them in one afternoon? Michi answers that by making the map the interface and letting an AI itinerary hang off it. Here is how it is built, from the request contract to the photos.'
 readTime: 7 min read
+liveUrl: https://michi-planner.vercel.app
+repo: https://github.com/shusingh/trip-planner
 tags:
   - ai
   - design
@@ -17,7 +19,7 @@ import {
 
 Most trip planners hand you a list. Ten attractions, eight restaurants, a wall of names you now have to cross-reference against a map in another tab to find out whether any two of them are near each other. But proximity is the first real question a trip raises. Not "what is good here" so much as "what is good here that I can actually string into one afternoon without crossing the city twice."
 
-A list cannot answer that. A map can. So [Michi](https://atlas-trip-planner.vercel.app) is built the other way around: the map is the interface, and the AI itinerary is a set of annotations pinned onto it. You give it a destination, some dates, and what you are into; a model returns a structured itinerary; every stop lands as a marker on a living, three-dimensional map you can fly through.
+A list cannot answer that. A map can. So [Michi](https://michi-planner.vercel.app) is built the other way around: the map is the interface, and the AI itinerary is a set of annotations pinned onto it. You give it a destination, some dates, and what you are into; a model returns a structured itinerary; every stop lands as a marker on a living, three-dimensional map you can fly through.
 
 ## The map is the interface, not a tab
 
@@ -67,4 +69,4 @@ Serverless means the first request after an idle period pays a cold start. Rathe
 
 The version that ships today is deliberately one flow: three inputs, one generated itinerary, one map. The obvious next steps, streaming the itinerary in as it generates, saving and sharing trips, and editable day-by-day cards, are all real and all deferred behind getting the core loop to feel good first.
 
-Michi is live at [atlas-trip-planner.vercel.app](https://atlas-trip-planner.vercel.app), and the code is on [GitHub](https://github.com/shusingh/trip-planner). The one line I would keep from building it: the fastest way to make a plan feel real is to put it in space, so build the map first and let the words hang off it.
+Michi is live at [michi-planner.vercel.app](https://michi-planner.vercel.app), and the code is on [GitHub](https://github.com/shusingh/trip-planner). The one line I would keep from building it: the fastest way to make a plan feel real is to put it in space, so build the map first and let the words hang off it.
