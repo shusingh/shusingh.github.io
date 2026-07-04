@@ -7,8 +7,18 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Fri, 03 Jul 2026 23:51:03 GMT</lastBuildDate>
-    <pubDate>Fri, 03 Jul 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Sat, 04 Jul 2026 17:21:20 GMT</lastBuildDate>
+    <pubDate>Sat, 04 Jul 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Rebuilding the trip planner as Atlas: a map-first redesign, and what broke</title>
+      <link>https://shusingh.github.io/writing/rebuilding-the-trip-planner-as-atlas</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/rebuilding-the-trip-planner-as-atlas</guid>
+      <pubDate>Sat, 04 Jul 2026 00:00:00 GMT</pubDate>
+      <description>The AI trip planner worked, but it looked like a component library demo and buried the map behind a results tab. I rebuilt the frontend around a local shadcn-style system and MapLibre, moved the Go backend onto Vercel serverless, and hit three genuinely instructive bugs along the way: a CSS custom property that silently lost a cascade war, a Go builder that treats the word &quot;internal&quot; as sacred, and a login wall nobody asked for.</description>
+      <category>engineering</category>
+      <category>design</category>
+      <category>side-projects</category>
+    </item>
     <item>
       <title>One line a day: building a journal small enough to survive</title>
       <link>https://shusingh.github.io/writing/one-line-a-day-building-a-journal</link>
