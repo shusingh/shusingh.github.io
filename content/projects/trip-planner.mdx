@@ -1,19 +1,19 @@
 ---
 title: "AI trip planner"
 slug: "trip-planner"
-description: "A full-stack travel planner with a Vite + React + TypeScript frontend, a Go backend, and Hugging Face integration for itinerary generation. End-to-end deployable."
+description: "A full-stack travel planner with a Vite + React + TypeScript frontend, a Go backend on Groq inference, and a MapLibre GL map-first UI. Deployed end to end on Vercel serverless."
 kind: "personal"
 link: "https://github.com/shusingh/trip-planner"
 repo: "https://github.com/shusingh/trip-planner"
-liveUrl: "https://tripplannerwebsite.onrender.com/"
-tags: ["Go", "React", "TypeScript", "Hugging Face", "Full-stack"]
+liveUrl: "https://atlas-trip-planner.vercel.app"
+tags: ["Go", "React", "TypeScript", "Groq", "MapLibre", "Full-stack"]
 year: 2024
 status: "released"
 featured: true
 order: 3
 diagram:
-  nodes: ["React UI", "Go API", "Hugging Face"]
-  caption: "Typed frontend, Go service layer, and an inference backend that stays cleanly behind the API."
+  nodes: ["React UI", "MapLibre map", "Go API", "Groq"]
+  caption: "Typed frontend with a map-first layout, a Go service layer, and an inference backend that stays cleanly behind the API."
 ---
 
 import {
@@ -24,15 +24,15 @@ import {
 
 ## System intent
 
-AI Trip Planner is a full-stack application for generating travel itineraries from user preferences. It is intentionally small enough to ship, but it exercises the same boundaries a larger AI product needs: typed UI state, backend-owned model calls, response normalization, latency handling, and deployment.
+AI Trip Planner is a full-stack application for generating travel itineraries from user preferences and plotting them on a live map. It is intentionally small enough to ship, but it exercises the same boundaries a larger AI product needs: typed UI state, backend-owned model calls, response normalization, latency handling, and deployment.
 
-The important design choice is that the frontend does not call the model provider directly. The Go API owns prompt construction, inference calls, response shaping, and failure handling.
+The important design choice is that the frontend does not call the model provider directly. The Go API owns prompt construction, inference calls, response shaping, and failure handling. The map is a first-class part of the UI, not an afterthought bolted onto a results list: recommendations render as markers on a MapLibre GL canvas backed by keyless OpenFreeMap tiles.
 
 <LayerDiagram
   groups={[
-    { title: 'Frontend', items: ['React', 'typed form state', 'itinerary rendering'] },
+    { title: 'Frontend', items: ['React', 'typed form state', 'MapLibre GL map', 'itinerary rendering'] },
     { title: 'Backend', items: ['Go API', 'prompt assembly', 'response normalization'] },
-    { title: 'Inference', items: ['Hugging Face API', 'model timeout', 'fallback messaging'] },
+    { title: 'Inference', items: ['Groq API', 'model timeout', 'fallback messaging'] },
   ]}
   caption="Model-specific behavior stays behind the API boundary so the UI can render a stable itinerary contract."
 />
@@ -60,7 +60,7 @@ The frontend collects destination, dates, interests, budget, and pacing. The Go 
 
 **Normalize before rendering.** The model can produce messy text. The UI should receive sections, days, activities, and notes in a predictable shape.
 
-**Design for cold starts.** The live demo runs on free hosting, so the first request after idle can be slow. The UI needs a real loading state rather than pretending generation is instant.
+**Design for cold starts.** The backend runs as a Vercel serverless function, so an idle instance adds latency to the first request. The UI needs a real loading state rather than pretending generation is instant.
 
 ## Failure modes
 
@@ -72,7 +72,7 @@ The frontend collects destination, dates, interests, budget, and pacing. The Go 
   caption="The user experience depends on making slow or failed generation legible instead of leaving the screen in an ambiguous state."
 />
 
-The major failure cases are provider timeout, malformed model output, and free-tier cold start. The app handles these as product states rather than raw exceptions.
+The major failure cases are provider timeout, malformed model output, and serverless cold start. The app handles these as product states rather than raw exceptions.
 
 ## What I would improve
 
