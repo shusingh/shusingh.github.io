@@ -34,9 +34,9 @@ The core technical bet is that the two hard parts of this app want two different
 
 <LayerDiagram
   groups={[
-    { title: 'App shell (Swift / AppKit)', items: ['menu bar + Dock', 'borderless NSWindow per note', 'JSON store + .md mirror on disk'] },
-    { title: 'Bridge', items: ['one WKScriptMessageHandler', 'text / color / drag / pin / close'] },
-    { title: 'Editor (CodeMirror 6, in a WKWebView)', items: ['live-preview decorations', 'code highlighting', 'toolbar + list keymaps'] },
+    { title: 'App shell (Swift / AppKit)', items: ['menu bar + Dock', 'borderless NSWindow per note', 'JSON store + .md mirror'] },
+    { title: 'Bridge', items: ['one message handler', 'text · color · drag', 'pin · close · openURL'] },
+    { title: 'Editor (CodeMirror 6)', items: ['live-preview decorations', 'code highlighting', 'toolbar + list keymaps'] },
   ]}
   caption="Native AppKit is good at borderless floating windows; a mature editor engine is good at live markdown. Jotdown uses each for its strength and keeps the seam to a handful of messages."
 />
