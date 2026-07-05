@@ -8,6 +8,7 @@ export interface WritingFrontmatter {
   readTime: string;
   tags: string[];
   liveUrl?: string;
+  liveLabel?: string;
   repo?: string;
   pypiUrl?: string;
   draft?: boolean;
@@ -149,6 +150,10 @@ export function parseWritingFrontmatter(value: unknown, source: string): Writing
   if (liveUrl !== undefined && typeof liveUrl !== 'string') {
     throw new Error(`[${source}] frontmatter.liveUrl must be a string`);
   }
+  const liveLabel = value.liveLabel;
+  if (liveLabel !== undefined && typeof liveLabel !== 'string') {
+    throw new Error(`[${source}] frontmatter.liveLabel must be a string`);
+  }
   const repo = value.repo;
   if (repo !== undefined && typeof repo !== 'string') {
     throw new Error(`[${source}] frontmatter.repo must be a string`);
@@ -157,7 +162,7 @@ export function parseWritingFrontmatter(value: unknown, source: string): Writing
   if (pypiUrl !== undefined && typeof pypiUrl !== 'string') {
     throw new Error(`[${source}] frontmatter.pypiUrl must be a string`);
   }
-  return { title, date, slug, excerpt, readTime, tags, liveUrl, repo, pypiUrl, draft };
+  return { title, date, slug, excerpt, readTime, tags, liveUrl, liveLabel, repo, pypiUrl, draft };
 }
 
 export function parseWorkFrontmatter(value: unknown, source: string): WorkFrontmatter {

@@ -68,7 +68,7 @@ export function WritingDetailPage() {
                     target="_blank"
                     rel="noreferrer"
                   >
-                    Live demo <span aria-hidden="true">↗</span>
+                    {frontmatter.liveLabel ?? 'Live demo'} <span aria-hidden="true">↗</span>
                   </a>
                 ) : null}
                 {frontmatter.pypiUrl ? (
