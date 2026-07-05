@@ -97,6 +97,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://shusingh.github.io/projects/jotdown</loc>
+    <lastmod>2026-07-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://shusingh.github.io/projects/rag-platform</loc>
     <lastmod>2026-07-05</lastmod>
     <changefreq>monthly</changefreq>
