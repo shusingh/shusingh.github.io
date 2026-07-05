@@ -7,8 +7,18 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Sun, 05 Jul 2026 22:00:36 GMT</lastBuildDate>
-    <pubDate>Sat, 04 Jul 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Sun, 05 Jul 2026 22:08:44 GMT</lastBuildDate>
+    <pubDate>Sun, 05 Jul 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Jotdown: sticky notes with a real editor underneath</title>
+      <link>https://shusingh.github.io/writing/jotdown-live-markdown-sticky-notes</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/jotdown-live-markdown-sticky-notes</guid>
+      <pubDate>Sun, 05 Jul 2026 00:00:00 GMT</pubDate>
+      <description>Apple Stickies is the most frictionless note app on the Mac and the least useful once a note grows past a grocery list. I wanted to keep the friction and fix the ceiling: floating desktop notes that are still one keystroke away, but with a real live-markdown editor inside each one. Here is how Jotdown is built, and the two decisions that made it possible.</description>
+      <category>local-first</category>
+      <category>design</category>
+      <category>side-projects</category>
+    </item>
     <item>
       <title>Michi: building a trip planner that starts with the map</title>
       <link>https://shusingh.github.io/writing/building-michi-a-map-first-trip-planner</link>

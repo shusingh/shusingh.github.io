@@ -163,6 +163,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://shusingh.github.io/writing/jotdown-live-markdown-sticky-notes</loc>
+    <lastmod>2026-07-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://shusingh.github.io/writing/building-michi-a-map-first-trip-planner</loc>
     <lastmod>2026-07-04</lastmod>
     <changefreq>monthly</changefreq>
