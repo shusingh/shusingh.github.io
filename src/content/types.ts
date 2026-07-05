@@ -50,6 +50,7 @@ export interface ProjectFrontmatter {
   link: string;
   repo?: string;
   liveUrl?: string;
+  liveLabel?: string;
   pypiUrl?: string;
   upstream?: string;
   prUrl?: string;
@@ -240,6 +241,10 @@ export function parseProjectFrontmatter(value: unknown, source: string): Project
   if (liveUrl !== undefined && typeof liveUrl !== 'string') {
     throw new Error(`[${source}] frontmatter.liveUrl must be a string`);
   }
+  const liveLabel = value.liveLabel;
+  if (liveLabel !== undefined && typeof liveLabel !== 'string') {
+    throw new Error(`[${source}] frontmatter.liveLabel must be a string`);
+  }
   const pypiUrl = value.pypiUrl;
   if (pypiUrl !== undefined && typeof pypiUrl !== 'string') {
     throw new Error(`[${source}] frontmatter.pypiUrl must be a string`);
@@ -287,6 +292,7 @@ export function parseProjectFrontmatter(value: unknown, source: string): Project
     link,
     repo,
     liveUrl,
+    liveLabel,
     pypiUrl,
     upstream,
     prUrl,

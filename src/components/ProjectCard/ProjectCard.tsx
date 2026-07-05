@@ -14,6 +14,7 @@ interface ProjectCardProps {
   link: string;
   repo?: string;
   liveUrl?: string;
+  liveLabel?: string;
   upstream?: string;
   prUrl?: string;
   prNumber?: number;
@@ -50,6 +51,7 @@ export function ProjectCard({
   link,
   repo,
   liveUrl,
+  liveLabel,
   upstream,
   prUrl,
   prNumber,
@@ -107,7 +109,7 @@ export function ProjectCard({
         <div className={styles.actions}>
           {liveUrl ? (
             <a href={liveUrl} target="_blank" rel="noreferrer" onClick={stopPropagation}>
-              Live demo <span aria-hidden="true">↗</span>
+              {liveLabel ?? 'Live demo'} <span aria-hidden="true">↗</span>
             </a>
           ) : null}
           <a href={primaryHref} target="_blank" rel="noreferrer" onClick={stopPropagation}>

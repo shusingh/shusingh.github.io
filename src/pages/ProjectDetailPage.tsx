@@ -83,7 +83,7 @@ export function ProjectDetailPage() {
               )}
               {frontmatter.liveUrl ? (
                 <a href={frontmatter.liveUrl} target="_blank" rel="noreferrer">
-                  Live demo <span aria-hidden="true">↗</span>
+                  {frontmatter.liveLabel ?? 'Live demo'} <span aria-hidden="true">↗</span>
                 </a>
               ) : null}
               {frontmatter.pypiUrl ? (

@@ -82,6 +82,7 @@ export function HomePage() {
               link={frontmatter.link}
               repo={frontmatter.repo}
               liveUrl={frontmatter.liveUrl}
+              liveLabel={frontmatter.liveLabel}
               upstream={frontmatter.upstream}
               prUrl={frontmatter.prUrl}
               prNumber={frontmatter.prNumber}

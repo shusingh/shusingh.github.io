@@ -14,8 +14,8 @@ const navItemsAfterProjects = [
   { to: '/now', label: 'Now' },
 ] as const;
 
-/* One Line leads the menu, then the trip planner; the rest keep the projects-page order. */
-const pinnedSlugs = ['one-line', 'trip-planner'];
+/* One Line leads the menu, then Jotdown, then the trip planner; the rest keep the projects-page order. */
+const pinnedSlugs = ['one-line', 'jotdown', 'trip-planner'];
 function pinnedRank(slug: string): number {
   const index = pinnedSlugs.indexOf(slug);
   return index === -1 ? pinnedSlugs.length : index;

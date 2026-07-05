@@ -1,0 +1,74 @@
+---
+title: "Jotdown"
+slug: "jotdown"
+description: "The sticky notes app Apple Stickies should have been: floating macOS notes with a real live-markdown editor. Markdown renders in place (CodeMirror 6 in a WKWebView), checkboxes are clickable, code blocks are syntax-highlighted, and every note is mirrored as a plain .md file on disk. A small Swift/AppKit shell owns the windows and persistence."
+kind: "personal"
+link: "https://github.com/shusingh/Jotdown"
+repo: "https://github.com/shusingh/Jotdown"
+liveUrl: "https://github.com/shusingh/Jotdown/releases/latest"
+liveLabel: "Download"
+tags: ["Swift", "AppKit", "CodeMirror 6", "WKWebView", "macOS"]
+year: 2026
+status: "released"
+featured: false
+order: 5
+diagram:
+  nodes: ["Markdown note", "CodeMirror 6 (WKWebView)", "Swift bridge", "JSON + .md on disk"]
+  caption: "A native AppKit shell owns the windows and the disk; a web view renders a real markdown editor. The two talk over one tiny message bridge."
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+## System intent
+
+Jotdown does for Apple Stickies what iTerm2 did for Terminal: it keeps the familiar shape and raises the ceiling. Notes are still small, borderless windows that float on the desktop, drag, resize, and color like Stickies. Inside each one, though, is a genuine markdown editor: headings, lists, quotes, dividers, links, and fenced code all render in place, and only the line under the cursor reveals its raw syntax.
+
+The constraint that shapes the product is friction. A note must be one keystroke away, with no vault to open, no project to file it under, and no account to sign into. Everything the app gains in capability, it has to pay for in kept simplicity.
+
+## Requirements
+
+- A new note is instant: a menu bar click or `⌘N`, no setup, no navigation.
+- Markdown renders live, Obsidian-style, revealing raw syntax only on the active line.
+- Checkboxes are interactive, code blocks are syntax-highlighted, and links are clickable.
+- Notes are true desktop stickies: borderless, movable, resizable, collapsible, and colorable.
+- Every note is stored as a plain `.md` file, readable by anything, forever.
+- The whole thing stays small enough to read in an afternoon.
+
+## High-level design
+
+<FlowDiagram
+  nodes={['type markdown', 'CodeMirror parses + decorates', 'live preview in the web view', 'bridge reports text', 'Swift persists JSON + .md']}
+  caption="The web view owns editing and rendering; Swift owns the windows and the disk. One message bridge is the only seam between them."
+/>
+
+The app is two halves joined by a deliberately tiny contract. A native Swift/AppKit shell puts one borderless `NSWindow` on screen per note, each hosting a `WKWebView`. The editor inside is CodeMirror 6 with a custom live-preview plugin that hides formatting tokens except on the lines the selection touches. When text, color, or a drag happens, the web view posts a small message; Swift moves windows and writes files. The editor never assumes the bridge exists, so the same page runs headless in a browser, which is what the parity test suite drives.
+
+## Architecture
+
+<LayerDiagram
+  groups={[
+    { title: 'App shell (Swift / AppKit)', items: ['menu bar + Dock', 'borderless NSWindow per note', 'JSON store + .md mirror'] },
+    { title: 'Bridge', items: ['WKScriptMessageHandler', 'text / color / drag / pin / close'] },
+    { title: 'Editor (CodeMirror 6)', items: ['live-preview decorations', 'code highlighting + auto-tag', 'toolbar + list keymaps'] },
+  ]}
+  caption="Three layers, each kept as thin as it can be. The editor is vendored as a committed bundle, so a plain swift build needs no Node."
+/>
+
+## Design decisions
+
+**The document is the source of truth.** Interactive checkboxes, Quip-style list numbering, and rendered bullets change how markdown is *displayed*, never what is *stored*. A note must open correctly in any other markdown tool, so every note is mirrored as a plain `.md` file on disk alongside its internal JSON.
+
+**Rendering lives in a web view, windows live in AppKit.** A borderless, movable, multi-window desktop app is exactly what native `NSWindow` is good at, and live markdown with real undo, IME, and syntax highlighting is exactly what a mature editor engine is good at. Jotdown uses each for its strength and keeps the seam between them to a handful of message types.
+
+**Migrated from a hand-rolled editor to CodeMirror 6.** The first editor was a contenteditable engine; its undo and cross-line selection were the worst defects. Moving to CodeMirror bought native undo, real selection, IME, and a proper Lezer markdown parser, at the cost of learning its decoration and precedence rules. The custom live-preview plugin reproduces the per-line reveal on top of native editing.
+
+**Polite by default, attention opt-in.** Notes sit at the normal window level and layer like any other window. Making all notes float was tried and reverted: unfocused notes sat on top of freshly opened windows from other apps. Pinning a single note above the rest is opt-in, per note, and persists across relaunch.
+
+**Vendored editor bundle.** The CodeMirror bundle is built offline with esbuild and committed to the repo, so `swift build` and `make install` work with no Node installed and the app has no network dependency.
+
+## What I would improve
+
+Notarization and a universal build so the download runs without a Gatekeeper detour and on Intel Macs as well as Apple Silicon; note search and quick-open across all notes; and a "start at login" toggle so the menu bar item is always waiting.
