@@ -59,7 +59,7 @@ export function WritingDetailPage() {
             ) : (
               <span />
             )}
-            {frontmatter.liveUrl || frontmatter.repo ? (
+            {frontmatter.liveUrl || frontmatter.pypiUrl || frontmatter.repo ? (
               <div className={styles.projectLinks}>
                 {frontmatter.liveUrl ? (
                   <a
@@ -69,6 +69,16 @@ export function WritingDetailPage() {
                     rel="noreferrer"
                   >
                     Live demo <span aria-hidden="true">↗</span>
+                  </a>
+                ) : null}
+                {frontmatter.pypiUrl ? (
+                  <a
+                    className={styles.projectLink}
+                    href={frontmatter.pypiUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    PyPI <span aria-hidden="true">↗</span>
                   </a>
                 ) : null}
                 {frontmatter.repo ? (
