@@ -141,6 +141,36 @@
   background: var(--border);
 }
 
+/* Emphasized call-to-action so the path to the full Projects page reads as
+   a button, not another list row that blends into the LIVE links above. */
+.dropdownCta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 2px;
+  padding: 10px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 6px;
+  background: var(--accent-bg);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--accent-strong);
+  text-decoration: none;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dropdownCta:hover,
+.dropdownCta:focus-visible {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-elevated);
+}
+
 .dropdownLabel {
   padding: 4px 10px 2px;
   font-family: var(--font-mono);

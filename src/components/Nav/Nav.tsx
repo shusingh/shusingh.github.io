@@ -116,13 +116,6 @@ function ProjectsDropdown() {
       </button>
       {open ? (
         <ul className={styles.dropdown} role="menu" aria-label="Projects">
-          <li role="none">
-            <Link role="menuitem" className={styles.dropdownItem} to="/projects">
-              All projects
-              <span aria-hidden="true">→</span>
-            </Link>
-          </li>
-          <li role="none" aria-hidden="true" className={styles.dropdownRule} />
           <li role="none" className={styles.dropdownLabel}>
             Live
           </li>
@@ -140,6 +133,13 @@ function ProjectsDropdown() {
               </a>
             </li>
           ))}
+          <li role="none" aria-hidden="true" className={styles.dropdownRule} />
+          <li role="none">
+            <Link role="menuitem" className={styles.dropdownCta} to="/projects">
+              All projects
+              <span aria-hidden="true">→</span>
+            </Link>
+          </li>
         </ul>
       ) : null}
     </li>
