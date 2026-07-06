@@ -236,7 +236,9 @@
   color: var(--text-primary);
 }
 
-.layerItems {
+/* `.layers` prefix raises specificity above the host `.prose ul/li` rules,
+   which would otherwise leak padding-left and li margins into the diagram. */
+.layers .layerItems {
   display: grid;
   gap: 8px;
   margin: 0;
@@ -244,7 +246,7 @@
   list-style: none;
 }
 
-.layerItems li {
+.layers .layerItems li {
   margin: 0;
   padding: 8px 10px;
   border: 1px solid var(--border);
@@ -289,7 +291,8 @@
   font-size: 20px;
 }
 
-.comparisonItems {
+/* `.comparison` prefix beats the host `.prose ul/li` padding + margin leak. */
+.comparison .comparisonItems {
   display: grid;
   gap: 8px;
   margin: 14px 0 0;
@@ -297,7 +300,7 @@
   list-style: none;
 }
 
-.comparisonItems li {
+.comparison .comparisonItems li {
   margin: 0;
   padding: 9px 10px;
   border: 1px solid var(--border);
