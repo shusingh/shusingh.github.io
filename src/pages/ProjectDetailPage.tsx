@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 
 import { Prose } from '@/components/Prose/Prose';
+import { ReadingProgress } from '@/components/ReadingProgress/ReadingProgress';
 import { SEO } from '@/components/SEO/SEO';
 import { WorkDiagram } from '@/components/WorkDiagram/WorkDiagram';
 import { getAdjacent, getProjectBySlug, projectEntries } from '@/content/load';
@@ -37,6 +38,7 @@ export function ProjectDetailPage() {
 
   return (
     <article className={styles.page}>
+      <ReadingProgress />
       <SEO
         title={frontmatter.title}
         description={frontmatter.description}
