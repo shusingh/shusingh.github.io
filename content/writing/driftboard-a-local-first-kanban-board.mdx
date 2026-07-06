@@ -22,6 +22,8 @@ I had a Kanban board that worked and that I did not trust. It did the job at a d
 
 Most of the rebuild was ordinary. Three decisions were not, and they are the ones worth writing down.
 
+<img src="/driftboard-board.jpg" alt="The Driftboard board: five columns (Backlog, This Week, In Progress, Review, Done) of cards with priority badges, colored labels, due-date badges and checklist progress, above a toolbar with quick filters, focus mode, density, sort, and JSON controls." />
+
 ## Which drag library to trust
 
 The first question was which drag-and-drop foundation to build on now that the old one was archived. There were three honest options: `@hello-pangea/dnd`, the maintained fork of the archived library; Atlassian's new headless `pragmatic-drag-and-drop`, which is what Trello and Jira actually run on; and `dnd-kit`, the one most new React boards reach for.
@@ -59,5 +61,7 @@ That split generalized into the whole state model. A Zustand store holds the boa
 ## What the constraint bought
 
 None of this needed a server, and refusing to add one is what kept the project honest. The board is a plain object that serializes to a zod-validated JSON file you can export, re-import, and move between machines. It opens instantly because there is nothing to fetch, and it works on a plane because there is nothing to reach.
+
+<img src="/driftboard-landing.jpg" alt="The Driftboard landing page: the headline 'A Kanban board you'll actually enjoy using' beside a local-first badge, Open board and Try the demo buttons, and a preview of the board showing This Week, In Progress, and Done columns." />
 
 The lesson I keep relearning on these small apps is that the interesting work is rarely the feature list. It was three decisions: trust a maintained library, decouple the thing you drag from the thing you reorder, and decide precisely which state is allowed into history. The rest is just columns and cards.
