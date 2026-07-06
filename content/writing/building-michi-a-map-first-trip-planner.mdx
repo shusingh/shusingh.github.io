@@ -21,9 +21,13 @@ Most trip planners hand you a list. Ten attractions, eight restaurants, a wall o
 
 A list cannot answer that. A map can. So [Michi](https://michi-planner.vercel.app) is built the other way around: the map is the interface, and the AI itinerary is a set of annotations pinned onto it. You give it a destination, some dates, and what you are into; a model returns a structured itinerary; every stop lands as a marker on a living, three-dimensional map you can fly through.
 
+<img src="/michi-landing.jpg" alt="The Michi landing page: the headline 'Plan your perfect trip with AI' over a faded 3D map of Kyoto, with a three-step Destination, Dates, Interests wizard and a Start planning button." />
+
 ## The map is the interface, not a tab
 
 The layout is a split screen. A narrow panel on the left holds the plan; the rest of the window is a MapLibre GL map on keyless [OpenFreeMap](https://openfreemap.org/) tiles, with real building extrusions so that zooming into a stop gives you a city with depth instead of a flat grid. Selecting any recommendation flies the camera to it and opens its marker.
+
+<img src="/michi-itinerary.jpg" alt="Michi's split-screen result view: a left panel listing itinerary stops (Tokyo Skytree, Shibuya Crossing, Meiji Shrine, Senso-ji) with photos and short descriptions, beside a 3D map of Tokyo with numbered markers." />
 
 <LayerDiagram
   groups={[
@@ -48,6 +52,8 @@ The frontend never talks to the model. A small Go service owns the entire conver
 Asking for coordinates directly is what makes the map cheap. There is no second geocoding pass over the results; the model hands back places already located, and the UI just drops pins. **The backend's job is to turn model-shaped text into a contract the interface can trust,** so the UI only ever deals with product states: loading, a good itinerary, an empty category, or a recoverable error.
 
 ## An input step that trusts the model
+
+<img src="/michi-destination.jpg" alt="Michi's destination step: a 'Where do you want to go?' input set to Tokyo, Japan, beside a live 3D map of central Tokyo with building extrusions." />
 
 The interests step started as nine fixed chips: Food, History, Nightlife, and so on. That is what you build for a weak model, and it quietly caps the product at whatever taxonomy you thought of in advance. Michi runs on a 70-billion-parameter model that reads free text without complaint, so leaving it a nine-item menu was wasting the engine.
 
