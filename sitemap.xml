@@ -85,6 +85,12 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://shusingh.github.io/projects/kanban-board</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://shusingh.github.io/projects/markitdown</loc>
     <lastmod>2026-07-06</lastmod>
     <changefreq>monthly</changefreq>
@@ -139,12 +145,6 @@
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://shusingh.github.io/projects/kanban-board</loc>
-    <lastmod>2026-07-06</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://shusingh.github.io/projects/dify</loc>
     <lastmod>2026-07-06</lastmod>
     <changefreq>monthly</changefreq>
@@ -161,6 +161,12 @@
     <lastmod>2026-07-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://shusingh.github.io/writing/driftboard-a-local-first-kanban-board</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
     <loc>https://shusingh.github.io/writing/jotdown-live-markdown-sticky-notes</loc>

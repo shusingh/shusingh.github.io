@@ -7,8 +7,18 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Mon, 06 Jul 2026 02:17:27 GMT</lastBuildDate>
-    <pubDate>Sun, 05 Jul 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Mon, 06 Jul 2026 15:49:51 GMT</lastBuildDate>
+    <pubDate>Mon, 06 Jul 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Driftboard: rebuilding a Kanban board around drag that does not flicker</title>
+      <link>https://shusingh.github.io/writing/driftboard-a-local-first-kanban-board</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/driftboard-a-local-first-kanban-board</guid>
+      <pubDate>Mon, 06 Jul 2026 00:00:00 GMT</pubDate>
+      <description>I had a small Kanban project built on a drag-and-drop library that Atlassian has since archived. Rebuilding it into Driftboard, a local-first board with rich cards and a command palette, came down to three decisions: which drag library to trust, how to make cross-column dragging stop flickering, and how to keep undo honest when every interaction mutates the board. Here is how each one went.</description>
+      <category>local-first</category>
+      <category>design</category>
+      <category>side-projects</category>
+    </item>
     <item>
       <title>Jotdown: sticky notes with a real editor underneath</title>
       <link>https://shusingh.github.io/writing/jotdown-live-markdown-sticky-notes</link>
