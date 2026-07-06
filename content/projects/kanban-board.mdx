@@ -1,16 +1,17 @@
 ---
-title: "Kanban board"
+title: "Driftboard"
 slug: "kanban-board"
-description: "A responsive Kanban board built with React, TypeScript, and Vite. Drag-and-drop columns, persistent state, and a clean component model end-to-end."
+description: "A local-first, Trello-class Kanban board in React and TypeScript. dnd-kit drag and drop with a lifted preview, rich cards, a command palette, focus mode, undo/redo, and JSON import/export, all persisted in the browser."
 kind: "personal"
-link: "https://github.com/shusingh/kanban-board"
-repo: "https://github.com/shusingh/kanban-board"
-liveUrl: "https://kanban-board-6ty7.onrender.com/"
-tags: ["React", "TypeScript", "Vite"]
-year: 2024
+link: "https://kanban-board-fawn-phi.vercel.app"
+repo: "https://github.com/shusingh/driftboard"
+liveUrl: "https://kanban-board-fawn-phi.vercel.app"
+liveLabel: "Live demo"
+tags: ["React", "TypeScript", "dnd-kit", "Zustand", "Tailwind"]
+year: 2026
 status: "released"
 featured: false
-order: 9
+order: 4
 ---
 
 import {
@@ -20,44 +21,46 @@ import {
 
 ## System intent
 
-This is a compact Kanban application focused on frontend architecture rather than feature count. The goal is to model board state cleanly enough that drag-and-drop behavior, persistence, and responsive rendering do not turn into tangled component state.
+Driftboard is a rebuild of an earlier, simpler Kanban project into a genuinely usable local-first planning tool. The constraint is the product: no accounts, no backend, no sync. The whole board lives in your browser, saves itself as you type, and works offline. Everything else is in service of making that feel fast and delightful rather than limiting.
 
-It is not trying to compete with Trello. It is a focused UI systems project: state transitions, drag ergonomics, component boundaries, and local persistence.
+It is a UI-systems project first. The interesting problems are drag ergonomics, keeping a rich board model clean under many mutations, and making undo, filtering, and cross-column moves coexist without turning component state into a swamp.
 
 <LayerDiagram
   groups={[
-    { title: 'UI layer', items: ['board layout', 'columns', 'cards'] },
-    { title: 'State layer', items: ['typed board model', 'move actions', 'local persistence'] },
-    { title: 'Interaction layer', items: ['drag start', 'drop target', 'reorder result'] },
+    { title: 'UI layer', items: ['topbar + toolbar', 'columns + rich cards', 'detail panel + ⌘K palette'] },
+    { title: 'State layer', items: ['Zustand board store', 'zundo undo/redo', 'localStorage persistence'] },
+    { title: 'Interaction layer', items: ['dnd-kit sensors', 'cross-column working copy', 'single commit on drop'] },
   ]}
-  caption="The useful part is keeping visual components separate from board-state transitions."
+  caption="Visual components render from the store and dispatch typed actions; drag mechanics stay isolated from board-state transitions."
 />
 
 ## Requirements
 
-- Cards should move between columns without corrupting order.
-- Board state should survive refresh.
-- Components should stay small enough to extend.
-- The layout should work at laptop and tablet widths.
-- State transitions should be explicit and typed.
+- Cards move within and across columns, and columns reorder, without corrupting order.
+- The board survives refresh and works with no network.
+- Every mutation is a typed store action so undo/redo is a byproduct, not a bolt-on.
+- Search, quick filters, label filters, and sort are display concerns that never mutate stored order.
+- A file can be exported and re-imported without ever corrupting the board.
 
 ## High-level design
 
 <FlowDiagram
-  nodes={['drag card', 'calculate target', 'apply move action', 'persist board', 'render updated columns']}
-  caption="Drag-and-drop is modeled as a state transition first and a visual interaction second."
+  nodes={['drag card', 'compute target column + index', 'commit one move action', 'reindex + persist', 'render updated columns']}
+  caption="A drag is a state transition first and a visual interaction second. Intermediate hover state lives in a throwaway working copy so undo history stays one entry per move."
 />
 
-The board model owns columns and cards. UI components render from that model and dispatch typed transitions. Persistence is local, which keeps the project simple while still forcing a real serialization boundary.
+The board model owns columns, cards, and labels. A Zustand store exposes typed actions (`moveCard`, `moveColumn`, checklist and label edits, and so on) and is wrapped by zundo for undo/redo and by a persistence layer that mirrors to `localStorage`. A separate, non-undoable UI store holds theme, density, focus, filters, and selection, so undoing a card move never rewinds your theme.
 
 ## Design decisions
 
-**Centralize board updates.** Dragging a card affects at least two columns. Keeping that transition in one place avoids duplicate reorder logic.
+**dnd-kit over the alternatives.** The earlier version used the archived `react-beautiful-dnd`. Driftboard moves to dnd-kit, whose `DragOverlay` decouples the moving card from list re-renders. That single choice removes the cross-column flicker the old approach fought, and gives a lifted preview and keyboard dragging for free.
 
-**Persist the model, not the DOM.** The stored state is the board object. The UI can change without breaking persistence as long as the model remains stable.
+**Commit once, on drop.** Cross-column dragging updates a temporary working copy for the placeholder, but the store is written exactly once when the card lands, so each move is a single, clean undo step.
 
-**Keep drag state temporary.** The app should only persist completed moves, not transient hover state.
+**Filtering is a view, not a mutation.** Search, sort, and label filters transform what you see without touching stored order, and dragging is disabled while a filter is narrowing cards so rendered indices can never disagree with the model.
+
+**Own your data.** The whole board round-trips to a zod-validated JSON file, so a bad import can never corrupt state and the board is trivially portable between devices.
 
 ## What I would improve
 
-The next version would add keyboard drag interactions, undo, and a richer persistence backend. The most important accessibility improvement would be a non-pointer workflow for moving cards between columns.
+The next steps are a real mini-board preview on the landing page instead of a static snapshot, per-card multi-select drag, and an IndexedDB path for boards large enough to strain `localStorage`. The most valuable refinement is deeper keyboard support so the entire board, not just dragging, is operable without a pointer.

@@ -1,0 +1,63 @@
+---
+title: 'Driftboard: rebuilding a Kanban board around drag that does not flicker'
+date: 2026-07-06
+slug: driftboard-a-local-first-kanban-board
+excerpt: 'I had a small Kanban project built on a drag-and-drop library that Atlassian has since archived. Rebuilding it into Driftboard, a local-first board with rich cards and a command palette, came down to three decisions: which drag library to trust, how to make cross-column dragging stop flickering, and how to keep undo honest when every interaction mutates the board. Here is how each one went.'
+readTime: 6 min read
+liveUrl: https://kanban-board-fawn-phi.vercel.app
+liveLabel: Live demo
+repo: https://github.com/shusingh/driftboard
+tags:
+  - local-first
+  - design
+  - side-projects
+---
+
+import {
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+I had a Kanban board that worked and that I did not trust. It did the job at a demo, but it was built on `react-beautiful-dnd`, which Atlassian has since deprecated and archived, and its drag felt like a library doing its best rather than an app that had made a decision. Driftboard is the rebuild: same idea, taken seriously. A local-first board with rich cards, a detail panel, a command palette, focus mode, undo, and JSON export, all living entirely in the browser. No accounts, no backend, nothing to sync.
+
+Most of the rebuild was ordinary. Three decisions were not, and they are the ones worth writing down.
+
+## Which drag library to trust
+
+The first question was which drag-and-drop foundation to build on now that the old one was archived. There were three honest options: `@hello-pangea/dnd`, the maintained fork of the archived library; Atlassian's new headless `pragmatic-drag-and-drop`, which is what Trello and Jira actually run on; and `dnd-kit`, the one most new React boards reach for.
+
+The fork was the least work and the lowest ceiling: it clones your DOM node for the drag preview and re-renders whole lists, which is exactly where a custom card and buttery cross-column motion strain. Pragmatic is the most powerful and the most plumbing, since you write collision detection and drop indicators yourself. For a solo board that wants a bespoke lifted preview without hand-rolling the physics, dnd-kit sat in the right place: its `DragOverlay` hands you full control of the dragged element, its sortable presets cover both cards and columns, and keyboard dragging comes for free.
+
+<LayerDiagram
+  groups={[
+    { title: 'DndContext', items: ['pointer + keyboard sensors', 'closest-corners collision'] },
+    { title: 'Sortable contexts', items: ['columns (horizontal)', 'cards per column (vertical)'] },
+    { title: 'DragOverlay', items: ['the lifted card', 'rotate + scale + shadow'] },
+  ]}
+  caption="Two nested sortable contexts under one DndContext. The card you drag is not the card in the list; it is a separate overlay element."
+/>
+
+## Why the ghost card was flickering
+
+The old board had a bug I had learned to live with: dragging a card across a column boundary made the drag preview jump by a frame. It is a small thing that reads as cheap, and it turned out to be the whole argument for the rewrite.
+
+The cause is structural. When the moving element is a real list item, crossing into another column re-mounts it in a different `SortableContext`, and the re-mount costs a frame. `DragOverlay` fixes this by construction: the thing under your cursor is a separate element that never re-mounts, while the list items below it quietly rearrange. Decouple the preview from the list and the flicker has nowhere to live.
+
+<FlowDiagram
+  nodes={['pick up card', 'render it in DragOverlay', 'lists reflow underneath', 'drop', 'commit one move to the store']}
+  caption="The overlay follows the pointer; the columns are free to re-render behind it without touching the element you are dragging."
+/>
+
+## Keeping undo honest
+
+The last decision was about state. Cross-column dragging is genuinely stateful: as you hover, the placeholder has to appear in the target column, which means something is being reordered mid-drag. The naive version writes each of those intermediate arrangements into the store, and if the store is what undo records, a single drag becomes a dozen undo steps.
+
+So I split the difference. During a drag, the intermediate arrangement lives in a throwaway working copy that only the board renders. The real store is written exactly once, when the card lands. Every move is one clean undo entry.
+
+That split generalized into the whole state model. A Zustand store holds the board and every mutation as a typed action, wrapped by zundo for undo/redo and mirrored to `localStorage`. A second, deliberately non-undoable store holds theme, density, focus, filters, and selection, because undoing a card move should never rewind your theme or reopen a panel. Filtering and sort follow the same principle from the other side: they are views over the board, never mutations of it, and dragging switches off while a filter is narrowing cards so the indices you see can never disagree with the indices the store commits.
+
+## What the constraint bought
+
+None of this needed a server, and refusing to add one is what kept the project honest. The board is a plain object that serializes to a zod-validated JSON file you can export, re-import, and move between machines. It opens instantly because there is nothing to fetch, and it works on a plane because there is nothing to reach.
+
+The lesson I keep relearning on these small apps is that the interesting work is rarely the feature list. It was three decisions: trust a maintained library, decouple the thing you drag from the thing you reorder, and decide precisely which state is allowed into history. The rest is just columns and cards.
