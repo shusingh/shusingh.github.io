@@ -1,0 +1,119 @@
+---
+title: Delete more features
+date: 2026-09-24
+slug: delete-more-features
+excerpt: 'Shipping a feature has never been cheaper. Keeping one alive costs exactly what it always did. As generation gets faster, the scarce skill on a product team stops being the ability to add things and becomes the discipline to take them away.'
+readTime: 7 min read
+tags:
+  - product
+  - engineering
+  - ai
+---
+
+import {
+  ComparisonDiagram,
+  FlowDiagram,
+  LayerDiagram,
+} from '../../src/components/MdxDiagrams/MdxDiagrams';
+
+Every product I have worked on got worse in the same way. Nobody made a bad decision. Each feature was reasonable when it shipped: a customer asked, a competitor had it, it was a small change behind a flag. Two years later the settings page scrolls, the onboarding explains things nobody uses, and every new change has to tiptoe around code paths that three people understand and nobody owns.
+
+Products rarely die of one bad feature. They die of a hundred reasonable ones.
+
+That was always true. What changed is the price of adding. An engineer with a coding agent can take a feature from ticket to pull request in an afternoon. A designer can generate five variants of a screen before lunch. The cost of *adding* collapsed. The cost of *having* did not move at all.
+
+**When adding is cheap, removing becomes the skill that matters.** Teams that do not learn to delete will drown in their own output.
+
+## Shipping is a purchase, not a gift
+
+We talk about shipping a feature as if it were finished work. It is closer to signing a lease. The build is the deposit; the rent comes every month after.
+
+<ComparisonDiagram
+  left={{
+    eyebrow: 'Paid once',
+    title: 'The cost to build',
+    items: ['Design and implementation', 'Review and QA', 'Launch and announcement'],
+  }}
+  right={{
+    eyebrow: 'Paid forever',
+    title: 'The cost to keep',
+    items: ['Every future change must respect it', 'Every new user must learn or ignore it', 'Every incident might involve it'],
+  }}
+  caption="AI shrank the left column. The right column is the same size it always was."
+/>
+
+The rent shows up in places no roadmap tracks. Test suites get slower. Migrations get riskier because some old path still reads the column you want to drop. Support learns a workaround, then trains the next hire on it. The product surface gets a little harder to explain, so the docs grow, so the onboarding grows, so activation drops a point and someone proposes a feature to fix activation.
+
+None of this lands on the person who shipped the feature. It lands on everyone else, spread thin across years. That is why it never shows up as a line item and why it compounds so quietly.
+
+## Why nobody deletes anything
+
+If removal is so valuable, why is it so rare? Because every incentive points the other way.
+
+- **Shipping is visible; subtraction is not.** A launch gets a demo, a changelog entry, and a line in a performance review. Removing a feature gets a thread of complaints from the four people who used it.
+- **Usage data lies politely.** A feature used by two percent of accounts looks small until someone notices one of those accounts is your largest customer. So nobody wants to be the one who checked.
+- **Flags make it feel free.** A feature behind a flag feels reversible, so it never feels urgent to decide. In practice, a flag that has been on for a year is not a flag. It is a second codebase.
+- **Nobody owns the whole.** Each feature has an author. The product as a coherent thing often has no one whose job it is to say "this no longer belongs."
+
+AI makes every one of these worse. When a feature takes an afternoon, the bar for "is this worth it" quietly drops to "does anyone want it," and someone always does.
+
+## Deletion is a design skill
+
+Good deletion is not a purge. It is editing, and editing is a craft with a method.
+
+<FlowDiagram
+  nodes={['measure real usage', 'find who depends on it', 'announce and offer a path', 'remove the UI', 'remove the code']}
+  caption="Most teams stop after step two. The value is in steps four and five."
+/>
+
+The last step is the one people skip. Hiding a feature from the UI while leaving its code, its tables, and its tests in place captures almost none of the benefit. The rent is mostly paid by the code, not the button. If the migration still has to handle it and the tests still exercise it, you have not deleted anything. You have just stopped admitting it exists.
+
+The harder part is judgment: deciding what the product *is* well enough to know what it is not. A product with a sharp point of view can say no to a feature request that is perfectly reasonable, because it does not fit. A product without one has to say yes to everything, and becomes the average of its customers' requests.
+
+I notice this most in my own side projects, where no one else is asking for anything. The versions I am proudest of are almost never the ones with the most in them. They are the ones where I cut the thing I was excited about, because it made the core thing harder to reach.
+
+## What cheap generation actually changes
+
+There is a hopeful version of this story. The same tools that made adding cheap can make removing cheap too.
+
+<LayerDiagram
+  groups={[
+    {
+      title: 'Find it',
+      items: ['trace every caller of a code path', 'map flags to real traffic', 'list data that only one feature reads'],
+    },
+    {
+      title: 'Remove it',
+      items: ['strip dead branches and flags', 'write the data migration', 'update tests and docs together'],
+    },
+    {
+      title: 'Prove it',
+      items: ['diff behavior before and after', 'watch error rates for a week', 'keep a clean revert ready'],
+    },
+  ]}
+  caption="The unglamorous work that made deletion expensive is exactly the kind agents are good at."
+/>
+
+Removal used to be expensive mostly because of archaeology: finding every place a feature leaked into, understanding code whose author had left, being confident nothing else depended on it. That is tedious, mechanical, search-heavy work. It is also exactly the work coding agents are best at.
+
+So the bottleneck is not tooling anymore. It is willingness. A team can now afford to remove a feature as easily as it adds one. The only question is whether anyone is asking the agent to.
+
+## A few rules I would adopt
+
+If I were setting norms for a team today, I would start small:
+
+1. **Every feature ships with an exit criterion.** Not a vague "we will revisit," but a number: if fewer than some share of active users touch this in ninety days, it goes.
+2. **Flags expire.** A flag older than a quarter either becomes permanent code or gets removed. No third option.
+3. **Deletions get celebrated like launches.** Same changelog, same demo slot, same credit in reviews. Teams do what gets noticed.
+4. **Someone owns the whole.** One person per product area whose explicit job includes saying "this no longer fits."
+5. **Net lines is a metric worth watching.** Not a target, but a smell. A quarter where the codebase only grew is a quarter where nobody edited.
+
+None of these are clever. They just move deletion from a heroic act to a routine one.
+
+## The bet
+
+Here is where I think this goes. Over the next few years, the gap between product teams will not come from who can build fastest. Everyone will be able to build fast. It will come from who can keep their product small enough to stay coherent while the cost of adding approaches zero.
+
+The best products have always been edited. The difference now is that the author writes a thousand words a minute, and someone has to be the editor.
+
+Build less. Keep less. Delete more.
