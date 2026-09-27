@@ -1,8 +1,8 @@
 ---
-title: Compliance testing orchestrator
+title: Pre-launch compliance testing orchestrator
 slug: disco-ta
 eyebrow: Amazon · Step Functions Architecture
-description: A Step Functions orchestration layer for end-to-end compliance test execution, with marketplace-level isolation, test-data locking, callback-based execution, and compensation guarantees.
+description: A Step Functions pre-launch testing platform that validates each control against ~10 downstream systems and blocks faulty launches, replacing brittle Lambda chains with marketplace-level isolation, test-data locking, and compensation guarantees.
 date: 2025-03-01
 tech:
   - Step Functions
@@ -11,8 +11,8 @@ tech:
   - EventBridge
   - Test Executor
 stat:
-  number: 100%
-  label: Marketplace failures tolerated without losing other results
+  number: '<1%'
+  label: Workflow failure rate, down from 8% after replacing chained Lambdas
 diagram:
   nodes:
     - acquire data
@@ -28,7 +28,9 @@ order: 4
 
 ## The problem
 
-The testing automation platform needed to orchestrate end-to-end test execution for Maverick compliance controls. A single test run could span multiple test suites and marketplaces. Each combination needed test data, an asynchronous test execution, result processing, and cleanup.
+Faulty control launches used to be caught after they shipped. Each one meant a post-launch investigation that chased 10+ teams to work out which downstream system had rejected the control and why. The fix was to test before launch: validate every control against the ~10 downstream systems it touches, and block the launch if any of them fails.
+
+The testing automation platform needed to orchestrate that end-to-end test execution for compliance controls. The existing orchestration was a chain of Lambdas, and it was brittle: one marketplace failing could stall the rest, and failures were hard to attribute. A single test run could span multiple test suites and marketplaces. Each combination needed test data, an asynchronous test execution, result processing, and cleanup.
 
 The tricky part was not starting tests. The tricky part was preserving isolation.
 
@@ -114,7 +116,9 @@ The design produced a workflow with clear operational properties:
 - **Precise compensation.** Failed iterations release only the test data they own.
 - **Long-running execution support.** Test Executor callbacks allow up to seven-day runs without polling compute.
 - **Result durability.** Detailed test counts and reports are persisted in DynamoDB during execution; aggregation reads from storage rather than relying on callback payloads.
-- **Observable state transitions.** Every state emits structured logs and metrics for debugging and alerting.
+- **Observable state transitions.** Every state emits structured logs and metrics for debugging and alerting, and each marketplace's outcome is recorded for risk managers.
+- **Failure rate from 8% to under 1%.** Replacing the Lambda chain with explicit retries, isolation, and compensation removed most of the failures that had been orchestration artifacts rather than real test failures.
+- **Faulty launches blocked before they ship.** Each control is validated against ~10 downstream systems, replacing post-launch investigations that meant chasing 10+ teams.
 
 The most important result is not that the workflow can run tests. It is that the workflow can fail without corrupting shared test data or losing unrelated marketplace results.
 

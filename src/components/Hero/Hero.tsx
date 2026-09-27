@@ -33,9 +33,10 @@ export function Hero() {
               full-stack infrastructure they run on, end to end on AWS.
             </p>
             <p className={styles.description}>
-              Shipped: regulatory data pipelines processing 30M+ records a month,
-              citation-grounded retrieval systems on Bedrock, and full-stack platforms used across
-              three Amazon partner teams.
+              Four years at Amazon, now focused on RAG on Bedrock, evaluation harnesses, and the
+              guardrails that make LLM systems safe to ship. Shipped: an agentic platform that cut
+              escalated tickets from ~50 to ~5 a month, and a control launch platform that took
+              launches from 20+ weeks to under 2 days.
             </p>
             <div className={styles.ctas}>
               <a
@@ -66,8 +67,8 @@ export function Hero() {
           <div className={styles.right}>
             <PhotoFrame src="/shubham.jpg" alt="Shubham Singh at Lake Union, Seattle" />
             <StatusCard label="Currently">
-              Leading frontend and backend architecture for AI-assisted compliance launch workflows
-              at Amazon.
+              Leading ComplianceIQ at Amazon: a citation-grounded Strands agent that now acts on
+              intent through MCP tools, behind audited calls and human approval.
             </StatusCard>
           </div>
         </div>

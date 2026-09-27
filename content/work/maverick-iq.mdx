@@ -1,20 +1,22 @@
 ---
-title: 'MaverickIQ: agentic Q&A for compliance'
+title: 'ComplianceIQ: an agentic AI platform for compliance'
 slug: maverick-iq
 eyebrow: Amazon · Architect & Tech Lead
-description: An agentic Q&A system that lets engineering teams self-serve compliance questions instead of filing tickets, built on hybrid BM25 plus kNN retrieval, citation-grounded answers, and compliance-grade auditability.
-date: 2026-05-15
+description: A citation-grounded agent on Bedrock that answers compliance questions and now acts on them, with hybrid BM25 plus kNN retrieval, a fail-closed grounding policy, a release-gating eval harness, and audited MCP tool calls behind human approval.
+date: 2026-09-27
 tech:
   - Strands Agents SDK
   - AWS Bedrock
   - AgentCore
+  - Bedrock Guardrails
+  - MCP
+  - A2A
   - OpenSearch
   - BM25 + kNN
-  - Bedrock KB
   - Python
 stat:
   number: '90% ↓'
-  label: Manual ticket volume across 5 partner teams
+  label: Escalated tickets, ~50 to ~5 a month across 5 partner teams
 diagram:
   nodes:
     - router
@@ -50,7 +52,7 @@ A working system has to give grounded answers with citations from the right kind
 
 ## The approach
 
-MaverickIQ is an agentic Q&A system built with **Strands Agents SDK** on **AWS Bedrock AgentCore**, with **hybrid BM25 plus kNN retrieval** over structured control metadata and approved internal documentation. Citation-grounded responses were a hard architectural constraint, not a prompt preference.
+ComplianceIQ started as an agentic Q&A system built with **Strands Agents SDK** on **AWS Bedrock AgentCore**, with **hybrid BM25 plus kNN retrieval** over structured control metadata and approved internal documentation. Citation-grounded responses were a hard architectural constraint, not a prompt preference. I led the design and delivery for five partner teams, owned the backend and UI architecture, and directed three junior engineers through the build.
 
 ```text
 question  ->  router  ->  retrieve  ->  ground  ->  answer
@@ -85,11 +87,28 @@ The user-facing effect: every answer comes with **clickable citations** that lin
 
 The architectural effect: hallucinations are structurally inhibited, not merely discouraged. A claim with no citation cannot render. A wrong citation is verifiable. The system fails visibly by saying "I do not know" instead of invisibly returning wrong but confident prose.
 
-### Tool calling with audit boundaries
+### A fail-closed grounding policy
 
-The agent has access to a small set of tools: `SearchControls` for BM25-backed filtered search and direct lookup over the control index, `ExplainConcept` for kNN-backed documentation retrieval, and a Phase 1 path for mutation tools through MCP Gateway. Each tool call is structured, logged, and audit-traceable.
+The schema makes an unsupported claim impossible to render. The grounding policy makes it unlikely to be generated in the first place. Every answer passes through **Bedrock Guardrails** contextual grounding and **Automated Reasoning checks** before it reaches the user, and the policy is fail-closed: if a claim cannot be shown to follow from the retrieved evidence, the system declines rather than returning it.
+
+Measured against the same question set, the base model produced unsupported claims in roughly **45%** of answers. With the grounding policy in place, the suite detects **none**. The cost is a higher refusal rate on genuinely ambiguous questions, which is the right trade in a domain where a confident wrong answer is a liability.
+
+### From answering to acting
+
+Answering questions removed the ticket queue. The next bottleneck was the work that followed the answer. Configuring a regulatory control launch meant a risk manager filling in long, interdependent forms by hand, usually by copying an existing control and changing a few fields.
+
+So the agent learned to act. Alongside the read tools, `SearchControls` for BM25-backed filtered search over the control index and `ExplainConcept` for kNN-backed documentation retrieval, I built tools over the knowledge base and the data catalog systems and integrated downstream **MCP servers** through a gateway. A risk manager can now state intent, "clone control X, but change Y", and the agent resolves the source control, drafts the new configuration, and proposes it. What took hours of form-filling takes minutes.
+
+Acting raises the stakes, so every mutation sits behind two boundaries:
+
+- **Audited tool calls.** Each call is structured and logged with its inputs, outputs, and the model and prompt versions that produced it, so it can be traced after the fact.
+- **Human approval.** The agent proposes; a person approves. No mutation reaches a downstream system without an explicit sign-off on the exact change.
 
 Tool calls are gated by an explicit allow-list. The agent cannot invent tools, construct arbitrary backend calls, or reach data it does not have explicit permission for. The constraint is enforced at the SDK and gateway layer, not at the prompt layer. Relying on a prompt to keep an LLM out of trouble is not a strategy.
+
+### Agent-to-agent (A2A)
+
+Other teams were starting to build their own agents, and several of them needed compliance answers mid-task. Rather than have each one reimplement retrieval and grounding, I stood up **agent-to-agent (A2A)** infrastructure so their agents can invoke the Strands agent as a reusable capability. The grounding policy, permissions, and audit trail travel with it, so a downstream agent gets the same guarantees a human user does.
 
 ## The infrastructure that made it shippable
 
@@ -102,18 +121,20 @@ The parts of this system that determined whether it would actually be trusted in
 - **Near-real-time freshness.** Source changes flow from DynamoDB Streams through a sync Lambda into OpenSearch, with a target of reflecting control configuration changes in the search index within 60 seconds.
 - **Permission-aware retrieval.** Different teams have access to different policy documents. The retrieval layer filters results by the requesting user's permissions before they reach the agent, so the agent cannot surface or reason over data the user is not entitled to see.
 - **Guardrails for fail-closed behavior.** If a tool returns no usable evidence, the system asks for a more specific control ID or refined query instead of fabricating an answer. Guardrails and schema checks make the refusal path an intended product behavior.
-- **Continuous evaluation against a held-out question set.** Real compliance questions with known-good answers run nightly. Quality regressions get caught against the eval set before users see them.
+- **An evaluation harness that gates every release.** A suite of 500+ cases covers grounding, citation correctness, and refusal behavior, and a release that regresses on any of them does not ship. **99% of answers pass citation verification**, both in the suite and in production.
 
 None of this is the interesting part of a demo. All of it is the part that determined whether compliance leadership would let the system near a real user.
 
 ## The results
 
-Across five partner teams piloting the system, MaverickIQ deflected approximately **90% of manual control-interpretation tickets**. Teams stopped filing tickets to compliance for routine questions because the answers were already accessible: grounded, cited, and verifiable in seconds.
+Across five partner teams, escalated engineering tickets fell from roughly **50 a month to about 5**. Teams stopped filing tickets for routine questions because the answers were already accessible: grounded, cited, and verifiable in seconds.
 
 Specific patterns worth noting:
 
 - **Time-to-answer** for routine questions dropped from typical multi-day ticket turnaround to seconds.
 - **Compliance team capacity** shifted toward high-judgment work: regulatory interpretation, audit prep, and control design.
+- **Control launch configuration** dropped from hours to minutes once the agent could act on stated intent, with every change still passing human approval.
+- **Unsupported answers** went from roughly 45% on the base model to none detected, and 99% of answers pass citation verification.
 - **Citation engagement is high.** Users actually click citations and verify against source documents. That is the strongest signal that the trust model is working. Users do not take answers on faith, but the system makes verification fast enough that they use it anyway.
 
 The deflection is not because the LLM is smart. It is because retrieval is matched to the shape of the knowledge and the citations are real. The model is doing translation work: turning "show controls with deployment failures" into the right BM25-backed control-index query, or turning "what does this launch state mean?" into a kNN-grounded explanation from approved documentation. That is the right job for the LLM in this system.
@@ -122,7 +143,7 @@ The deflection is not because the LLM is smart. It is because retrieval is match
 
 A few honest things.
 
-**Retrieval recall is the ceiling.** When MaverickIQ fails, it is almost never because the agent reasoned badly. It is because the right control document, configuration row, or knowledge-base passage was not retrieved. Improving the read model, query construction, chunking, embeddings, and reranking has a higher ceiling than improving the model. Most of the win is upstream of the LLM.
+**Retrieval recall is the ceiling.** When ComplianceIQ fails, it is almost never because the agent reasoned badly. It is because the right control document, configuration row, or knowledge-base passage was not retrieved. Improving the read model, query construction, chunking, embeddings, and reranking has a higher ceiling than improving the model. Most of the win is upstream of the LLM.
 
 **The system is conservative by design.** It is much more likely to say "I do not have evidence to answer that" than to answer wrongly. This is the right calibration for compliance. False negatives are recoverable, false positives are not. It does mean users sometimes get refusals on questions a human expert would have answered confidently. Reducing the refusal rate without breaking the trust model is an ongoing tension.
 
@@ -132,7 +153,7 @@ A few honest things.
 
 ## What I would do differently
 
-**Build the eval set before building the agent.** The first version of MaverickIQ shipped with subjective spot-checks for quality. A structured eval set with known-good Q&A pairs would have caught a class of regressions earlier and given the team a more defensible way to talk about quality changes with stakeholders.
+**Build the eval harness before building the agent.** The first version shipped with subjective spot-checks for quality. The 500+ case harness that now gates every release came later. Had it existed from day one, it would have caught a class of regressions earlier and given the team a more defensible way to talk about quality changes with stakeholders.
 
 **Invest in query planning and re-ranking earlier.** The router and retrieval tools work, but quality depends heavily on mapping the user's natural-language question to the right filters and source plane. A learned re-ranker for documentation relevance and a stronger query planner for control-index filters would meaningfully improve recall@5. Recall is the actual bottleneck.
 

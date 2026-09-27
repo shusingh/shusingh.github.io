@@ -127,7 +127,7 @@ export function HomePage() {
             {
               label: 'Building',
               value:
-                'Citation-grounded compliance Q&A and operator surfaces for control launch workflows at Amazon.',
+                'ComplianceIQ at Amazon: a citation-grounded agent that now acts on intent through MCP tools, behind human approval.',
             },
             {
               label: 'Learning',

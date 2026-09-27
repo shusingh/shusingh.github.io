@@ -24,11 +24,13 @@ export function AboutPage() {
 
           <div className={styles.body}>
             <p>
-              I spend most of my time on production AI and compliance infrastructure at Amazon:
-              citation-grounded Q&amp;A, hybrid retrieval over compliance knowledge, and operator
-              surfaces for control launch workflows. Before that I shipped large-scale compliance
-              orchestration: the EU DSA pipeline, a compliance testing automation platform, and
-              ZeroTouch, the control launch platform I led across three partner teams.
+              I've been at Amazon since August 2022 (SDE II since October 2025), building
+              production backend and distributed systems on AWS. These days I lead ComplianceIQ, an
+              agentic AI platform on Bedrock: citation-grounded answers, a fail-closed grounding
+              policy, an eval harness that gates every release, and MCP tools that let the agent act
+              on a risk manager's intent behind human approval. Before that I shipped the regulatory
+              control launch platform (20+ weeks to under 2 days per launch), its pre-launch testing
+              orchestrator, and a compliance data pipeline handling 30M+ records a month.
             </p>
             <p>
               What I actually care about is the production path. Most agentic-system talk online is
@@ -62,13 +64,17 @@ export function AboutPage() {
 
             <dt className={styles.factLabel}>Working on</dt>
             <dd className={styles.factValue}>
-              Production AI systems for compliance search, review, and launch workflows
+              Agentic AI on Bedrock: RAG, evaluation harnesses, guardrails, MCP and A2A
             </dd>
 
             <dt className={styles.factLabel}>Stack</dt>
             <dd className={styles.factValue}>
-              Java · Python · TypeScript · Go · AWS (Bedrock, Step Functions, OpenSearch, Lambda)
+              Python · TypeScript · Java · Go · SQL · AWS (Bedrock, Step Functions, Lambda,
+              DynamoDB, OpenSearch)
             </dd>
+
+            <dt className={styles.factLabel}>Education</dt>
+            <dd className={styles.factValue}>M.S. Data Science, Indiana University Bloomington</dd>
 
             <dt className={styles.factLabel}>Off-hours</dt>
             <dd className={styles.factValue}>

@@ -2,7 +2,7 @@
 title: ZeroTouch / RISC Central UI
 slug: zero-touch
 eyebrow: Amazon · Sole HLD Author
-description: A redesigned control launch portal for dynamic DAG workflows, multi-tenant artifact management, role-gated actions, and lock-aware review flows across workflow and content backends.
+description: The UI for a regulatory control launch platform running 2,000+ launches a year, cutting launch time from 20+ weeks to under 2 days, with dynamic DAG workflows, multi-tenant artifact management, and lock-aware review flows across two backends.
 date: 2025-08-01
 tech:
   - React
@@ -12,7 +12,7 @@ tech:
   - Artifact APIs
 stat:
   number: 2,000+
-  label: Control launches targeted in 2026
+  label: Launches a year, each cut from 20+ weeks to under 2 days
 diagram:
   nodes:
     - Workflow API
@@ -28,7 +28,9 @@ order: 3
 
 ## The problem
 
-ZeroTouch was moving from a rigid linear workflow to a config-driven DAG model for launching safety and compliance controls. The old RISC Central UI had been built around the old assumption: a fixed wizard, hardcoded sub-steps, limited visibility into in-flight work, and no clean way to reuse or bring user-provided artifacts.
+ZeroTouch is the regulatory control launch platform: it runs **2,000+ control launches a year**, replacing a manual, multi-team process that used to take **20+ weeks per launch**. I owned the UI design, both HLD and LLD, and its delivery.
+
+The platform was moving from a rigid linear workflow to a config-driven DAG model for launching safety and compliance controls. The old RISC Central UI had been built around the old assumption: a fixed wizard, hardcoded sub-steps, limited visibility into in-flight work, and no clean way to reuse or bring user-provided artifacts.
 
 That model broke down as soon as the backend became dynamic. Controls could now have different graph shapes, skippable steps, rewind behavior, generated artifacts, user-uploaded artifacts, and approval paths that varied by control type. At the same time, artifact storage was moving out of the workflow service into a separate multi-tenant content service.
 
@@ -129,6 +131,8 @@ The design gave three partner teams a shared implementation contract:
 - One gate model for locks, pending states, artifacts, and role constraints.
 - One state-management model for workflow state, content state, and local UI state.
 - One set of API sequences for generate, refine, edit, approve, reject, upload, rewind, and approval workflows.
+
+The platform now runs 2,000+ regulatory control launches a year, and a launch that once took 20+ weeks of manual, multi-team coordination completes in **under 2 days**.
 
 The value was not only the final UI. The value was removing ambiguity across teams. Backend owners, content-service owners, and frontend implementers could reason from the same document about who owned which state, when the UI should poll, which backend receives which mutation, and what the user sees during every in-flight transition.
 

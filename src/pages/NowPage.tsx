@@ -15,8 +15,8 @@ const entries: NowEntry[] = [
     label: 'Building',
     value: (
       <p>
-        Production AI surfaces for compliance work at Amazon: citation-grounded Q&amp;A,
-        permission-aware retrieval, and operator workflows for control launch and review.
+        Taking the compliance agent at Amazon from answering to acting: tools over the knowledge
+        base and data catalog, downstream MCP servers, and human approval on every change.
       </p>
     ),
   },
@@ -24,8 +24,9 @@ const entries: NowEntry[] = [
     label: 'Shipping',
     value: (
       <p>
-        Iteration on <strong>MaverickIQ</strong>, our citation-grounded Q&amp;A platform, with hybrid
-        BM25 + kNN retrieval over compliance corpora with full audit logs.
+        <strong>ComplianceIQ</strong> releases, each gated by a 500+ case eval harness covering
+        grounding, citation correctness, and refusal behavior, plus A2A so other teams' agents
+        can call ours.
       </p>
     ),
   },
