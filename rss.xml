@@ -7,8 +7,18 @@
     <description>SDE II at Amazon building production agentic AI systems and distributed infrastructure on AWS.</description>
     <language>en-us</language>
     <managingEditor>shubh.singh.dev@gmail.com (Shubham Singh)</managingEditor>
-    <lastBuildDate>Mon, 06 Jul 2026 16:12:18 GMT</lastBuildDate>
-    <pubDate>Mon, 06 Jul 2026 00:00:00 GMT</pubDate>
+    <lastBuildDate>Sun, 27 Sep 2026 17:20:35 GMT</lastBuildDate>
+    <pubDate>Thu, 24 Sep 2026 00:00:00 GMT</pubDate>
+    <item>
+      <title>Delete more features</title>
+      <link>https://shusingh.github.io/writing/delete-more-features</link>
+      <guid isPermaLink="true">https://shusingh.github.io/writing/delete-more-features</guid>
+      <pubDate>Thu, 24 Sep 2026 00:00:00 GMT</pubDate>
+      <description>Shipping a feature has never been cheaper. Keeping one alive costs exactly what it always did. As generation gets faster, the scarce skill on a product team stops being the ability to add things and becomes the discipline to take them away.</description>
+      <category>product</category>
+      <category>engineering</category>
+      <category>ai</category>
+    </item>
     <item>
       <title>Driftboard: rebuilding a Kanban board around drag that does not flicker</title>
       <link>https://shusingh.github.io/writing/driftboard-a-local-first-kanban-board</link>
