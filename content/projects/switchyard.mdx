@@ -39,7 +39,7 @@ Switchyard is a router that sits in front of a pool of OpenAI-compatible model s
     <img
       src="/diagrams/switchyard-architecture.webp"
       width="1120"
-      height="916"
+      height="1024"
       loading="lazy"
       decoding="async"
       alt="Switchyard architecture. Clients send OpenAI-compatible requests to the router, a single Go binary. Inside it, admission control, the prefix keyer, the routing policy, and the streaming proxy form the request path; the policy reads a prefix index and a load tracker; a KV event subscriber updates the index from vLLM's events; a health checker probes the replicas. The proxy streams to one of four vLLM replicas on one RTX 4090."
