@@ -16,7 +16,6 @@ order: 4
 
 import {
   FlowDiagram,
-  LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
 ## Change intent
@@ -41,14 +40,19 @@ This PR adds an EML converter that extracts message headers, body content, and a
 
 ## High-level design
 
-<LayerDiagram
-  groups={[
-    { title: 'Input', items: ['RFC 822 envelope', 'MIME parts', 'attachments'] },
-    { title: 'Converter', items: ['header extraction', 'body selection', 'metadata rendering'] },
-    { title: 'Output', items: ['Markdown preamble', 'body text', 'attachment list'] },
-  ]}
-  caption="The converter follows the existing MarkItDown pattern: isolate format-specific parsing and return clean Markdown."
-/>
+<figure data-wide>
+  <a href="/diagrams/markitdown-eml.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/markitdown-eml.webp"
+      width="1120"
+      height="800"
+      loading="lazy"
+      decoding="async"
+      alt="Where the EML converter fits in MarkItDown. A .eml file goes to MarkItDown, which selects the new EmlConverter, marked as this PR; it extracts headers, selects the body with text/plain preferred over HTML, and lists attachments as metadata, producing Markdown for search or RAG."
+    />
+  </a>
+  <figcaption>Fig. 1. The converter follows the existing MarkItDown pattern: isolate format-specific parsing and return clean Markdown.</figcaption>
+</figure>
 
 The implementation treats the email as a structured document rather than a blob of text. Headers become a readable preamble. Body selection follows a deterministic preference order. Attachment metadata is included so downstream systems know what was present even if they do not ingest the attachment content yet.
 

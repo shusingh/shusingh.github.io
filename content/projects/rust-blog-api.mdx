@@ -13,7 +13,6 @@ order: 8
 ---
 
 import {
-  FlowDiagram,
   LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
@@ -42,10 +41,19 @@ The scope is intentionally constrained. A small API makes it easier to focus on 
 
 ## High-level design
 
-<FlowDiagram
-  nodes={['HTTP request', 'route handler', 'validate payload', 'domain operation', 'HTTP response']}
-  caption="The route handler should translate between HTTP and domain types, not own the business logic."
-/>
+<figure data-wide>
+  <a href="/diagrams/rust-blog-api-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/rust-blog-api-architecture.webp"
+      width="1120"
+      height="620"
+      loading="lazy"
+      decoding="async"
+      alt="Rust blog API architecture in Actix Web. A client request passes through the router and extractors to handlers that translate HTTP to the domain layer, which owns post types and rules and sits in front of storage; domain error types map to HTTP status and body."
+    />
+  </a>
+  <figcaption>Fig. 1. The route handler should translate between HTTP and domain types, not own the business logic.</figcaption>
+</figure>
 
 The API layer handles routing and extraction. Domain types describe posts and validation. Error types map cleanly into HTTP responses. Persistence is intentionally simple in the first version, but the boundary is shaped so a database can be added later.
 

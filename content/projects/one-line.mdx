@@ -14,7 +14,6 @@ order: 4
 ---
 
 import {
-  FlowDiagram,
   LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
@@ -46,10 +45,19 @@ It is deliberately not a notes app, not a habit platform, and not a cloud servic
 
 ## High-level design
 
-<FlowDiagram
-  nodes={['type one line', 'pick a mood', 'persist to date key', 'derive streaks and stats', 'render flashbacks and year map']}
-  caption="Every feature is a pure derivation from one date-keyed map of entries."
-/>
+<figure data-wide>
+  <a href="/diagrams/one-line-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/one-line-architecture.webp"
+      width="1120"
+      height="800"
+      loading="lazy"
+      decoding="async"
+      alt="One Line architecture in the browser. The composer writes one line and one mood into a single map of entries keyed by date, persisted to localStorage; streaks, flashbacks, the year map, and monthly insights are derived from that map at render time."
+    />
+  </a>
+  <figcaption>Fig. 1. Every feature is a pure derivation from one date-keyed map of entries.</figcaption>
+</figure>
 
 The store is a single object mapping `YYYY-MM-DD` keys to `{ text, mood }`. Everything else, streaks, flashbacks, the year map, monthly insight counts, is derived at render time. There is no cache to invalidate and no second source of truth.
 

@@ -16,7 +16,6 @@ order: 8
 
 import {
   FlowDiagram,
-  LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
 ## Change intent
@@ -42,14 +41,19 @@ This PR preserves explicit `null` values during tool invocation for both direct 
 
 ## High-level design
 
-<LayerDiagram
-  groups={[
-    { title: 'Input contract', items: ['required parameter', 'nullable value', 'schema validation'] },
-    { title: 'Invocation path', items: ['argument dump', 'FunctionTool.invoke', 'auto calling'] },
-    { title: 'Regression tests', items: ['direct invoke', 'automatic tool call', 'nullable required arg'] },
-  ]}
-  caption="The important boundary is not parsing. It is preserving caller intent after validation."
-/>
+<figure data-wide>
+  <a href="/diagrams/agent-framework-null.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/agent-framework-null.webp"
+      width="1120"
+      height="636"
+      loading="lazy"
+      decoding="async"
+      alt="The Agent Framework null fix. Calls from your code through FunctionTool.invoke and model tool calls through automatic function calling both pass schema validation, then the argument dump, marked as this PR, which now keeps explicit null, so the tool function receives x=None rather than a missing argument."
+    />
+  </a>
+  <figcaption>Fig. 1. The important boundary is not parsing. It is preserving caller intent after validation.</figcaption>
+</figure>
 
 The implementation keeps the fix close to the argument dump path. Validated arguments are serialized without dropping explicitly provided nullable fields. Tests cover the direct tool invocation path and the automatic function-calling path so both surfaces preserve the same contract.
 

@@ -17,11 +17,6 @@ diagram:
   caption: "A native AppKit shell owns the windows and the disk; a web view renders a real markdown editor. The two talk over one tiny message bridge."
 ---
 
-import {
-  FlowDiagram,
-  LayerDiagram,
-} from '../../src/components/MdxDiagrams/MdxDiagrams';
-
 <img src="/jotdown-note.png" alt="A Jotdown sticky note titled Today, showing live-rendered markdown: a heading, bold and italic text, ticked checkboxes with strikethrough, a blockquote, inline code, and a syntax-highlighted Python code block with a language badge." />
 
 ## System intent
@@ -41,23 +36,21 @@ The constraint that shapes the product is friction. A note must be one keystroke
 
 ## High-level design
 
-<FlowDiagram
-  nodes={['type markdown', 'CodeMirror parses + decorates', 'live preview in the web view', 'bridge reports text', 'Swift persists JSON + .md']}
-  caption="The web view owns editing and rendering; Swift owns the windows and the disk. One message bridge is the only seam between them."
-/>
+<figure data-wide>
+  <a href="/diagrams/jotdown-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/jotdown-architecture.webp"
+      width="1120"
+      height="824"
+      loading="lazy"
+      decoding="async"
+      alt="Jotdown architecture. In a WKWebView, the CodeMirror 6 editor renders live Markdown, with toolbar keymaps and code block highlighting; it posts messages over a bridge to the Swift and AppKit shell, which moves note windows and persists notes as JSON with a Markdown mirror on disk. Parity tests run the same editor in a headless browser."
+    />
+  </a>
+  <figcaption>Fig. 1. The web view owns editing and rendering; Swift owns the windows and the disk. One message bridge is the only seam between them.</figcaption>
+</figure>
 
 The app is two halves joined by a deliberately tiny contract. A native Swift/AppKit shell puts one borderless `NSWindow` on screen per note, each hosting a `WKWebView`. The editor inside is CodeMirror 6 with a custom live-preview plugin that hides formatting tokens except on the lines the selection touches. When text, color, or a drag happens, the web view posts a small message; Swift moves windows and writes files. The editor never assumes the bridge exists, so the same page runs headless in a browser, which is what the parity test suite drives.
-
-## Architecture
-
-<LayerDiagram
-  groups={[
-    { title: 'App shell (Swift / AppKit)', items: ['menu bar + Dock', 'borderless NSWindow per note', 'JSON store + .md mirror'] },
-    { title: 'Bridge', items: ['WKScriptMessageHandler', 'text / color / drag / pin / close'] },
-    { title: 'Editor (CodeMirror 6)', items: ['live-preview decorations', 'code highlighting + auto-tag', 'toolbar + list keymaps'] },
-  ]}
-  caption="Three layers, each kept as thin as it can be. The editor is vendored as a committed bundle, so a plain swift build needs no Node."
-/>
 
 ## Design decisions
 

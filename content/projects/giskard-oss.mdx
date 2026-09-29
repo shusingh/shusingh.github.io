@@ -16,7 +16,6 @@ order: 12
 
 import {
   FlowDiagram,
-  LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
 ## Change intent
@@ -40,14 +39,19 @@ This PR adds `JsonValid`, a check that validates both raw JSON strings and alrea
 
 ## High-level design
 
-<LayerDiagram
-  groups={[
-    { title: 'Input surface', items: ['string JSON', 'dict/list objects', 'primitive values'] },
-    { title: 'Validation', items: ['json parsing', 'JSON Schema', 'configuration errors'] },
-    { title: 'Output', items: ['pass/fail result', 'clear reason', 'test coverage'] },
-  ]}
-  caption="The PR is small, but the contract matters because LLM pipelines need to know which boundary failed."
-/>
+<figure data-wide>
+  <a href="/diagrams/giskard-jsonvalid.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/giskard-jsonvalid.webp"
+      width="1120"
+      height="824"
+      loading="lazy"
+      decoding="async"
+      alt="The Giskard JsonValid check, marked as this PR. An LLM output, as a string or parsed value, is accepted, parsed if it is a string, and optionally validated against a JSON Schema before passing; invalid JSON and schema mismatches fail with a reason, and a malformed schema is a configuration error."
+    />
+  </a>
+  <figcaption>Fig. 1. The PR is small, but the contract matters because LLM pipelines need to know which boundary failed.</figcaption>
+</figure>
 
 The implementation validates syntax first. If a schema is provided, it validates the parsed value against that schema. Invalid user data produces a validation failure. Invalid schema configuration produces a configuration error so teams do not mistake a broken check for a broken model output.
 

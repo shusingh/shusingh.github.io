@@ -21,7 +21,6 @@ diagram:
 
 import {
   FlowDiagram,
-  LayerDiagram,
   LoopDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
@@ -51,25 +50,21 @@ It mirrors the internal tooling AI labs build - trace viewers, agent debuggers, 
 
 ## High-level design
 
-The timeline is a single `<canvas>`, never DOM - the browser's layout engine is the bottleneck past ~10k nodes. Span geometry lives in flat typed arrays (structure-of-arrays), so the render loop iterates 50k spans per frame with no allocation. A max-end segment tree answers "which spans overlap the viewport?" in `O(log n + k)`, and below ~2px a span degrades into a density band so a zoomed-out trace reads as shape, not mush.
+<figure data-wide>
+  <a href="/diagrams/agent-replay-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/agent-replay-architecture.webp"
+      width="1120"
+      height="824"
+      loading="lazy"
+      decoding="async"
+      alt="Agent Replay architecture in the browser. A JSONL trace is parsed by a Web Worker into a lazy payload store and a TraceIndex of typed arrays and an interval tree, transferred zero-copy. A render loop queries the index, driven by viewport refs from pan, zoom, and scrub, and draws the canvas waterfall; React panels and the span tree read the index when interaction settles."
+    />
+  </a>
+  <figcaption>Fig. 1. The hot path (parse, index, draw) stays off React; React drives the panels that change when you stop, not every frame.</figcaption>
+</figure>
 
-<LayerDiagram
-  groups={[
-    {
-      title: 'Ingest (Web Worker)',
-      items: ['Parse JSONL', 'Build typed arrays', 'Build interval index', 'Transfer buffers zero-copy'],
-    },
-    {
-      title: 'Render (one rAF loop)',
-      items: ['Cull to the viewport', 'Bucket draws by color', 'Level-of-detail bands', 'Playhead + active spans'],
-    },
-    {
-      title: 'React (on settle)',
-      items: ['Inspector tabs', 'Token replay', 'Span tree (a11y)', 'Diff view'],
-    },
-  ]}
-  caption="The hot path (parse, index, draw) stays off React; React drives the panels that change when you stop, not every frame."
-/>
+The timeline is a single `<canvas>`, never DOM - the browser's layout engine is the bottleneck past ~10k nodes. Span geometry lives in flat typed arrays (structure-of-arrays), so the render loop iterates 50k spans per frame with no allocation. A max-end segment tree answers "which spans overlap the viewport?" in `O(log n + k)`, and below ~2px a span degrades into a density band so a zoomed-out trace reads as shape, not mush.
 
 A single `requestAnimationFrame` loop owns the canvas, with viewport and playhead state in refs so interaction never triggers a React render. Parsing and indexing happen in a Web Worker and the typed-array buffers are transferred back zero-copy. The full engineering story is in the writeup: [How I rendered 50k agent spans at 60fps](/writing/rendering-50k-agent-spans-at-60fps).
 

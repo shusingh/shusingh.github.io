@@ -22,7 +22,6 @@ diagram:
 
 import {
   FlowDiagram,
-  LayerDiagram,
   LoopDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
@@ -61,28 +60,24 @@ waymark
 
 ## High-level design
 
+<figure data-wide>
+  <a href="/diagrams/waymark-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/waymark-architecture.webp"
+      width="1120"
+      height="824"
+      loading="lazy"
+      decoding="async"
+      alt="Waymark architecture on your machine. The Typer CLI and Textual TUI write through one memory model into local SQLite; explicit imports write after a preview; Ask with sources retrieves from SQLite and optionally asks a local Ollama model; SQLite exports backup bundles; local AI agents are a planned consumer of grounded context."
+    />
+  </a>
+  <figcaption>Fig. 1. The CLI and TUI are thin surfaces over the same local memory model, so interactive and scripted workflows stay consistent.</figcaption>
+</figure>
+
 The project is a Python CLI/TUI built around a local data model. Typer owns the
 command surface, Textual provides the guided terminal app, and SQLite is the
 source of truth for entries, tags, sources, reflections, decisions, and backup
 metadata.
-
-<LayerDiagram
-  groups={[
-    {
-      title: 'Interface',
-      items: ['Typer commands', 'Textual guided app', 'doctor checks'],
-    },
-    {
-      title: 'Memory model',
-      items: ['entries', 'sources', 'tags', 'reflections', 'decisions'],
-    },
-    {
-      title: 'Portability',
-      items: ['explicit imports', 'backup bundles', 'GitHub + PyPI releases'],
-    },
-  ]}
-  caption="The CLI and TUI are thin surfaces over the same local memory model, so interactive and scripted workflows stay consistent."
-/>
 
 The important boundary is between memory and generation. Waymark can draft a
 structured card or use local embeddings, but the durable record is still the

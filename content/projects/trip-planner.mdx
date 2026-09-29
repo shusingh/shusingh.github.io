@@ -17,7 +17,6 @@ diagram:
 ---
 
 import {
-  FlowDiagram,
   LayerDiagram,
   LoopDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
@@ -49,10 +48,19 @@ The important design choice is that the frontend does not call the model provide
 
 ## High-level design
 
-<FlowDiagram
-  nodes={['trip form', 'typed request', 'Go prompt builder', 'model call', 'normalize itinerary', 'render plan']}
-  caption="The backend translates user constraints into a model request and translates model output back into a UI-friendly itinerary."
-/>
+<figure data-wide>
+  <a href="/diagrams/michi-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/michi-architecture.webp"
+      width="1120"
+      height="944"
+      loading="lazy"
+      decoding="async"
+      alt="Michi architecture. The traveler uses a React UI on Vercel that sends a trip request to a Go API serverless function, which builds the prompt and calls Groq's llama-3.3-70b and normalizes the result into one JSON contract. The UI pins places on a MapLibre GL map with tiles from OpenFreeMap and fetches place photos from the Wikipedia API."
+    />
+  </a>
+  <figcaption>Fig. 1. The backend translates user constraints into a model request and translates model output back into a UI-friendly itinerary.</figcaption>
+</figure>
 
 The frontend collects destination, dates, interests, budget, and pacing. The Go service builds a structured prompt, calls the inference API, parses the result into an itinerary shape, and returns the response to the UI. The UI only handles product states: loading, success, empty result, and error.
 

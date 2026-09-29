@@ -1,17 +1,20 @@
-// Renders the hand-authored SVG diagrams in diagrams/ to WebP images in
-// public/diagrams/, using the site's own typefaces. Run with `npm run diagrams`
-// after editing a diagram; the outputs are committed so the site build does not
-// depend on this step.
+// Renders the diagrams in diagrams/ to WebP images in public/diagrams/, using
+// the site's own typefaces. A diagram is either a spec module (diagrams/*.ts,
+// built with scripts/diagrams/kit.ts, default-exporting a Diagram) or a plain
+// SVG file. Run with `npm run diagrams` after editing one; the outputs are
+// committed so the site build does not depend on this step.
 //
-// The SVG source stays the editable original. It is rendered to a raster
-// because an SVG loaded through <img> cannot use the page's web fonts.
+// Diagrams are rasterized because an SVG loaded through <img> cannot use the
+// page's web fonts. Pass diagram names to render only those.
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import zlib from 'node:zlib';
 
 import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
+
+import type { Diagram } from './diagrams/kit';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
@@ -87,29 +90,40 @@ async function prepareFonts(): Promise<string[]> {
       const woff = await fs.readFile(path.join(root, 'node_modules', font));
       await fs.writeFile(target, woffToSfnt(woff));
       return target;
-    }),
+    })
   );
 }
 
+async function loadSvg(file: string): Promise<string> {
+  const full = path.join(sourceDir, file);
+  if (file.endsWith('.svg')) return fs.readFile(full, 'utf8');
+  const mod = (await import(pathToFileURL(full).href)) as { default: Diagram };
+  return mod.default.render();
+}
+
 async function main(): Promise<void> {
+  const only = process.argv.slice(2);
   const fontFiles = await prepareFonts();
   await fs.mkdir(outputDir, { recursive: true });
-  const sources = (await fs.readdir(sourceDir)).filter((name) => name.endsWith('.svg'));
+  const sources = (await fs.readdir(sourceDir)).filter(
+    (file) => /\.(svg|ts)$/.test(file) && (only.length === 0 || only.includes(file.replace(/\.(svg|ts)$/, '')))
+  );
 
-  for (const name of sources) {
-    const svg = await fs.readFile(path.join(sourceDir, name), 'utf8');
+  for (const file of sources) {
+    const name = file.replace(/\.(svg|ts)$/, '');
+    const svg = await loadSvg(file);
     const resvg = new Resvg(svg, {
       font: { fontFiles, loadSystemFonts: false, defaultFontFamily: 'Hanken Grotesk' },
       fitTo: { mode: 'zoom', value: SCALE },
     });
     const png = resvg.render().asPng();
-    const outPath = path.join(outputDir, name.replace(/\.svg$/, '.webp'));
+    const outPath = path.join(outputDir, `${name}.webp`);
     // Flat diagram colors compress far better losslessly than with lossy
     // quantization, which also blurs thin lines and small text.
     const info = await sharp(png).webp({ lossless: true, effort: 6 }).toFile(outPath);
     console.log(
-      `[diagrams] ${name} -> ${path.relative(root, outPath)} ` +
-        `(${info.width}x${info.height}, ${(info.size / 1024).toFixed(0)} KB)`,
+      `[diagrams] ${file} -> ${path.relative(root, outPath)} ` +
+        `(${info.width}x${info.height}, ${(info.size / 1024).toFixed(0)} KB)`
     );
   }
 }

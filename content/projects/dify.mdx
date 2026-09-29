@@ -16,7 +16,6 @@ order: 10
 
 import {
   FlowDiagram,
-  LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
 ## Change intent
@@ -40,14 +39,19 @@ This PR adds Redis-backed Socket.IO manager selection when collaboration mode is
 
 ## High-level design
 
-<LayerDiagram
-  groups={[
-    { title: 'Config', items: ['collaboration mode', 'Redis URL', 'runtime topology'] },
-    { title: 'Socket layer', items: ['manager selection', 'server construction', 'event routing'] },
-    { title: 'Coverage', items: ['in-memory path', 'Redis path', 'server init tests'] },
-  ]}
-  caption="The contribution is small, but it changes an important production boundary: local realtime state versus shared realtime coordination."
-/>
+<figure data-wide>
+  <a href="/diagrams/dify-socketio.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/dify-socketio.webp"
+      width="1120"
+      height="858"
+      loading="lazy"
+      decoding="async"
+      alt="Dify realtime events across workers. Collaboration config drives manager selection, marked as this PR, in each API worker; with collaboration on, each worker's Socket.IO server uses a Redis manager so events emitted on worker 1 reach a client on worker 2; with collaboration off, the in-memory manager is used as before."
+    />
+  </a>
+  <figcaption>Fig. 1. The contribution is small, but it changes an important production boundary: local realtime state versus shared realtime coordination.</figcaption>
+</figure>
 
 The implementation keeps the Socket.IO setup explicit. The extension checks whether collaboration mode is enabled, constructs the appropriate manager, and passes it into the Socket.IO server. Tests cover the default single-process path and the Redis-backed collaboration path.
 

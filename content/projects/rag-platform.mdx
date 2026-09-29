@@ -16,7 +16,6 @@ diagram:
 ---
 
 import {
-  FlowDiagram,
   LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
@@ -45,10 +44,19 @@ It is useful as an HLD exercise because it keeps the scope tight. The system doe
 
 ## High-level design
 
-<FlowDiagram
-  nodes={['query', 'normalize', 'retrieve', 'rank', 'assemble citations', 'respond']}
-  caption="The response shape is built around evidence first. Answer generation can sit downstream, but retrieval remains its own service boundary."
-/>
+<figure data-wide>
+  <a href="/diagrams/rag-platform-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/rag-platform-architecture.webp"
+      width="1120"
+      height="796"
+      loading="lazy"
+      decoding="async"
+      alt="RAG platform architecture. A client calls the Go API, which validates the request; a normalizer checks a Redis cache keyed by index version; on a miss, retrieve and rank queries OpenSearch with filters; citation assembly reads Postgres records and returns results with citations."
+    />
+  </a>
+  <figcaption>Fig. 1. The response shape is built around evidence first. Answer generation can sit downstream, but retrieval remains its own service boundary.</figcaption>
+</figure>
 
 The Go API owns request validation and response shape. OpenSearch owns search and filtering. Postgres stores durable document and query records. Redis is reserved for hot-path cache decisions where repeated queries should not pay full retrieval cost.
 

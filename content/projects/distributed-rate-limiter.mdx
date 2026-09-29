@@ -17,7 +17,6 @@ diagram:
 
 import {
   FlowDiagram,
-  LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
 ## System intent
@@ -41,14 +40,19 @@ The design goal is simple: given a subject key, a limit, and a time window, retu
 
 ## High-level design
 
-<LayerDiagram
-  groups={[
-    { title: 'Caller', items: ['endpoint key', 'tenant or user ID', 'limit config'] },
-    { title: 'Limiter', items: ['Lua script', 'sliding window', 'decision metadata'] },
-    { title: 'Redis', items: ['sorted set', 'timestamp scores', 'window TTL'] },
-  ]}
-  caption="The Go layer owns API ergonomics. Redis owns shared state. Lua owns atomicity."
-/>
+<figure data-wide>
+  <a href="/diagrams/rate-limiter-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/rate-limiter-architecture.webp"
+      width="1120"
+      height="776"
+      loading="lazy"
+      decoding="async"
+      alt="Rate limiter architecture. Traffic reaches any app instance, each embedding the Go limiter, which runs one atomic Lua script in Redis that trims, counts, inserts, and sets a TTL on a per-key sorted set with timestamps as scores; each endpoint chooses to fail open or closed if Redis is down."
+    />
+  </a>
+  <figcaption>Fig. 1. The Go layer owns API ergonomics. Redis owns shared state. Lua owns atomicity.</figcaption>
+</figure>
 
 Each rate-limit bucket is represented as a Redis sorted set. Request timestamps are both the score and the member value. On each request, the Lua script removes expired entries, counts the remaining entries, inserts the current timestamp if capacity exists, updates TTL, and returns the decision.
 

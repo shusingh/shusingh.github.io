@@ -19,7 +19,6 @@ diagram:
 ---
 
 import {
-  FlowDiagram,
   LayerDiagram,
   LoopDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
@@ -53,18 +52,19 @@ These requirements shape the architecture more than the model choice does.
 
 ## High-level design
 
-<FlowDiagram
-  nodes={[
-    'upload document',
-    'enqueue ingestion job',
-    'chunk + index',
-    'ask question',
-    'retrieve evidence',
-    'critic validates',
-    'answer or refuse',
-  ]}
-  caption="Documents move through an async ingestion path. Questions move through a bounded agent path with citation checks before finalization."
-/>
+<figure data-wide>
+  <a href="/diagrams/agentops-rag-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/agentops-rag-architecture.webp"
+      width="1180"
+      height="1052"
+      loading="lazy"
+      decoding="async"
+      alt="AgentOps RAG architecture. A client with a tenant JWT calls FastAPI. The write path stores metadata in Postgres and enqueues jobs on Redis Streams for an ingest worker that indexes into OpenSearch, with failures going to a scoped dead-letter queue. The answer path runs a planner, a tenant-filtered retriever over OpenSearch, a coverage critic backed by an LLM API, and a finalizer that answers or refuses. OpenTelemetry traces every hop; an eval harness and benchmarks sit outside."
+    />
+  </a>
+  <figcaption>Fig. 1. Documents move through an async ingestion path. Questions move through a bounded agent path with citation checks before finalization.</figcaption>
+</figure>
 
 The write path starts at `POST /documents`. The API validates the JWT, derives tenant ID from claims, stores metadata in Postgres, and enqueues an ingestion job in Redis Streams. The worker chunks the document, indexes chunks into OpenSearch, updates document state, and writes failed jobs to a DLQ with tenant ID, document ID, stage, and retry count.
 

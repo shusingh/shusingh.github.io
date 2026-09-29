@@ -16,7 +16,6 @@ order: 11
 
 import {
   FlowDiagram,
-  LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
 ## Change intent
@@ -40,14 +39,19 @@ The PR fixes the rendering path by decoding PTY output as UTF-8 before it reache
 
 ## High-level design
 
-<LayerDiagram
-  groups={[
-    { title: 'Shell service', items: ['PTY stream', 'byte buffer', 'UTF-8 decode'] },
-    { title: 'Renderer', items: ['string input', 'terminal surface', 'font stack'] },
-    { title: 'User impact', items: ['clean prompts', 'readable symbols', 'editor consistency'] },
-  ]}
-  caption="The service boundary owns byte decoding. The UI owns rendering."
-/>
+<figure data-wide>
+  <a href="/diagrams/posthog-terminal.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/posthog-terminal.webp"
+      width="1120"
+      height="670"
+      loading="lazy"
+      decoding="async"
+      alt="The PostHog Code terminal fix. PTY bytes flow into the shell service, where UTF-8 decoding, marked as this PR, happens once at the boundary; the terminal surface in the renderer receives strings and draws them with the app's code font stack, also marked as this PR. Shell service tests were updated."
+    />
+  </a>
+  <figcaption>Fig. 1. The service boundary owns byte decoding. The UI owns rendering.</figcaption>
+</figure>
 
 The code change is small, but the boundary is important. Terminal rendering should not depend on downstream components guessing how to decode raw process output. Once the service returns valid strings, the renderer can stay focused on display.
 

@@ -17,8 +17,6 @@ diagram:
 
 import {
   FlowDiagram,
-  LoopDiagram,
-  LayerDiagram,
 } from '../../src/components/MdxDiagrams/MdxDiagrams';
 
 ## System intent
@@ -42,24 +40,21 @@ The core opinion is that agent systems should behave like software systems. Role
 
 ## High-level design
 
-<LayerDiagram
-  groups={[
-    { title: 'State', items: ['task definition', 'plan JSON', 'revision history'] },
-    { title: 'Agents', items: ['planner', 'executor', 'critic', 'refiner'] },
-    { title: 'Controls', items: ['schemas', 'eval cases', 'bounded retries'] },
-  ]}
-  caption="The project treats schemas and state as the design surface. Agents are components operating against those contracts."
-/>
+<figure data-wide>
+  <a href="/diagrams/strands-multi-agent-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/strands-multi-agent-architecture.webp"
+      width="1120"
+      height="824"
+      loading="lazy"
+      decoding="async"
+      alt="Strands multi-agent architecture. A structured task enters a bounded loop of planner, executor, critic, and refiner, each reading and writing explicit task state; the refiner loops back to the executor when the result is not good enough; human feedback updates state through the refiner; schemas and eval cases constrain the roles."
+    />
+  </a>
+  <figcaption>Fig. 1. The project treats schemas and state as the design surface. Agents are components operating against those contracts.</figcaption>
+</figure>
 
 The planner creates a structured plan. The executor performs the next bounded action. The critic evaluates the result against a rubric. The refiner applies feedback to the current state and hands it back into the loop.
-
-<LoopDiagram
-  steps={['plan', 'execute', 'critic check', 'refine']}
-  decision="Good enough?"
-  yes="finalize state"
-  no="apply targeted revision"
-  caption="The loop is intentionally bounded so failure is visible and testable."
-/>
 
 ## Design decisions
 
