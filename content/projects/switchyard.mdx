@@ -18,21 +18,11 @@ diagram:
   caption: "The router predicts which replica already holds a request's prefix in its KV cache, without a tokenizer."
 ---
 
-import {
-  FlowDiagram,
-  LayerDiagram,
-} from '../../src/components/MdxDiagrams/MdxDiagrams';
-
 ## System intent
 
 Inference engines like vLLM cache the KV state of recent prompts and reuse it when a new prompt starts the same way. Agents resend the same system prompt and tool definitions every step, and conversations resend their history every turn, so most of a prompt is often already cached somewhere in the pool. A cache-blind load balancer scatters related requests across replicas, and each replica recomputes prefixes another one already holds.
 
 Switchyard is a router that sits in front of a pool of OpenAI-compatible model servers and sends each request to the replica most likely to have its prefix cached, balanced against load.
-
-<FlowDiagram
-  nodes={['admission', 'prefix key', 'index match', 'policy', 'streaming proxy']}
-  caption="Every request is decoded once, hashed, matched against the router's view of each replica's cache, and proxied with retries before the first byte."
-/>
 
 ## Requirements
 
@@ -44,14 +34,19 @@ Switchyard is a router that sits in front of a pool of OpenAI-compatible model s
 
 ## High-level design
 
-<LayerDiagram
-  groups={[
-    { title: 'Request path', items: ['admission and fair queuing', 'canonical bytes', 'chained block hashes'] },
-    { title: 'Routing state', items: ['per-replica prefix index', 'in-flight load tickets', 'learned prefill throughput'] },
-    { title: 'Resilience', items: ['health checks', 'circuit breakers', 'retry budget'] },
-  ]}
-  caption="The index is bounded by each replica's real KV capacity and discards its beliefs when a replica restarts."
-/>
+<figure data-wide>
+  <a href="/diagrams/switchyard-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/switchyard-architecture.webp"
+      width="1120"
+      height="916"
+      loading="lazy"
+      decoding="async"
+      alt="Switchyard architecture. Clients send OpenAI-compatible requests to the router, a single Go binary. Inside it, admission control, the prefix keyer, the routing policy, and the streaming proxy form the request path; the policy reads a prefix index and a load tracker; a KV event subscriber updates the index from vLLM's events; a health checker probes the replicas. The proxy streams to one of four vLLM replicas on one RTX 4090."
+    />
+  </a>
+  <figcaption>Fig. 1. The request path (numbered) and the control plane. Select the image for full size.</figcaption>
+</figure>
 
 Each request is reduced to a canonical byte form (model, tools, messages) and hashed in fixed-size blocks, each hash covering everything before it, so requests that share a prefix share leading hashes. The router remembers which blocks it sent where, within each replica's KV capacity, with LRU eviction and a TTL.
 

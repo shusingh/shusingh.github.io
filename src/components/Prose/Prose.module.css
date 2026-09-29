@@ -200,3 +200,30 @@
   border-radius: 8px;
   border: 1px solid var(--border);
 }
+
+.prose figure {
+  margin: 2em 0;
+}
+
+.prose figure img {
+  display: block;
+  width: 100%;
+}
+
+.prose figcaption {
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* Diagrams wider than the text column break out of it, centered on the
+   column and never wider than the viewport minus its gutters. */
+.prose figure[data-wide] {
+  position: relative;
+  left: 50%;
+  width: min(1000px, calc(100vw - 48px));
+  transform: translateX(-50%);
+}
