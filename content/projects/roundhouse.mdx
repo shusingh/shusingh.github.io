@@ -1,0 +1,89 @@
+---
+title: "Roundhouse"
+slug: "roundhouse"
+description: "A sandbox service for LLM agents in Go: each sandbox is its own Firecracker microVM with hard limits and no network by default, started from snapshots and a warm pool in milliseconds."
+kind: "personal"
+link: "https://github.com/shusingh/roundhouse"
+repo: "https://github.com/shusingh/roundhouse"
+tags: ["Go", "Firecracker", "KVM", "Linux", "Security"]
+year: 2026
+status: "released"
+featured: true
+order: 0
+stat:
+  number: "3.2 ms"
+  label: "from create to first command, warm pool, p50"
+diagram:
+  nodes: ["create", "admission", "warm pool or snapshot", "microVM", "guest agent"]
+  caption: "Each sandbox is a jailed Firecracker microVM restored from a snapshot, driven by an agent over vsock."
+---
+
+## System intent
+
+Agents write and run code: they install packages, run scripts, and read and write files across many steps. That code is untrusted. It may be wrong, it may be steered by a malicious prompt, and it runs next to other users' work. Containers share the host kernel, so one kernel bug separates a workload from the host.
+
+Roundhouse gives each agent session its own microVM behind a hardware virtualization boundary, with hard limits on everything it can consume and no network unless it asks for one. The hard part is doing that at the speed agents expect: a sandbox that takes a second to appear is a sandbox nobody uses.
+
+## Requirements
+
+- Isolation by hardware virtualization, not a shared kernel, with every host resource a sandbox uses released when it ends, even after a crash of the control plane.
+- Start a usable sandbox in milliseconds, not the second a kernel boot takes.
+- Hard limits on CPU, memory, processes, disk size and I/O, network rate, console output, command time, idle time, and lifetime.
+- No network by default; when allowed, never to the host, other sandboxes, private ranges, or cloud metadata.
+- A containment suite of hostile workloads, and benchmarks with the method written before the numbers.
+
+## High-level design
+
+<figure data-wide>
+  <a href="/diagrams/roundhouse-architecture.webp" target="_blank" rel="noopener">
+    <img
+      src="/diagrams/roundhouse-architecture.webp"
+      width="1120"
+      height="1098"
+      loading="lazy"
+      decoding="async"
+      alt="Roundhouse architecture. Agents call the API of roundhoused, a single Go binary, where authentication, admission, the sandbox manager, and the booter form the create path. The manager claims a sandbox from a warm pool, or the booter restores a template snapshot into a new per-sandbox jail holding a Firecracker VMM, a network namespace, a scratch disk, and the guest agent, which receives commands over vsock. Host nftables rules apply each sandbox's egress policy."
+    />
+  </a>
+  <figcaption>Fig. 1. The create and exec path (numbered). Select the image for full size.</figcaption>
+</figure>
+
+Every sandbox runs in Firecracker, launched by its jailer into a chroot with its own PID and network namespaces, a cgroup, and an unprivileged uid. Teardown kills the whole cgroup at once. A crashed control plane leaks nothing: at startup it removes every jail, cgroup, namespace, and disk it does not own.
+
+Sandboxes do not boot. A template is a snapshot of a guest taken right after its agent starts listening. A create restores it into a fresh jail with a private copy of the guest's disk, and a warm pool keeps restored sandboxes ready to hand over. Restored clones start from identical memory, so each one receives fresh host entropy with a forced kernel reseed, its own identity, and the host's clock before anyone uses it.
+
+Inside the guest, the agent is PID 1 and speaks HTTP over vsock. Commands stream stdout and stderr back as frames and run in a guest cgroup below the guest's own memory and process limits, so a fork bomb is stopped inside the guest while the agent keeps answering.
+
+## Results
+
+On an i9-13900K under WSL2, which means nested virtualization, through the public API, three runs, medians. Sandboxes are 1 vCPU and 256 MiB.
+
+| Path | Create to first command, p50 | p99 |
+|---|---:|---:|
+| Warm pool claim | 3.2 ms | 8.0 ms |
+| Snapshot restore | 108 ms | 189 ms |
+| Cold boot | 730 ms | 795 ms |
+
+- One host held 1,000 idle sandboxes at 8.3 MiB of proportional memory each, because clones share every page of the snapshot they never write.
+- A command round trip in a ready sandbox takes 1.24 ms at p50.
+- A neighbor's latency did not move while another sandbox ran a fork bomb, a memory hog, a disk fill, a CPU spin, or a console flood.
+
+For context, not comparison: on the same host a runc container starts in 9.5 ms and a gVisor container in 28 ms, both sharing or emulating a host kernel.
+
+## What went wrong, and what it taught me
+
+**A VM that died five seconds after boot.** Commands that ran more than a few seconds lost their output stream. The VMM was being killed with `SIGXFSZ`: the jail's file size limit was below the guest disk's size, and the guest's first ext4 journal commit, five seconds after boot, wrote past it. `RLIMIT_FSIZE` bounds write offsets, not bytes written, and an ext4 journal sits in the middle of the disk.
+
+**Restored guests that lived in the past.** Firecracker can advance a restored guest's clock, but not under nested virtualization, so clones read the time their snapshot was taken. A test that deliberately aged the snapshot caught it, and the host now sets the guest's clock as part of every restore.
+
+**One restore in a thousand.** The first full benchmark run showed a rare lost connection right after a restore. The guest resets every vsock connection when it processes the transport reset event Firecracker sends on restore, and under load that can happen after the host has already connected. The fix is a probe command, retried once, before a sandbox is handed over; it also absorbs the first command's page-fault cost, which is why warm pool claims answer in 3 ms and not 28.
+
+## Design decisions
+
+**Snapshots over boot.** A template per image and VM shape, with a manifest of everything a restore depends on (Firecracker version, CPU model, kernel and disk digests, device configuration). A template that no longer matches its host is refused rather than restored.
+
+**Guest limits below host limits.** The host's cgroups and Firecracker's rate limiters are the security boundary. The guest's own cgroup keeps a misbehaving workload from taking the agent down with it, so the sandbox stays usable.
+
+**Callers before pools.** Pooled sandboxes use only capacity nobody else is using; a create that finds the host full evicts idle pooled sandboxes before it answers 429.
+
+**Evidence over assertion.** A containment suite runs every attack in the threat model against real microVMs, sampling a neighbor's latency throughout and scanning the host for leftovers after every test.
